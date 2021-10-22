@@ -5,11 +5,11 @@
 
 %}
 
+%option yylineno
 %option noyywrap
 
 %%
 
-// Reglas
 "main"                              return MAIN;
 "\{"                                return BLOCK_START;
 "\}"                                return BLOCK_END;
@@ -19,7 +19,7 @@
 "\]"                                return BRACKET_END;
 ";"                                 return COLON;
 ","                                 return COMMA;
-(_|[a-zA-Z])[a-zA-Z0-9_]*           return IDENTIFIER;
+"(_|[a-zA-Z])[a-zA-Z0-9_]*"         return IDENTIFIER;
 "begin_local"                       return BEGIN_LOCAL;
 "end_local"                         return END_LOCAL;
 "int"                               return TYPE;
@@ -81,5 +81,15 @@ int main(int argc, char** argv) {
     exit(-2);
   }
 
+  // Invocamos al analizador lexico 
   int analizador = yylex();
+
+  // Analizamos todo el fichero para finalizar la ejecución
+  while (analizador != 0){
+    printf("__%d__", analizador);
+    analizador = yylex();
+  }
+
+  exit(1);
+
 }
