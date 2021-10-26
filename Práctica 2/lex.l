@@ -39,6 +39,9 @@ float              [0-9]*\.[0-9]+
 "#"                                 return OP_UNARY;
 "?"                                 return OP_UNARY;
 "!"                                 return OP_UNARY;
+">>"                                return OP_UNARY;
+"<<"                                return OP_UNARY;
+"$"                                 return OP_UNARY;
 "*"                                 return OP_BINARY;
 "/"                                 return OP_BINARY;
 "<"                                 return OP_BINARY;
@@ -52,6 +55,7 @@ float              [0-9]*\.[0-9]+
 "--"                                return OP_BINARY;
 "&"                                 return OP_BINARY;
 "**"                                return OP_BINARY;
+"%"                                 return OP_BINARY;
 "++"                                return OP_TERNARY_1;
 "@"                                 return OP_TERNARY_2;
 "+"                                 return PLUS_MINUS;
@@ -65,7 +69,7 @@ float              [0-9]*\.[0-9]+
 "true"                              return CONST_BOOL;
 "false"                             return CONST_BOOL;
 \'[^\']\'                           return CONST_CHAR;
-\"[^\"]\"                           return STRING;
+\"[^\"]*\"                           return STRING;
 {identificador}                     return IDENTIFIER;
 \n                                  {}
 [ \t]+                              {}
@@ -75,43 +79,39 @@ float              [0-9]*\.[0-9]+
 
 %%
 
-// Procedimientos
+// Programa
 int main(int argc, char** argv) {
-  // Se comprueba que se recibe 1 argumento (nombre del fichero fuente)
+  
+  // Comprobación de argumentos
   if (argc <= 1) {
-
-        printf("\nError al ejecutar la aplicación...\n");
-        printf("Uso: %s nombre_fichero_fuente\n", argv[0]);
-
+    printf("\nERROR: el numero de argumentos introducidos es incorrecto\n");
+    printf("\nEjecucion correcta: %s nombre_fichero\n", argv[0]);
+    
     exit(-1);
-
   }
 
-    // Se abre el fichero recibido por parámetro
+    // Abrimos el fichero en modo lectura (r)
     yyin = fopen(argv[1], "r");
 
-    // Si "yyin" es nulo no se ha podido abrir el fichero
+    // En caso de no poder abrir el fichero (NULL) mostramos el error 
     if (yyin == NULL) {
-
-        printf ("\nError al abrir el fichero %s\n", argv[1]);
+        printf ("\nNo se ha podido abrir el fichero %s\n", argv[1]);
 
         exit (-2);
-
     }
 
-    // Invoca al analizador léxico para comenzar el análisis
-  int an = yylex();
+    // Llamamos a yylex para lanzar el analizador léxico
+  int analyzer = yylex();
 
-    // Hasta que no termine de analizar todo el fichero no finalizará la
-    // ejecución
-  while (an != 0) {
+  // Continuamos lanzando yylex() mientras quede fichero por leer
+  while (analyzer != 0) {
 
-    printf("__%d__ : %s\n", an, yytext);
-    //printf("%s ", yytext());
-    an = yylex();
+    printf("__%d__ : %s\n", analyzer, yytext);
+    analyzer = yylex();
 
   }
 
+  // Finaliza el programa
   exit(1);
 
 }
