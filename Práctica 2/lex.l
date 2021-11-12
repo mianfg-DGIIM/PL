@@ -1,7 +1,7 @@
 %{
 
 // Declaraciones
-#include "constants.h"
+#include <y.tab.h>
 
 %}
 

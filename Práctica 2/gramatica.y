@@ -4,10 +4,10 @@
 #include <stdio.h>
 #include <string.h>
 
-
-void yyerror(const char *msg); //Para imprimir el mensaje de error
 int yylex();   //Para el reconocimiento previo de los token 
- 
+void yyerror(const char *msg); //Para imprimir el mensaje de error
+int linea = 1; //Para llevar una cuenta de la linea en la que estamos
+
 %}
 
 /*
@@ -17,13 +17,13 @@ que se esperaban en lugar de los que han producido el error
 */
 
 
-%error-verbose
+//%error-verbose
 
 
 
 /*Declaramos el conjunto de reglas o produciones que definen nuestra gramática*/
 
-%token MAIN 
+%token MAIN
 %token BLOCK_START
 %token BLOCK_END
 %token PARENT_START;
@@ -62,11 +62,11 @@ que se esperaban en lugar de los que han producido el error
 %right PLUS_MINUS;
 
 %%
-//REGLAS GRAMATICALES produciones 
+//REGLAS GRAMATICALES produciones
 
 Programa : Cabecera_programa bloque COLON
 Cabecera_programa : MAIN COLON
-bloque := BLOCK_START
+bloque : BLOCK_START
             Declar_de_variables_locales
             Declar_de_subprogs
             Sentencias
@@ -74,21 +74,21 @@ bloque := BLOCK_START
 Declar_de_subprogs : Declar_de_subprogs Declar_subprog
                       |COLON
 Declar_subprog : Cabecera_subprograma bloque COLON
-Cabecera_subprograma : TIPO IDENTIFIER PARENT_START lista_de_parametros PARENT_END
-                        |  TIPO IDENTIFIER PARENT_START PARENT_END COLON
+Cabecera_subprograma : TYPE IDENTIFIER PARENT_START lista_de_parametros PARENT_END
+                        |  TYPE IDENTIFIER PARENT_START PARENT_END COLON
 Declar_de_variables_locales : BEGIN_LOCAL
                                   Variables_locales
                                   END_LOCAL COLON
 Variables_locales : Variables_locales Cuerpo_declar_variables
                      |  Cuerpo_declar_variables COLON
-Cuerpo_declar_variables : TIPO lista_variables COLON
-                           |  LIST_OF TIPO lista_variables COLON
+Cuerpo_declar_variables : TYPE lista_variables COLON
+                           |  LIST_OF TYPE lista_variables COLON
 lista_variables : lista_variables COMMA IDENTIFIER
                    |  IDENTIFIER COLON
-lista_de_parametros : lista_de_parametros COMA TIPO IDENTIFIER
-                       |  lista_de_parametros COMA
-                          LIST_OF TIPO IDENTIFIER
-                       |  TIPO IDENTIFIER
+lista_de_parametros : lista_de_parametros COMMA TYPE IDENTIFIER
+                       |  lista_de_parametros COMMA
+                          LIST_OF TYPE IDENTIFIER
+                       |  TYPE IDENTIFIER
                        |  LIST_OF IDENTIFIER COLON
 Sentencias : Sentencias Sentencia
               |  Sentencia COLON
@@ -100,32 +100,30 @@ Sentencia : bloque
              |  Sentencia_entrada
              |  Sentencia_salida
              |  Sentencia_return
-             |  Sentencias_lista COLON
+             |  Sentencias_lista
 Sentencia_asignacion : IDENTIFIER ASSIGN expresion COLON
 Sentencia_if : IF PARENT_START expresion PARENT_END Sentencia
                 |  IF PARENT_START expresion PARENT_END Sentencia ELSE Sentencia COLON
 Sentencia_while : WHILE PARENT_START expresion PARENT_END Sentencia COLON
 Sentencia_for : FOR IDENTIFIER ASSIGN expresion TO expresion Sentencia COLON
-Sentencia_entrada : INPUT Lista_variables COLON
+Sentencia_entrada : INPUT lista_variables COLON
 Sentencia_salida : OUTPUT Lista_expresiones_o_cadena COLON
-Lista_expresiones_o_cadena : Lista_expresiones_o_cadena COMA expresion
-                              |  Lista_expresiones_o_cadena COMA STRING
+Lista_expresiones_o_cadena : Lista_expresiones_o_cadena COMMA expresion
+                              |  Lista_expresiones_o_cadena COMMA STRING
                               |  expresion
                               |  STRING COLON
 Sentencia_return : RETURN expresion COLON
-Sentencias_lista : OP_UNARY expresion
-                    | OP_UNARY  expresion
-                    |  OP_UNARY expresion COLON
+Sentencias_lista : OP_UNARY expresion COLON
 expresion : PARENT_START expresion PARENT_END
              |  OP_UNARY expresion
              |  expresion OP_BINARY expresion
              |  expresion  OP_TERNARY_1 expresion OP_TERNARY_2  expresion
              |  IDENTIFIER
              |  constante
-             |  funcio COLON
+             |  funcion COLON
 funcion : IDENTIFIER PARENT_START Lista_expresiones PARENT_END
            |  IDENTIFIER PARENT_START PARENT_END COLON
-Lista_expresiones : Lista_expresiones COMA expresion
+Lista_expresiones : Lista_expresiones COMMA expresion
                      |  expresion COLON
 constante : constante_base
              |  constante_lista COLON
@@ -137,26 +135,20 @@ constante_lista :  BLOCK_START  constante_lista_int BLOCK_END
                    |  BLOCK_START constante_lista_float BLOCK_END
                    |  BLOCK_START constante_lista_bool BLOCK_END
                    |  BLOCK_START constante_lista_char BLOCK_END COLON
-constante_lista_int : constante_lista_int COMA CONST_INT
+constante_lista_int : constante_lista_int COMMA CONST_INT
                        |  CONST_INT COLON
-constante_lista_float : constante_lista_float COMA CONST_FLOAT
+constante_lista_float : constante_lista_float COMMA CONST_FLOAT
                        |  CONST_FLOAT COLON
-constante_lista_bool : constante_lista_bool COMA CONST_BOOL
+constante_lista_bool : constante_lista_bool COMMA CONST_BOOL
                        |  CONST_BOOL COLON
-constante_lista_char : constante_lista_char COMA CONST_CHAR
+constante_lista_char : constante_lista_char COMMA CONST_CHAR
                        |  CONST_CHAR COLON
 
 %%
 
-
-#ifdef DOSWINDOWS /* Variable de entorno que indica la plataforma */
-#include "lexyy.c"
-#else
-#include "lex.yy.c"
-#endif
-
 // Se debe implementar la función yyerror. En este caso simplemente escribimos
 // el mensaje de error en pantalla
-void yyerror( char *msg ){
-	fprintf(stderr, "Línea %d: %s\n", yylineno, msg) ;
+void yyerror(const char *mensaje){
+	fprintf(stderr, "Línea %d: %s\n", linea, mensaje) ;
+	    linea++;
 }

@@ -497,7 +497,7 @@ char *yytext;
 #line 2 "lex.l"
 
 // Declaraciones
-#include "constants.h"
+#include <y.tab.h>
 
 #line 503 "lex.yy.c"
 
