@@ -64,8 +64,8 @@ pruebafloat = pruebafloat ** 2.7
 if ( a <= 3 || a != 2) pruebachar = 'a' else if ( a % 2 == 0 ) a = 14
 
 
-milistaf = milistaf - #(milistaf ++ (10 * (20/2000)) @ #milistaf) 
+milistaf = milistaf - #(milistaf ++ (10 * (20/2000)) @ #milistaf)
 
 output "el mejor equipo del mundo", 7, pruebafloat
 
-}
+};

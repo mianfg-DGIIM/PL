@@ -68,7 +68,7 @@
 /* Copy the first part of user declarations.  */
 
 /* Line 189 of yacc.c  */
-#line 1 ".\\gramatica.y"
+#line 1 "gramatica.y"
  //CÓDIGO C
 
 #include <stdlib.h>
@@ -77,12 +77,12 @@
 
 int yylex();   //Para el reconocimiento previo de los token
 void yyerror(const char *msg); //Para imprimir el mensaje de error
-int linea = 1; //Para llevar una cuenta de la linea en la que estamos
+int linea = 1;
  
 
 
 /* Line 189 of yacc.c  */
-#line 86 "y.tab.c"
+#line 86 "gramatica.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -94,7 +94,7 @@ int linea = 1; //Para llevar una cuenta de la linea en la que estamos
 # undef YYERROR_VERBOSE
 # define YYERROR_VERBOSE 1
 #else
-# define YYERROR_VERBOSE 0
+# define YYERROR_VERBOSE 1
 #endif
 
 /* Enabling the token table.  */
@@ -144,41 +144,6 @@ int linea = 1; //Para llevar una cuenta de la linea en la que estamos
      PLUS_MINUS = 290
    };
 #endif
-/* Tokens.  */
-#define MAIN 258
-#define BLOCK_START 259
-#define BLOCK_END 260
-#define PARENT_START 261
-#define PARENT_END 262
-#define BRACKET_START 263
-#define BRACKET_END 264
-#define COLON 265
-#define COMMA 266
-#define BEGIN_LOCAL 267
-#define END_LOCAL 268
-#define TYPE 269
-#define LIST_OF 270
-#define ASSIGN 271
-#define IF 272
-#define ELSE 273
-#define WHILE 274
-#define FOR 275
-#define TO 276
-#define INPUT 277
-#define OUTPUT 278
-#define RETURN 279
-#define CONST_INT 280
-#define CONST_FLOAT 281
-#define CONST_BOOL 282
-#define CONST_CHAR 283
-#define STRING 284
-#define IDENTIFIER 285
-#define OP_UNARY 286
-#define OP_BINARY 287
-#define OP_TERNARY_1 288
-#define OP_TERNARY_2 289
-#define PLUS_MINUS 290
-
 
 
 
@@ -194,7 +159,7 @@ typedef int YYSTYPE;
 
 
 /* Line 264 of yacc.c  */
-#line 198 "y.tab.c"
+#line 163 "gramatica.tab.c"
 
 #ifdef short
 # undef short
@@ -1543,7 +1508,7 @@ yyreduce:
       
 
 /* Line 1455 of yacc.c  */
-#line 1547 "y.tab.c"
+#line 1512 "gramatica.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1755,14 +1720,10 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 148 ".\\gramatica.y"
+#line 148 "gramatica.y"
 
 
-#ifdef DOSWINDOWS /* Variable de entorno que indica la plataforma */
-#include "lexyy.c"
-#else
 #include "lex.yy.c"
-#endif
 
 // Se debe implementar la función yyerror. En este caso simplemente escribimos
 // el mensaje de error en pantalla

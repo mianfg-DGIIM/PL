@@ -1,23 +1,23 @@
 .SUFFIXES:
 
-lex: main.o y.tab.o
-	gcc -o lex main.o y.tab.o
-
-y.tab.o: y.tab.c
-	gcc -c y.tab.c
+prueba: main.o y.tab.o
+	gcc -o prueba main.o y.tab.o
 
 main.o: main.c
-	gcc -c main.c
+	gcc -c -o main.o main.c -I.
 
-y.tab.c: gramatica.y lex.yy.c
-	bison -o y.tab.c gramatica.y
+y.tab.o: y.tab.c
+	gcc -o y.tab.o y.tab.c -lfl -I.
 
-lex.yy.c: lex.l
-	flex lex.l
+y.tab.c: tokens.l lex.yy.c
+	bison -v -d -o y.tab.c gramatica.y
 
-clean:
-	rm -f lex main.o y.tab.o y.tab.c lex.yy.c
+lex.yy.c: tokens.l
+	flex -o lex.yy.c tokens.l
 
-all:
-	make clean
-	make lex
+limpia:
+	rm -f prueba main.o y.tab.o y.tab.c lex.yy.c
+
+todo:
+	make limpia
+	make prueba

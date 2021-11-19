@@ -4,10 +4,10 @@
 #include <stdio.h>
 #include <string.h>
 
-int yylex();   //Para el reconocimiento previo de los token 
+int yylex();   //Para el reconocimiento previo de los token
 void yyerror(const char *msg); //Para imprimir el mensaje de error
-int linea = 1; //Para llevar una cuenta de la linea en la que estamos
-
+int linea = 1;
+ 
 %}
 
 /*
@@ -17,13 +17,13 @@ que se esperaban en lugar de los que han producido el error
 */
 
 
-//%error-verbose
+%error-verbose
 
 
 
 /*Declaramos el conjunto de reglas o produciones que definen nuestra gramática*/
 
-%token MAIN
+%token MAIN 
 %token BLOCK_START
 %token BLOCK_END
 %token PARENT_START;
@@ -62,6 +62,7 @@ que se esperaban en lugar de los que han producido el error
 %right PLUS_MINUS;
 
 %%
+
 //REGLAS GRAMATICALES produciones
 
 Programa : Cabecera_programa bloque COLON
@@ -146,9 +147,10 @@ constante_lista_char : constante_lista_char COMMA CONST_CHAR
 
 %%
 
+#include "lex.yy.c"
+
 // Se debe implementar la función yyerror. En este caso simplemente escribimos
 // el mensaje de error en pantalla
-void yyerror(const char *mensaje){
-	fprintf(stderr, "Línea %d: %s\n", linea, mensaje) ;
-	    linea++;
+void yyerror(const char *msg ){
+	fprintf(stderr, "Línea %d: %s\n", linea, msg) ;
 }
