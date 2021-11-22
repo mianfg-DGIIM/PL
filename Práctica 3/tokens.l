@@ -1,13 +1,20 @@
 %{
-
 // Declaraciones
-#include "y.tab.h"
+#include "gramatica.tab.h"
+extern int line_number;
+
+void yyerror(char const *s) {
+  fprintf(stderr, "line %d: %s\n", line_number, s);
+}
+
+extern char* yytext;
 
 %}
 
 %option noyywrap
 identificador      (_|[a-zA-Z])[a-zA-Z0-9_]*
 float              [0-9]*\.[0-9]+
+
 %%
 
 "main"                              return MAIN;
@@ -68,12 +75,10 @@ float              [0-9]*\.[0-9]+
 "true"                              return CONST_BOOL;
 "false"                             return CONST_BOOL;
 \'[^\']\'                           return CONST_CHAR;
-\"[^\"]*\"                           return STRING;
+\"[^\"]*\"                          return STRING;
 {identificador}                     return IDENTIFIER;
-\n                                  {linea++;}
-[ \t]+                              {}
-.                                   {
-                                      printf("\nERROR LÉXICO (línea %d): no se reconoce '%s'", linea, yytext);
-                                    }
+[\n]                                {line_number++;}
+[ \t]+                              ;
+.                                   yyerror("Error in Syntax!");
 
 %%

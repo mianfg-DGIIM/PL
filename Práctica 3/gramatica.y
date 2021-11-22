@@ -1,13 +1,11 @@
 %{ //CÓDIGO C
 
-#include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
-
 int yylex();   //Para el reconocimiento previo de los token
 void yyerror(const char *msg); //Para imprimir el mensaje de error
-int linea = 1;
- 
+int line_number=1;
+extern int yylineno;
+
 %}
 
 /*
@@ -147,10 +145,9 @@ constante_lista_char : constante_lista_char COMMA CONST_CHAR
 
 %%
 
-#include "lex.yy.c"
 
-// Se debe implementar la función yyerror. En este caso simplemente escribimos
-// el mensaje de error en pantalla
-void yyerror(const char *msg ){
-	fprintf(stderr, "Línea %d: %s\n", linea, msg) ;
+int main()
+{
+	yyparse();
+	return 0;
 }
