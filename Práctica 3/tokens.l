@@ -1,17 +1,17 @@
+%option noyywrap
 %{
-// Declaraciones
-#include "gramatica.tab.h"
-extern int line_number;
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <string.h>
+	//#include "constants.h" PARECE NO USARSE YA, SE DEJAN LOS QUE SACA YACC (creo, aunque he visto gente que lo deja y funciona igual)
+	#include "gramatica.tab.h"
+	extern FILE *yyin;
 
-void yyerror(char const *s) {
-  fprintf(stderr, "line %d: %s\n", line_number, s);
-}
-
-extern char* yytext;
-
+	int lineno = 1; // initialize to 1
+	void yyerror();
 %}
 
-%option noyywrap
+
 identificador      (_|[a-zA-Z])[a-zA-Z0-9_]*
 float              [0-9]*\.[0-9]+
 
@@ -77,8 +77,8 @@ float              [0-9]*\.[0-9]+
 \'[^\']\'                           return CONST_CHAR;
 \"[^\"]*\"                          return STRING;
 {identificador}                     return IDENTIFIER;
-[\n]                                {line_number++;}
+[\n]                                { lineno += 1; }
 [ \t]+                              ;
-.                                   yyerror("Error in Syntax!");
+.                                   { yyerror("Unrecognized character"); }
 
 %%

@@ -1,10 +1,13 @@
 %{ //CÓDIGO C
 
 #include <stdio.h>
-int yylex();   //Para el reconocimiento previo de los token
-void yyerror(const char *msg); //Para imprimir el mensaje de error
-int line_number=1;
-extern int yylineno;
+#include <stdlib.h>
+#include <string.h>
+
+extern FILE *yyin;
+extern int lineno;
+extern int yylex();
+void yyerror();
 
 %}
 
@@ -15,7 +18,7 @@ que se esperaban en lugar de los que han producido el error
 */
 
 
-%error-verbose
+//%error-verbose
 
 
 
@@ -145,9 +148,20 @@ constante_lista_char : constante_lista_char COMMA CONST_CHAR
 
 %%
 
+void yyerror() {
+	fprintf(stderr, "Syntax error at line: %d\n", lineno);
+	exit(1);
+}
 
-int main()
-{
-	yyparse();
-	return 0;
+int main(int argc, char *argv[]){
+	int flag;
+	yyin = fopen(argv[1], "r");
+	if(!yyin){
+		printf("ERROR en la apertura del archivo");
+		return -1;
+	}
+	flag = yyparse();
+	fclose(yyin);
+
+	return flag;
 }
