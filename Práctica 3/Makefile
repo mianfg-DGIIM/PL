@@ -1,50 +1,37 @@
-# .SUFFIXES:
-#
-# prueba: main.o gramatica.tab.o
-# 	gcc -o prueba main.o gramatica.tab.o
-#
-# main.o: main.c
-# 	gcc -c -o main.o main.c -I.
-#
-# gramatica.tab.o: gramatica.tab.c
-# 	gcc -o gramatica.tab.o gramatica.tab.c
-#
-# gramatica.tab.c: tokens.l lex.yy.c
-# 	bison -v -d -o gramatica.tab.c gramatica.y
-#
-# lex.yy.c: tokens.l
-# 	flex tokens.l
-#
-# limpia:
-# 	rm -f prueba main.o gramatica.tab.o gramatica.tab.c lex.yy.c
-#
-# todo:
-# 	make limpia
-# 	make prueba
+OBJ = obj
+SRC = src
+BIN = bin
 
-# compiler: lex.yy.o gramatica.tab.o
-# 	gcc -o compiler $^
-#
-# gramatica.tab.h: gramatica.y
-# 	bison --debug --verbose -d gramatica.y
-#
-# gramatica.tab.c: gramatica.y
-# 	bison -d gramatica.y
-#
-# lex.yy.c: tokens.l gramatica.tab.h
-# 	flex tokens.l
+syntactic: $(OBJ)/main.o $(OBJ)/gramatica.tab.o
+	@echo ""
+	@echo Generando ejecutable...
+	@echo ""
+	gcc -o $(BIN)/syntactic $(OBJ)/main.o $(OBJ)/gramatica.tab.o
+	@echo ""
+	@echo Ejecutable generado con éxito
+	@echo ""
 
+$(OBJ)/main.o: $(SRC)/main.c
+	gcc -o $@ -c $(SRC)/main.c
 
-all: gramatica
+$(OBJ)/gramatica.tab.o: $(SRC)/gramatica.tab.c
+	gcc -o $@ -c $(SRC)/gramatica.tab.c
 
-gramatica.tab.c gramatica.tab.h: gramatica.y
-	bison -d gramatica.y
+$(SRC)/gramatica.tab.c: $(SRC)/gramatica.y $(SRC)/lex.yy.c
+	bison -v -d -o $@ $(SRC)/gramatica.y
 
-lex.yy.c: tokens.l gramatica.tab.h
-	flex tokens.l
+$(SRC)/lex.yy.c: $(SRC)/tokens.l
+	flex $(SRC)/tokens.l
+	mv lex.yy.c $(SRC)
 
-gramatica: lex.yy.c gramatica.tab.c gramatica.tab.h
-	gcc -o gramatica gramatica.tab.c lex.yy.c
+all:
+	make syntactic
 
 clean:
-	rm gramatica gramatica.tab.c lex.yy.c gramatica.tab.h
+	@echo ""
+	@echo Limpiando los ficheros...
+	@echo ""
+	rm -rf $(BIN)/syntactic $(OBJ)/* $(SRC)/gramatica.tab.c $(SRC)/lex.yy.c
+	@echo ""
+	@echo Limpieza finalizada
+	@echo ""

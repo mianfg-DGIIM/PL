@@ -1,17 +1,14 @@
-%option noyywrap
 %{
-	#include <stdio.h>
+
 	#include <stdlib.h>
 	#include <string.h>
-	//#include "constants.h" PARECE NO USARSE YA, SE DEJAN LOS QUE SACA YACC (creo, aunque he visto gente que lo deja y funciona igual)
-	#include "gramatica.tab.h"
-	extern FILE *yyin;
 
 	int lineno = 1; // initialize to 1
 	void yyerror();
 %}
 
-
+%option noyywrap
+%option yylineno
 identificador      (_|[a-zA-Z])[a-zA-Z0-9_]*
 float              [0-9]*\.[0-9]+
 
@@ -77,8 +74,8 @@ float              [0-9]*\.[0-9]+
 \'[^\']\'                           return CONST_CHAR;
 \"[^\"]*\"                          return STRING;
 {identificador}                     return IDENTIFIER;
-[\n]                                { lineno += 1; }
-[ \t]+                              ;
-.                                   { yyerror("Unrecognized character"); }
+[\n]                                {;}
+[ \t]+                              {;}
+.                                   { printf(" \nError Léxico en Linea: %d. No se reconoce la palabra '%s'. ", yylineno, yytext); }
 
 %%
