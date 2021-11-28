@@ -2,3 +2,6 @@
 .o
 .exe
 lex.yy.c
+Práctica 3/gramatica.exe
+Práctica 3/gramatica.tab.c
+Práctica 3/gramatica.tab.h
