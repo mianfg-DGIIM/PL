@@ -2,14 +2,8 @@ OBJ = obj
 SRC = src
 BIN = bin
 
-syntactic: $(OBJ)/main.o $(OBJ)/gramatica.tab.o
-	@echo ""
-	@echo Generando ejecutable...
-	@echo ""
-	gcc -o $(BIN)/syntactic $(OBJ)/main.o $(OBJ)/gramatica.tab.o
-	@echo ""
-	@echo Ejecutable generado con éxito
-	@echo ""
+practica3: $(OBJ)/main.o $(OBJ)/gramatica.tab.o
+	gcc -o $(BIN)/practica3 $(OBJ)/main.o $(OBJ)/gramatica.tab.o
 
 $(OBJ)/main.o: $(SRC)/main.c
 	gcc -o $@ -c $(SRC)/main.c
@@ -25,13 +19,7 @@ $(SRC)/lex.yy.c: $(SRC)/tokens.l
 	mv lex.yy.c $(SRC)
 
 all:
-	make syntactic
+	make practica3
 
 clean:
-	@echo ""
-	@echo Limpiando los ficheros...
-	@echo ""
-	rm -rf $(BIN)/syntactic $(OBJ)/* $(SRC)/gramatica.tab.c $(SRC)/lex.yy.c
-	@echo ""
-	@echo Limpieza finalizada
-	@echo ""
+	rm -rf $(BIN)/practica $(OBJ)/* $(SRC)/gramatica.tab.c $(SRC)/lex.yy.c
