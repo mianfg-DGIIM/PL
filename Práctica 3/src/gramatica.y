@@ -64,20 +64,21 @@ que se esperaban en lugar de los que han producido el error
 //REGLAS GRAMATICALES produciones
 
 Programa : MAIN bloque ;
-bloque : BLOCK_START 
-         Declar_de_variables_locales 
-         Declar_de_subprogs 
-         Sentencias 
+bloque : BLOCK_START
+         Declar_de_variables_locales
+         Declar_de_subprogs
+         Sentencias
          BLOCK_END ;
 Declar_de_subprogs : Declar_de_subprogs Declar_subprog
                    | ;
 Declar_subprog : Cabecera_subprograma bloque ;
 Cabecera_subprograma : TYPE IDENTIFIER PARENT_START lista_de_parametros PARENT_END
                      | TYPE IDENTIFIER PARENT_START PARENT_END ;
-Declar_de_variables_locales : BEGIN_LOCAL Variables_locales END_LOCAL ;
+Declar_de_variables_locales : BEGIN_LOCAL Variables_locales END_LOCAL
+                            | ;
 Variables_locales : Variables_locales Cuerpo_declar_variables
                   | Cuerpo_declar_variables ;
-Cuerpo_declar_variables : TYPE lista_variables 
+Cuerpo_declar_variables : TYPE lista_variables
                         | LIST_OF TYPE lista_variables ;
 lista_variables : lista_variables COMMA IDENTIFIER
                 | IDENTIFIER ;
@@ -112,7 +113,7 @@ Sentencias_lista : OP_UNARY expresion COLON ;
 expresion : PARENT_START expresion PARENT_END
           | OP_UNARY expresion
           | expresion OP_BINARY expresion
-          | expresion  OP_TERNARY_1 expresion OP_TERNARY_2  expresion
+          | expresion OP_TERNARY_1 expresion OP_TERNARY_2 expresion
           | IDENTIFIER
           | constante
           | funcion ;
