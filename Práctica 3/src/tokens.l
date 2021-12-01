@@ -40,29 +40,29 @@ float              [0-9]*\.[0-9]+
 "output"                            return OUTPUT;
 "return"                            return RETURN;
 "#"                                 return OP_UNARY;
-"?"                                 return OP_UNARY;
+"?"									return OP_UNARY;
+"--"                                return OP_BINARY;                                
+"++"                                return OP_TERNARY_1;
 "!"                                 return OP_UNARY;
 ">>"                                return OP_UNARY;
 "<<"                                return OP_UNARY;
 "$"                                 return OP_UNARY;
+"%"                                 return OP_BINARY;
 "*"                                 return OP_BINARY;
 "/"                                 return OP_BINARY;
+"+"                                 return PLUS_MINUS;
+"-"                                 return PLUS_MINUS;
 "<"                                 return OP_BINARY;
 ">"                                 return OP_BINARY;
 "<="                                return OP_BINARY;
 ">="                                return OP_BINARY;
 "=="                                return OP_BINARY;
 "!="                                return OP_BINARY;
+"&"                                 return OP_BINARY;
 "&&"                                return OP_BINARY;
 "||"                                return OP_BINARY;
-"--"                                return OP_BINARY;
-"&"                                 return OP_BINARY;
 "**"                                return OP_BINARY;
-"%"                                 return OP_BINARY;
-"++"                                return OP_TERNARY_1;
 "@"                                 return OP_TERNARY_2;
-"+"                                 return PLUS_MINUS;
-"-"                                 return PLUS_MINUS;
 [0-9]+                              return CONST_INT;
 \+[0-9]+                            return CONST_INT;
 \-[0-9]+                            return CONST_INT;
@@ -73,7 +73,7 @@ float              [0-9]*\.[0-9]+
 "false"                             return CONST_BOOL;
 \'[^\']\'                           return CONST_CHAR;
 \"[^\"]*\"                          return STRING;
-{identificador}                     return IDENTIFIER;
+{identificador}                     return IDENTIFIER; 
 [\n]                                {;}
 [ \t]+                              {;}
 .                                   { printf(" \nError Léxico en Linea: %d. No se reconoce la palabra '%s'. ", yylineno, yytext); }

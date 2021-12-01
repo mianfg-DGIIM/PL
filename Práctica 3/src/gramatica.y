@@ -50,12 +50,12 @@ que se esperaban en lugar de los que han producido el error
 %token STRING;
 %token IDENTIFIER
 
-%right OP_UNARY;   //DUDA:LO VI POR INTERNET,PERO NO ESTOY SEGURA???
-                    // PUEDE QUE TENGAMOS QUE PONE "NONASSOC" E INDICAMOS QUE NO ES ASOCIATIVA
+%right OP_UNARY;   
+                    
 %left OP_BINARY;
 
-%left OP_TERNARY_1; //Es el ++ , asociativa derecha o izquierda???
-%left OP_TERNARY_2; //Es el @, asociativa derecha o izquierda??
+%left OP_TERNARY_1; 
+%left OP_TERNARY_2; 
 
 %right PLUS_MINUS;
 
@@ -68,26 +68,30 @@ bloque : BLOCK_START
          Declar_de_variables_locales
          Declar_de_subprogs
          Sentencias
-         BLOCK_END ;
+         BLOCK_END;
 Declar_de_subprogs : Declar_de_subprogs Declar_subprog
                    | ;
 Declar_subprog : Cabecera_subprograma bloque ;
 Cabecera_subprograma : TYPE IDENTIFIER PARENT_START lista_de_parametros PARENT_END
-                     | TYPE IDENTIFIER PARENT_START PARENT_END ;
+                     | TYPE IDENTIFIER PARENT_START PARENT_END 
+                     | error; 
 Declar_de_variables_locales : BEGIN_LOCAL Variables_locales END_LOCAL
                             | ;
-Variables_locales : Variables_locales Cuerpo_declar_variables
-                  | Cuerpo_declar_variables ;
-Cuerpo_declar_variables : TYPE lista_variables
-                        | LIST_OF TYPE lista_variables ;
-lista_variables : lista_variables COMMA IDENTIFIER
-                | IDENTIFIER ;
+Variables_locales : Variables_locales Cuerpo_declar_variables COLON
+                  | Cuerpo_declar_variables COLON;
+Cuerpo_declar_variables : TYPE lista_variables  
+                        | LIST_OF TYPE lista_variables 
+                        | error;
+lista_variables : lista_variables COMMA IDENTIFIER 
+                | IDENTIFIER 
+                | error;
 lista_de_parametros : lista_de_parametros COMMA TYPE IDENTIFIER
                     | lista_de_parametros COMMA LIST_OF TYPE IDENTIFIER
                     | TYPE IDENTIFIER
                     | LIST_OF IDENTIFIER ;
 Sentencias : Sentencias Sentencia
-           | Sentencia ;
+           | Sentencia 
+           | ;
 Sentencia : bloque
           | Sentencia_asignacion
           | Sentencia_if
@@ -113,10 +117,12 @@ Sentencias_lista : OP_UNARY expresion COLON ;
 expresion : PARENT_START expresion PARENT_END
           | OP_UNARY expresion
           | expresion OP_BINARY expresion
+          | expresion PLUS_MINUS expresion
           | expresion OP_TERNARY_1 expresion OP_TERNARY_2 expresion
           | IDENTIFIER
           | constante
-          | funcion ;
+          | funcion 
+          | error;
 funcion : IDENTIFIER PARENT_START Lista_expresiones PARENT_END
         | IDENTIFIER PARENT_START PARENT_END ;
 Lista_expresiones : Lista_expresiones COMMA expresion
@@ -139,6 +145,7 @@ constante_lista_bool : constante_lista_bool COMMA CONST_BOOL
                      | CONST_BOOL ;
 constante_lista_char : constante_lista_char COMMA CONST_CHAR
                      | CONST_CHAR ;
+
 
 %%
 
