@@ -1,7 +1,7 @@
 main {
     
     begin_local
-        float   v1e, v1e2, @v1e3;
+        float   v1e, v1e2, ~;
         float   f1e, f1e2, f1e3;
         int   ve, ve2, ve3;
         list of float fe, fe2, fe3;

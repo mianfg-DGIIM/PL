@@ -5,7 +5,7 @@
 #include <string.h>
 #include "gramatica.tab.h"
 
-void yyerror(char *msg);
+void yyerror(const char *msg);
 
 #define YYERROR_VERBOSE
 
@@ -16,7 +16,7 @@ Mensaje de error sintáctico con BISON:
 BISON ante un error sintactivo, visualiza mensajes de errores con indicaciones de los tokens
 que se esperaban en lugar de los que han producido el error
 */
-%error-verbose
+%define parse.error verbose
 
 
 /*Declaramos el conjunto de reglas o produciones que definen nuestra gramática*/
@@ -92,7 +92,6 @@ lista_de_parametros : lista_de_parametros COMMA TYPE IDENTIFIER
                     | TYPE IDENTIFIER
                     | LIST_OF IDENTIFIER ;
 Sentencias : Sentencias Sentencia
-           | Sentencia 
            | ;
 Sentencia : bloque
           | Sentencia_asignacion
@@ -124,12 +123,7 @@ expresion : PARENT_START expresion PARENT_END
           | IDENTIFIER
           | constante
           | funcion
-          | error PLUS_MINUS
-          | error OP_TERNARY_1 
-          | error OP_TERNARY_2
-          | error OP_UNARY 
-          | error OP_BINARY
-          | error COLON;
+          | error ;
 funcion : IDENTIFIER PARENT_START Lista_expresiones PARENT_END
         | IDENTIFIER PARENT_START PARENT_END ;
 Lista_expresiones : Lista_expresiones COMMA expresion
@@ -162,6 +156,6 @@ constante_lista_char : constante_lista_char COMMA CONST_CHAR
 #include "lex.yy.c"
 #endif
 
-void yyerror(char *msg) {
+void yyerror(const char *msg) {
 	fprintf(stderr, "Linea %d: %s\n", yylineno, msg) ;
 }
