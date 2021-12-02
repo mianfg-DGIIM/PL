@@ -16,7 +16,7 @@ Mensaje de error sintáctico con BISON:
 BISON ante un error sintactivo, visualiza mensajes de errores con indicaciones de los tokens
 que se esperaban en lugar de los que han producido el error
 */
-%define parse.error verbose
+%error-verbose
 
 
 /*Declaramos el conjunto de reglas o produciones que definen nuestra gramática*/
