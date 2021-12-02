@@ -1,7 +1,11 @@
 main {
     
     begin_local
-        int   ve, ve2 ve3;
+        float   v1e, v1e2, v1e3;
+        float   f1e, f1e2, f1e3;
+        int   ve, ve2, ve3;
+        list of float fe, fe2, fe3;
+        
     end_local
 
     int funcionA (int a1, float a2, char a3)

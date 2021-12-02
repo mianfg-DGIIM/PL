@@ -23,3 +23,4 @@ all:
 
 clean:
 	rm -rf $(BIN)/practica3 $(OBJ)/* $(SRC)/gramatica.tab.c $(SRC)/lex.yy.c
+	rm -rf $(BIN)/practica3.exe
