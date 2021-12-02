@@ -123,8 +123,13 @@ expresion : PARENT_START expresion PARENT_END
           | expresion OP_TERNARY_1 expresion OP_TERNARY_2 expresion
           | IDENTIFIER
           | constante
-          | funcion 
-          | error;
+          | funcion
+          | error PLUS_MINUS
+          | error OP_TERNARY_1 
+          | error OP_TERNARY_2
+          | error OP_UNARY 
+          | error OP_BINARY
+          | error COLON;
 funcion : IDENTIFIER PARENT_START Lista_expresiones PARENT_END
         | IDENTIFIER PARENT_START PARENT_END ;
 Lista_expresiones : Lista_expresiones COMMA expresion
