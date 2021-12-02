@@ -77,11 +77,13 @@ Cabecera_subprograma : TYPE IDENTIFIER PARENT_START lista_de_parametros PARENT_E
                      | error; 
 Declar_de_variables_locales : BEGIN_LOCAL Variables_locales END_LOCAL
                             | ;
-Variables_locales : Variables_locales Cuerpo_declar_variables COLON
-                  | Cuerpo_declar_variables COLON;
-Cuerpo_declar_variables : TYPE lista_variables  
-                        | LIST_OF TYPE lista_variables 
-                        | error;
+Variables_locales : Variables_locales Cuerpo_declar_variables 
+                  | Cuerpo_declar_variables ;                  
+Cuerpo_declar_variables : TYPE lista_variables COLON
+                        | LIST_OF TYPE lista_variables COLON
+                        | error
+                        | TYPE error
+                        | LIST_OF TYPE error;
 lista_variables : lista_variables COMMA IDENTIFIER 
                 | IDENTIFIER 
                 | error;
