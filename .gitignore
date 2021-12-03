@@ -1,6 +1,8 @@
 *.idea
 *.o
 *.exe
+*.zip
+*.pdf
 lex.yy.c
 Práctica 3/gramatica.exe
 Práctica 3/gramatica.tab.c
