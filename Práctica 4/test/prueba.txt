@@ -1,16 +1,16 @@
 main {
     
     begin_local
-        int   ve a, b, c, d
-        float vf , h j;
+        int   ve;
+        float vf ;
         bool  vl ;
-        li···st of int   pe, pe2 ;
+        list of int   pe, pe2 ;
         list of float pf, pf2 ;
         list of char  pc, pc2 ;
         list of bool  pl ;
     end_local
 
-    int funcionA (int a1 float a2, char a3)
+    int funcionA (int a1, float a2, char a3)
     {
         begin_local
             int x1, x2;
@@ -27,9 +27,9 @@ main {
                     float x1;
                 end_local
 
-                x1= 1.3+ ;
-                if ((c2>10)*)
-                    c2= c2 - 1 *;
+                x1= 1.3 ;
+                if (c2>10)
+                    c2= c2 - 1 ;
                 else {
                     x1= 3.1 ;
                 }

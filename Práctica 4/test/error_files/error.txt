@@ -1,11 +1,13 @@
 main {
     
     begin_local
-        float   v1e, v1e2, v1e3;
-        float   f1e, f1e2, f1e3;
-        int   ve, ve2, ve3;
-        list of float fe, fe2, fe3;
-        
+        int   ve;
+        float vf ;
+        bool  vl ;
+        list of int   pe, pe2 ;
+        list of float pf, pf2 ;
+        list of char  pc, pc2 ;
+        list of bool  pl ;
     end_local
 
     int funcionA (int a1, float a2, char a3)
@@ -75,8 +77,6 @@ main {
     }
 
     ve = (ve2 * ve / 2) / 3 * ve2;
-
-    a = 4 <<< 3 || 4===3;
 
     pe = pe ++ 10 @ pe2;
     if (?pe == 5) pruebaint = 7;
