@@ -74,7 +74,7 @@ main {
         }
     }
 
-    ve = (ve2 * * ve) / 2 / 3 *+ ve2( ;
+    ve = (ve2 * * ve) / 2 / 3 *+ ve2;
 
     pe = pe ++ 10 @ pe2;
     if (?pe == 5) pruebaint = 7;

@@ -77,11 +77,16 @@ extern int yydebug;
     CONST_CHAR = 283,
     STRING = 284,
     IDENTIFIER = 285,
-    OP_UNARY = 286,
-    OP_BINARY = 287,
-    OP_TERNARY_1 = 288,
-    OP_TERNARY_2 = 289,
-    PLUS_MINUS = 290
+    OP_BINARY = 286,
+    OP_TERNARY_1 = 287,
+    OP_TERNARY_2 = 288,
+    OP_BINARY_OR = 289,
+    OP_BINARY_AND = 290,
+    OP_BINARY_EQ = 291,
+    OP_BINARY_REL = 292,
+    PLUS_MINUS = 293,
+    OP_BINARY_MUL = 294,
+    OP_UNARY = 295
   };
 #endif
 

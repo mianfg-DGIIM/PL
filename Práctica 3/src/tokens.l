@@ -40,27 +40,27 @@ float              [0-9]*\.[0-9]+
 "output"                            return OUTPUT;
 "return"                            return RETURN;
 "#"                                 return OP_UNARY;
-"?"									return OP_UNARY;
+"?"																	return OP_UNARY;
 "--"                                return OP_BINARY;                                
 "++"                                return OP_TERNARY_1;
 "!"                                 return OP_UNARY;
 ">>"                                return OP_UNARY;
 "<<"                                return OP_UNARY;
 "$"                                 return OP_UNARY;
-"%"                                 return OP_BINARY;
-"*"                                 return OP_BINARY;
-"/"                                 return OP_BINARY;
+"%"                                 return OP_BINARY_MUL;
+"*"                                 return OP_BINARY_MUL;
+"/"                                 return OP_BINARY_MUL;
 "+"                                 return PLUS_MINUS;
 "-"                                 return PLUS_MINUS;
-"<"                                 return OP_BINARY;
-">"                                 return OP_BINARY;
-"<="                                return OP_BINARY;
-">="                                return OP_BINARY;
-"=="                                return OP_BINARY;
-"!="                                return OP_BINARY;
+"<"                                 return OP_BINARY_REL;
+">"                                 return OP_BINARY_REL;
+"<="                                return OP_BINARY_REL;
+">="                                return OP_BINARY_REL;
+"=="                                return OP_BINARY_EQ;
+"!="                                return OP_BINARY_EQ;
 "&"                                 return OP_BINARY;
-"&&"                                return OP_BINARY;
-"||"                                return OP_BINARY;
+"&&"                                return OP_BINARY_AND;
+"||"                                return OP_BINARY_OR;
 "**"                                return OP_BINARY;
 "@"                                 return OP_TERNARY_2;
 [0-9]+                              return CONST_INT;
@@ -76,6 +76,6 @@ float              [0-9]*\.[0-9]+
 {identificador}                     return IDENTIFIER; 
 [\n]                                {;}
 [ \t]+                              {;}
-.                                   { printf(" \nError Léxico en Linea: %d. No se reconoce la palabra '%s'. ", yylineno, yytext); }
+.                                   { printf(" \nError Léxico en Linea: %d. No se reconoce la palabra '%s'.\n", yylineno, yytext); }
 
 %%

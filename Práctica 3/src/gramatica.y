@@ -21,7 +21,7 @@ que se esperaban en lugar de los que han producido el error
 
 /*Declaramos el conjunto de reglas o produciones que definen nuestra gramática*/
 
-%token MAIN 
+%token MAIN
 %token BLOCK_START
 %token BLOCK_END
 %token PARENT_START;
@@ -48,16 +48,18 @@ que se esperaban en lugar de los que han producido el error
 %token CONST_BOOL;
 %token CONST_CHAR;
 %token STRING;
-%token IDENTIFIER
-
-%right OP_UNARY;   
-                    
+%token IDENTIFIER;
 %left OP_BINARY;
-
 %left OP_TERNARY_1; 
 %left OP_TERNARY_2; 
 
-%right PLUS_MINUS;
+%left OP_BINARY_OR;
+%left OP_BINARY_AND;
+%left OP_BINARY_EQ;
+%left OP_BINARY_REL;
+%left PLUS_MINUS;
+%right OP_BINARY_MUL;
+%right OP_UNARY;
 
 %%
 
@@ -118,7 +120,13 @@ Sentencias_lista : OP_UNARY expresion COLON ;
 expresion : PARENT_START expresion PARENT_END
           | OP_UNARY expresion
           | expresion OP_BINARY expresion
+          | expresion OP_BINARY_OR expresion
+          | expresion OP_BINARY_AND expresion
+          | expresion OP_BINARY_EQ expresion
+          | expresion OP_BINARY_REL expresion
+          | expresion OP_BINARY_MUL expresion
           | expresion PLUS_MINUS expresion
+          | PLUS_MINUS expresion %prec OP_UNARY
           | expresion OP_TERNARY_1 expresion OP_TERNARY_2 expresion
           | IDENTIFIER
           | constante
