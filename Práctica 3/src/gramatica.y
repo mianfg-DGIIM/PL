@@ -5,7 +5,7 @@
 #include <string.h>
 #include "gramatica.tab.h"
 
-void yyerror(char *msg);
+void yyerror(const char *msg);
 
 #define YYERROR_VERBOSE
 
@@ -92,7 +92,6 @@ lista_de_parametros : lista_de_parametros COMMA TYPE IDENTIFIER
                     | TYPE IDENTIFIER
                     | LIST_OF IDENTIFIER ;
 Sentencias : Sentencias Sentencia
-           | Sentencia 
            | ;
 Sentencia : bloque
           | Sentencia_asignacion
@@ -123,8 +122,8 @@ expresion : PARENT_START expresion PARENT_END
           | expresion OP_TERNARY_1 expresion OP_TERNARY_2 expresion
           | IDENTIFIER
           | constante
-          | funcion 
-          | error;
+          | funcion
+          | error ;
 funcion : IDENTIFIER PARENT_START Lista_expresiones PARENT_END
         | IDENTIFIER PARENT_START PARENT_END ;
 Lista_expresiones : Lista_expresiones COMMA expresion
@@ -157,6 +156,6 @@ constante_lista_char : constante_lista_char COMMA CONST_CHAR
 #include "lex.yy.c"
 #endif
 
-void yyerror(char *msg) {
+void yyerror(const char *msg) {
 	fprintf(stderr, "Linea %d: %s\n", yylineno, msg) ;
 }

@@ -1,0 +1,81 @@
+main {
+    
+    begin_local
+        float   v1e, v1e2, ~;
+        float   f1e, f1e2, f1e3;
+        int   ve, ve2, ve3;
+        list of float fe, fe2, fe3;
+        
+    end_local
+
+    int funcionA (int a1, float a2, char a3)
+    {
+        begin_local
+            int x1, x2;
+        end_local
+
+        char funcionB (char b1, bool b2)
+        {
+            begin_local
+                float xf, xf2;
+            end_local
+
+            float funcionC (bool c1, int c2) {
+                begin_local
+                    float x1;
+                end_local
+
+                x1= 1.3 ;
+                if (c2>10)
+                    c2= c2 - 1 ;
+                else {
+                    x1= 3.1 ;
+                }
+                return x1 ;
+            }
+
+            xf = funcionC (true, 10);
+            x2 = xf*(funcionC(false,1)-funcionC(true, 23))/ 10.0;
+
+            while (x2*funcionC(false,1)-xf<10.0)
+                x2 = x2 * xf;
+        }
+
+        float funcionD (float d1)
+        {
+            begin_local
+                char dato;
+                int  valor;
+            end_local
+
+            char funcionE (char e1 , char e2 ) {
+                input  e1, e2 ;
+                
+                if (e1=='a')
+                    return e1;
+                else if (e1 == 'b')
+                    return e2;
+                else
+                    return ' ';
+            }
+
+            input valor ;
+            if (d1 > 0.0) {
+                begin_local
+                    int dato;
+                end_local
+                dato = 2;
+                dato = valor*20/dato;
+            } else {
+                valor = valor*100;
+                d1 =d1/1000.0;
+            }
+            return d1;
+        }
+    }
+
+    ve = (ve2 * ve / 2) / 3 * ve2;
+
+    pe = pe ++ 10 @ pe2;
+    if (?pe == 5) pruebaint = 7;
+}
