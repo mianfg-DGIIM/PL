@@ -67,33 +67,35 @@ que se esperaban en lugar de los que han producido el error
 
 Programa : MAIN bloque ;
 bloque : BLOCK_START
+         {tsAddMark()}
          Declar_de_variables_locales
          Declar_de_subprogs
          Sentencias
          BLOCK_END;
+         {tsCleanIn()}
 Declar_de_subprogs : Declar_de_subprogs Declar_subprog
                    | ;
-Declar_subprog : Cabecera_subprograma bloque ;
-Cabecera_subprograma : TYPE IDENTIFIER PARENT_START lista_de_parametros PARENT_END
-                     | TYPE IDENTIFIER PARENT_START PARENT_END 
+Declar_subprog : Cabecera_subprograma {subProg=1;} bloque {subProg=0;} ;
+Cabecera_subprograma : TYPE IDENTIFIER {decParam=1;} {tsAddSubprog($2);} PARENT_START lista_de_parametros PARENT_END {tsUpdateNparam($4);nParam=0;decParam=0}{$4.nDim=0;}
+                     | TYPE IDENTIFIER {decParam=1;} {tsAddSubprog($2);} PARENT_START PARENT_END
                      | error; 
-Declar_de_variables_locales : BEGIN_LOCAL Variables_locales END_LOCAL
+Declar_de_variables_locales : BEGIN_LOCAL {decVar=1;} Variables_locales END_LOCAL {decVar=0;}
                             | ;
 Variables_locales : Variables_locales Cuerpo_declar_variables 
                   | Cuerpo_declar_variables ;                  
-Cuerpo_declar_variables : TYPE lista_variables COLON
-                        | LIST_OF TYPE lista_variables COLON
+Cuerpo_declar_variables : TYPE  {setType($1)} lista_variables COLON
+                        | LIST_OF TYPE {setType($1)} lista_variables COLON
                         | error
                         | TYPE error
                         | LIST_OF TYPE error;
 lista_variables : lista_variables COMMA IDENTIFIER 
                 | IDENTIFIER 
                 | error;
-lista_de_parametros : lista_de_parametros COMMA TYPE IDENTIFIER
-                    | lista_de_parametros COMMA LIST_OF TYPE IDENTIFIER
-                    | TYPE IDENTIFIER
-                    | LIST_OF IDENTIFIER ;
-Sentencias : Sentencias Sentencia
+lista_de_parametros : lista_de_parametros COMMA TYPE IDENTIFIER {$4.nDim=0;nParam++;setType($3);tsAddParam($4);}
+                    | lista_de_parametros COMMA LIST_OF TYPE IDENTIFIER {$5.nDim=0;nParam++;setType($3);tsAddParam($5);}
+                    | TYPE IDENTIFIER {$2.nDim=0;nParam++;setType($1);tsAddParam($2);}
+                    | LIST_OF IDENTIFIER {$2.nDim=0;nParam++;setType($1);tsAddParam($2);} ; 
+Sentencias : Sentencias {decVar = 2; } Sentencia
            | ;
 Sentencia : bloque
           | Sentencia_asignacion
@@ -104,36 +106,65 @@ Sentencia : bloque
           | Sentencia_salida
           | Sentencia_return
           | Sentencias_lista ;
-Sentencia_asignacion : IDENTIFIER ASSIGN expresion COLON ;
-Sentencia_if : IF PARENT_START expresion PARENT_END Sentencia 
-             | IF PARENT_START expresion PARENT_END Sentencia ELSE Sentencia ;
-Sentencia_while : WHILE PARENT_START expresion PARENT_END Sentencia ;
-Sentencia_for : FOR IDENTIFIER ASSIGN expresion TO expresion Sentencia ;
+Sentencia_asignacion : IDENTIFIER ASSIGN expresion COLON {
+        if($1.type!=$3.type){
+                printf("Semantic Error(%d): Types are not equal.\n",line, $1.type, $3.type);
+        }
+        if(!equalSize($1,$3)){
+               printf("Semantic Error(%d): Sizes are not equal.\n",line); 
+        }
+
+
+};
+Sentencia_if : IF PARENT_START expresion PARENT_END Sentencia {
+        if($3.type!=BOOLEANO){
+              printf("Semantic Error(%d): Expression are not logic.\n", line);  
+        }
+}
+                | IF PARENT_START expresion PARENT_END Sentencia ELSE Sentencia {
+                     if($3.type!=BOOLEANO){
+                        printf("Semantic Error(%d): Expression are not logic.\n", line);    
+                     }
+                };
+
+Sentencia_while : WHILE PARENT_START expresion PARENT_END Sentencia {
+        if($3.type != BOOLEANO){
+		printf("Semantic Error(%d): Expression are not logic.\n", line);
+	}
+};
+Sentencia_for : FOR IDENTIFIER ASSIGN expresion TO expresion Sentencia {
+        if($4.type != ENTERO){
+		printf("Semantic Error(%d): Expression are not int.\n", line);
+	}
+        if($6.type != ENTERO){
+		printf("Semantic Error(%d): Expression are not int\n", line);
+	}
+};
 Sentencia_entrada : INPUT lista_variables COLON ;
 Sentencia_salida : OUTPUT Lista_expresiones_o_cadena COLON ;
-Lista_expresiones_o_cadena : Lista_expresiones_o_cadena COMMA expresion
-                           | Lista_expresiones_o_cadena COMMA STRING
-                           | expresion
-                           | STRING ;
-Sentencia_return : RETURN expresion COLON ;
+Lista_expresiones_o_cadena : Lista_expresiones_o_cadena COMMA expresion { nParam++; tsCheckParam($1, nParam); }
+                           | Lista_expresiones_o_cadena COMMA STRING { nParam++; tsCheckParam($1, nParam); }
+                           | expresion { nParam=1; tsCheckParam($1, nParam); }
+                           | STRING { nParam=1; tsCheckParam($1, nParam); };
+Sentencia_return : RETURN expresion {tsCheckReturn($2,&$$);} COLON ;
 Sentencias_lista : OP_UNARY expresion COLON ;
-expresion : PARENT_START expresion PARENT_END
-          | OP_UNARY expresion
+expresion : PARENT_START expresion PARENT_END { $$.type = $2.type; $$.nDim = $2.nDim; $$.tDim1 = $2.tDim1; $$.tDim2 = $2.tDim2; }
+          | OP_UNARY expresion {tsOpUnary($1, $2, &$$); }
           | expresion OP_BINARY expresion
-          | expresion OP_BINARY_OR expresion
-          | expresion OP_BINARY_AND expresion
-          | expresion OP_BINARY_EQ expresion
-          | expresion OP_BINARY_REL expresion
-          | expresion OP_BINARY_MUL expresion
-          | expresion PLUS_MINUS expresion
-          | PLUS_MINUS expresion %prec OP_UNARY
+          | expresion OP_BINARY_OR expresion {tsOpOr($1, $2, $3, &$$); }
+          | expresion OP_BINARY_AND expresion {tsOpAnd($1, $2, $3, &$$); }
+          | expresion OP_BINARY_EQ expresion {tsOpEqual($1, $2, $3, &$$); }
+          | expresion OP_BINARY_REL expresion  {tsOpRel($1, $2, $3, &$$); }
+          | expresion OP_BINARY_MUL expresion {tsOpMul($1, $2, $3, &$$); }
+          | expresion PLUS_MINUS expresion {tsOpSignBin($1, $2, $3, &$$); }
+          | PLUS_MINUS expresion {tsOpSign($1, $2, &$$); } %prec OP_UNARY
           | expresion OP_TERNARY_1 expresion OP_TERNARY_2 expresion
-          | IDENTIFIER
-          | constante
-          | funcion
+          | IDENTIFIER  {decVar = 0;}
+          | constante  {$$.type = $1.type; $$.nDim = $1.nDim; $$.tDim1 = $1.tDim1; $$.tDim2 = $1.tDim2; }
+          | funcion {$$.type = $1.type; $$.nDim = $1.nDim; $$.tDim1 = $1.tDim1; $$.tDim2 = $1.tDim2; currentFunction = -1;}
           | error ;
-funcion : IDENTIFIER PARENT_START Lista_expresiones PARENT_END
-        | IDENTIFIER PARENT_START PARENT_END ;
+funcion : IDENTIFIER PARENT_START Lista_expresiones PARENT_END { tsFunctionCall($1, &$$); }
+        | IDENTIFIER PARENT_START PARENT_END { tsFunctionCall($1, &$$); } ;
 Lista_expresiones : Lista_expresiones COMMA expresion
                   | expresion ;
 constante : constante_base
