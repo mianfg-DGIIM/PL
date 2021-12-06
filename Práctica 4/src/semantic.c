@@ -1,774 +1,666 @@
 #include "semantic.h"
 
-inTS ts[MAX_IN];
-int line=1;
-long int LIMIT=0;
-int decVar=0;
-int decParam = 0;
-int decFunction = 0;
-int subProg = 0;
-tData globalType = NA;
-int nParam = 0;
-int currentFunction = -1;
-int aux = 0;
+inTS     ts[MAX_STACK];
+long int TOS             = 0;
+int      line            = 1;
+int      decVar          = 0;
+int      decParam        = 0;
+int      esFunc          = 0;
+tData    currentType     = NOT_ASSIGNED;
+//int      nParams         = 0;
+int      checkParams     = 0;
+int      checkFunction   = 0;
+int      currentFunction = -1;
 
 
-//¿LAS NECESITAMOS O NO?
-// Devuelve si el atributo es array o no
-int isArray(attrs e){
-
-    return (e.nDim!=0);
+tData getListType(tData type) {
+  return type;
+  switch (type) {
+    case INT:
+      return LIST_INT;
+      break;
+    case FLOAT:
+      return LIST_FLOAT;
+      break;
+    case CHAR:
+      return LIST_CHAR;
+      break;
+    case BOOLEAN:
+      return LIST_BOOLEAN;
+      break;
+  }
 }
 
-// Devuelve si los dos posibles arrays que recibe tienen el mismo tamaño
-int equalSize(attrs e1, attrs e2){
-
-    return (e1.nDim == e2.nDim &&
-        e1.tDim1 == e2.tDim1 &&
-        e1.tDim2 == e2.tDim2);
-
+void setType(attrs value) {
+  currentType = value.type;
 }
 
-// Guarda el type de la variable
-int setType(attrs value){
-
-    globalType = value.type;
-
+int isList(attrs e) {
+  return e.type == LIST_INT || e.type == LIST_FLOAT || e.type == LIST_CHAR || e.type == LIST_BOOLEAN;
 }
 
-///////////////////////////////////////////////////////7777
-//CREACION TABLA SIMBOLOS 
-
-// Inserta una in en la tabla de símbolos
-int tsAddIn(inTS in){
-
-    // Si se tienen más entradas de las que puede alojar la tabla de símbolos
-    // dará un error, si no, se inserta
-	if(LIMIT < MAX_IN) {
-
-		ts[LIMIT].in=in.in;
-		ts[LIMIT].lex=in.lex;
-		ts[LIMIT].type=in.type;
-		ts[LIMIT].nParam=in.nParam;
-		ts[LIMIT].nDim=in.nDim;
-		ts[LIMIT].tDim1=in.tDim1;
-		ts[LIMIT].tDim2=in.tDim2;
-
-        // Se aumenta el contador de entradas
-		LIMIT++;
-
-        // Se muestra la tabla de símbolos por pantalla
-		//printTS();
-
-		return 1;
-
-	} else {
-
-		printf("Semantic Error(%d): Stack overflow", line);
-
-		return 0;
-
-	}
-
-}
-
-// Elimina una in de la tabla de símbolos
-int tsDelIn(){
-
-    // Si la tabla de símbolos tiene alguna in puede eliminar la última
-    if(LIMIT > 0){
-
-		LIMIT--;
-		return 1;
-
-	}else{
-
-		printf("Semantic Error(%d): Empty table", line);
-		return 0;
-
-	}
-
-}
-
-// Elimina las entradas de la tabla de símbolos hasta la mark de tope
-void tsCleanIn(){
-
-    while(ts[LIMIT-1].in != MARK && LIMIT > 0){
-		LIMIT--;
-	}
-	if (ts[LIMIT-1].in == MARK) {
-		LIMIT--;
-	}
-
-    if (ts[LIMIT-1].in == FORM) {
-        while(ts[LIMIT-1].in != FUNCTION && LIMIT > 0){
-    		LIMIT--;
-    	}
-        LIMIT--;
-	}
-
+tData listToType(tData listType) {
+  switch (listType) {
+    case LIST_INT:
+      return INT;
+    case LIST_FLOAT:
+      return FLOAT;
+    case LIST_CHAR:
+      return CHAR;
+    case LIST_BOOLEAN:
+      return BOOLEAN;
+    default:
+      return NOT_ASSIGNED;
+  }
 }
 
 
-// Busca una entrada según el id
-int tsSearchId(attrs e){
+int TS_AddEntry(inTS in) {
+  if (TOS < MAX_STACK) {        // Comprobamos si quedan entradas en la tabla de símbolos
+    ts[TOS].entry   = in.entry;
+    ts[TOS].lex     = in.lex;
+    ts[TOS].type    = in.type;
+    ts[TOS].nParams = in.nParams;
+    ts[TOS].nDim    = in.nDim;
+    ts[TOS].ended   = in.ended;
 
-    int i = LIMIT - 1;
-	int found = 0;
+    TOS++;          // Se aumenta el contador de entradas
+    //printTS();    // Se muestra la tabla de símbolos por pantalla
 
-	while (i > 0 && !found /*&& ts[i].in != MARK*/) {
-		if (ts[i].in == VAR && strcmp(e.lex, ts[i].lex) == 0) {
-			found = 1;
-		} else{
-			i--;
-		}
-	}
-
-	if(!found) {
-		//printf("Semantic Error(%d): Ident not declared: %s\n", line, e.lex);
-		return -1;
-	} else {
-		return i;
-	}
-
+    return 1;
+  } else {
+    printf("[SEMANTIC ERROR @ line %d] Symbol table overflow", line);
+    return -1;
+  }
 }
 
-// Busca una in según el nombre
-int tsSearchName(attrs e){
-
-    int i = LIMIT - 1;
-	int found = 0;
-
-
-	while (i > 0 && !found /*&& ts[i].in != MARK*/) {
-		if (ts[i].in == FUNCTION && strcmp(e.lex, ts[i].lex) == 0) {
-			found = 1;
-		} else{
-			i--;
-		}
-	}
-
-	if(!found) {
-		//printf("Semantic Error(%d): Ident not declared: %s\n", line, e.lex);
-		return -1;
-	} else {
-		return i;
-	}
-
+int TS_DeleteEntry() {
+  if (TOS > 0) {  // Si la tabla de símbolos tiene alguna in puede eliminar la última
+    TOS--;
+    return 1;
+  } else {
+    printf("[SEMANTIC ERROR @ line %d] Empty symbol table", line);
+    return -1;
+  }
 }
 
-// Añade un id
-void tsAddId(attrs e){
+/*int TS_ClearBlock() {
+  while (ts[TOS-1].in != MARK && TOS > 0) {
+    TOS--;
+  }
+  if (ts[TOS-1].in == MARK) {
+    TOS--;
+  }
+  if (ts[TOS-1].in == PARAM) {
+    while(ts[TOS-1].in != FUNCTION && TOS > 0){
+    TOS--;
+  }
+    TOS--;
+  }
+}*/
 
-    // Para añadir un id a la pila no se puede haber llegado al tope,
-    // el id no puede existir y se deben estar declarando variables
-	int j = LIMIT-1;
-	int found = 0;
+int TS_ClearBlock() {
+  int ret = -1;
+  int currentTOS = -1;    // valor del TOS antes de actualizar la función actual
 
-	if(j >= 0 && decVar == 1){
-		// Se obtiene la posición de la mark del bloque
-		while((ts[j].in != MARK) && (j >= 0) && !found){
+  if (TOS == 0)           // la TS está vacía
+    return 1;
 
-			if(strcmp(ts[j].lex, e.lex) != 0){
+  while (TOS > 0) {       // buscamos el inicio del bloque en el que estamos mientras que no
+                          // lleguemos a la base de la pila
+    TOS--;                // nos desplazamos a las entradas anteriores
 
-				j--;
+    if (ts[TOS].entry == MARK) {   // encuentra una entrada con la marca de inicio de bloque
+      ret = 1;
+      break;
+    }
+  }
 
-			} else{
+  if (TOS == 0) {
+    printf("[SEMANTIC] Analysis ended\n");
+    return ret;
+  }
 
-				found = 1;
-				printf("Semantic Error(%d): Exist ident: %s\n", line, e.lex);
+  // dejamos TOS donde estaría la marca de bloque para comenzar a insertar ahí,
+  // todo lo anterior en la TS se conserva (parámetros formales, funciones...)
+  currentTOS = TOS;
+  currentTOS--;
 
-	 		}
+  if (ts[currentTOS].entry == PARAM) {       // si el bloque es una función, actualizamos la
+                                              // función actual
+    while (ts[currentTOS].entry == PARAM) {
+      currentTOS--;
+    }
+  }
+  if (ts[currentTOS].entry == FUNCTION) {    // busca en la TS la última función definida no finalizada por declarar para
+                                              // convertirla en la actual (es su ámbito ahora)
+    ts[currentTOS].ended = 1;                 // señalamos que esta función ha finalizado, pues
+                                              // hemos eliminado el cuerpo de dicha función
+    updateCurrentFunction(currentTOS);
+  }
 
-		}
-
-		// Si no se ha encontrado significa que no existe, por lo que se añade
-        // a la pila
-		if(!found) {
-			inTS newIn;
-			newIn.in = VAR;
-			newIn.lex = e.lex;
-			newIn.type = globalType;
-			newIn.nParam = 0;
-			newIn.nDim=e.nDim;
-			newIn.tDim1=e.tDim1;
-			newIn.tDim2=e.tDim2;
-			tsAddIn(newIn);
-
-		}
-
-	}
+  return ret;
 }
 
-// Añade una mark de tope
-void tsAddMark(){
-
-    inTS inInitScope;
-
-	inInitScope.in = MARK;
-	inInitScope.lex = "{";
-	inInitScope.type = NA;
-	inInitScope.nParam = 0;
-	inInitScope.nDim = 0;
-	inInitScope.tDim1 = 0;
-	inInitScope.tDim2 = 0;
-
-	tsAddIn(inInitScope);
-
-    // Se añaden a la tabla de símbolos los parámetros de la función como las
-    // variables locales de ese bloque
-	if(subProg == 1){
-
-		int j = LIMIT - 2, mark = 0, funct = 0;
-
-		while(j > 0 && ts[j].in == FORM){
-
-			/*printf("\n\n");
-			printIn(j);
-			printf("\n\n");*/
-
-			if(ts[j].in == FORM) {
-
-				inTS newIn;
-				newIn.in = VAR;
-				newIn.lex = ts[j].lex;
-				newIn.type = ts[j].type;
-				newIn.nParam = ts[j].nParam;
-				newIn.nDim = ts[j].nDim;
-				newIn.tDim1 = ts[j].tDim1;
-				newIn.tDim2 = ts[j].tDim2;
-				tsAddIn(newIn);
-
-			}
-
-			j--;
-
-		}
-
-	}
-
+void updateCurrentFunction(int lastFunc){
+  lastFunc--;
+  while (ts[lastFunc].entry != FUNCTION && lastFunc > 0){
+    lastFunc--;
+  }
+  if (lastFunc == 0) {
+    currentFunction = -1;
+  } else {
+    if (ts[lastFunc].ended == 0)    // si la función encontrada todavía no ha terminado de definirse
+      currentFunction = lastFunc;
+    else
+      updateCurrentFunction(lastFunc);
+  }
 }
 
-// Añade una in de subprograma
-void tsAddSubprog(attrs e){
+int TS_FindById(attrs e) {
+  int i = TOS - 1;    
 
-  inTS inSubProg;
-	inSubProg.in = FUNCTION;
-	inSubProg.lex = e.lex;
-	inSubProg.nParam = 0;
-	inSubProg.nDim = 0;
-	inSubProg.tDim1 = 0;
-	inSubProg.tDim2 = 0;
-	inSubProg.type = e.type;
+  if (TOS == 0)
+    return -1;
+  
+  while (i > 0 /* && ts[i].entry != MARK */) {
+    if (ts[i].entry == VAR && strcmp(e.lex, ts[i].lex) == 0)
+      return i;
+    i--;
+  }
 
-	currentFunction = LIMIT;
-	tsAddIn(inSubProg);
-
+  //printf("[SEMANTIC ERROR @ line %d] Identifier not declared: %s\n", line, e.lex);
+  return -1;
 }
 
-// Añade una in de param formal
-void tsAddParam(attrs e){
+int TS_FindByName(attrs e) {
+  int i = TOS - 1;    
 
-    int j = LIMIT - 1, found = 0;
+  if (TOS == 0)
+    return -1;
+  
+  while (i > 0) {
+    if (ts[i].entry == FUNCTION && strcmp(e.lex, ts[i].lex) == 0)
+      return i;
+    i--;
+  }
 
-	while((j != currentFunction)  && (!found) ){
-
-		if(strcmp(ts[j].lex, e.lex) != 0) {
-
-			j--;
-
-		} else{
-
-			found = 1;
-			printf("Semantic Error(%d): Exist param: %s\n", line, e.lex);
-
-        }
-
-	}
-
-	if(!found) {
-
-		inTS newIn;
-		newIn.in = FORM;
-		newIn.lex = e.lex;
-		newIn.type = globalType;
-		newIn.nParam = 0;
-		newIn.nDim = e.nDim;
-		newIn.tDim1 = e.tDim1;
-		newIn.tDim2 = e.tDim2;
-		tsAddIn(newIn);
-
-	}
-
+  //printf("[SEMANTIC ERROR @ line %d] Identifier not declared: %s\n", line, e.lex);
+  return -1;
 }
 
-// Actualiza el número de parámetros de la función
-void tsUpdateNparam(attrs e){
+void TS_AddId(attrs e) {
+  int j = TOS - 1;    // Para añadir un id a la pila no se puede haber llegado al tope,
+                      // el id no puede existir y se deben estar declarando variables
+  int found = 0;
+  int index;
 
-    ts[currentFunction].nParam = nParam;
-	ts[currentFunction].nDim=e.nDim;
-	ts[currentFunction].tDim1=e.tDim1;
-	ts[currentFunction].tDim2=e.tDim2;
+  int numparams = ts[currentFunction].nParams;
 
+  if (index != 1) {   // Comprobamos que la variable a añadir no es una redeclaración de un
+                      // argumento de la función en la que se encuentra
+    // Comparamos con los parámetros formales de la fución actual
+    for (index = currentFunction+1; index < currentFunction+1+numparams; index++) {
+      if (strcmp(ts[index].lex, e.lex) == 0) {  // Su nombre es el de un argumento de la función
+        printf("[SEMANTIC ERROR @ line %d] Declaration error. Id already exists: %s\n", line, e.lex);
+        return;
+      }
+    }
+  }
+
+  if (j >= 0 && decVar == 1) {  // Caso declaración de variable
+    while (ts[j].entry != MARK && j >= 0 && !found) {   // Busca entrada con el mismo nombre
+                                                        // dentro del bloque
+      if (strcmp(ts[j].lex, e.lex) != 0) {
+        j--;
+      } else {
+        found = 1;
+        printf("[SEMANTIC ERROR @ line %d] Declaration error. Id already exists: %s\n", line, e.lex);
+        return;
+      }
+    }
+    if (!found) {
+      inTS inFunction;
+      inFunction.entry   = VAR;
+      inFunction.lex     = e.lex;
+      inFunction.type    = currentType;
+      inFunction.nParams = 0;
+      inFunction.nDim    = e.nDim;
+      TS_AddEntry(inFunction);
+    }
+  }
 }
 
+void TS_AddMark() {
+  inTS inInitScope;
 
-//
-///////////////////////////////////////////////////////////////////////////////
+  inInitScope.entry   = MARK;
+  inInitScope.lex     = "{";
+  inInitScope.type    = NOT_ASSIGNED;
+  inInitScope.nParams = 0;
+  inInitScope.nDim    = 0;
 
-///////////////////////////////////////////////////////////////////////////////
-// Analizador Semántico
-//
+  TS_AddEntry(inInitScope);
 
-// Devuelve la in que sea función más cercana
-int tsGetNextFunction(){
+  // Si es el cuerpo de una función, se añaden a la tabla de símbolos los parámetros/argumentos
+  // de la función como variables locales de ese bloque al fin de poder ser utilizadas
+  if (esFunc == 1) {
+    int j = TOS - 2;    // TOS-2 para leer los parámetros formales de antes de la llave
+    while (j > 0 && ts[j].entry == PARAM) {   // Mientras leamos parámetros formales los aniadimos
+                                              // como variables locales al nuevo bloque
+      inTS newIn;
+      newIn.entry   = VAR;
+      newIn.lex     = ts[j].lex;
+      newIn.type    = ts[j].type;
+      newIn.nParams = ts[j].nParams;
+      newIn.nDim    = ts[j].nDim;
+      TS_AddEntry(newIn);
 
-    int i = LIMIT - 1;
-	int found = 0;
-
-	while (i > 0 && !found) {
-
-		if (ts[i].in == FUNCTION) {
-			found = 1;
-		} else {
-			i--;
-		}
-
-	}
-
-	if(!found) {
-		return -1;
-	} else {
-		return i;
-	}
-
+      j--;
+    }
+  }
 }
 
-// Comprueba si el type de la expresión coincide con lo que devuelve la función
-void tsCheckReturn(attrs expr, attrs* res){
+void TS_AddFunction(attrs e) {
+  inTS inFunction;
 
-    int index = tsGetNextFunction();
+  inFunction.entry   = FUNCTION;
+  inFunction.lex     = e.lex;
+  inFunction.type    = currentType; // WIP e.type?
+  inFunction.nParams = 0;   // lo actualizaremos a continuación
+  inFunction.nDim    = 0;
 
-
-	if (index > -1) {
-
-		if (expr.type != ts[index].type) {
-			printf("Semantic Error(%d): Return not equal to return function.\n", line);
-			return;
-		}
-
-		attrs tmp;
-		tmp.nDim = ts[index].nDim;
-		tmp.tDim1 = ts[index].tDim1;
-		tmp.tDim2 = ts[index].tDim2;
-
-		if (!equalSize(expr,tmp)) {
-			printf("Semantic Error(%d): Return expresion not same size than return function.\n", line);
-			return;
-		}
-
-		res->type = expr.type;
-		res->nDim = expr.nDim;
-		res->tDim1 = expr.tDim1;
-		res->tDim2 = expr.tDim2;
-
-	} else {
-
-		printf("Semantic Error(%d): res not declared into function.\n", line);
-		return;
-
-	}
-
+  currentFunction = TOS;    // actualizamos la función actual
+  TS_AddEntry(inFunction);
 }
 
-// Devuelve el identificar
-void tsGetId(attrs id, attrs* res){
-
-    int index = tsSearchId(id);
-
-	if(index==-1) {
-        if(ts[index].in != FUNCTION)
-		      printf("\nSemantic Error(%d): Id not found %s.\n", line, id.lex);
-	} else {
-
-		res->lex = strdup(ts[index].lex);
-		res->type = ts[index].type;
-		res->nDim = ts[index].nDim;
-		res->tDim1 = ts[index].tDim1;
-		res->tDim2 = ts[index].tDim2;
-
-	}
-
-}
-
-// Realiza la comprobación de la operación !, &, ~
-void tsOpUnary(attrs op, attrs o, attrs* res){
-
-    if (o.type != BOOLEANO || isArray(o)) {
-		printf("Semantic Error(%d): Not operator expects logic expression.", line);
-	}
-
-	res->type = BOOLEANO;
-	res->nDim = 0;
-	res->tDim1 = 0;
-	res->tDim2 = 0;
-
-}
-
-// Realiza la comprobación de la operación +, -
-void tsOpSign(attrs op, attrs o, attrs* res){
-
-    if ((o.type != FLOTANTE && o.type != ENTERO) || isArray(o)) {
-		printf("Semantic Error(%d): Operator expects integer or real expression.", line);
-	}
-
-	res->type = o.type;
-	res->nDim = 0;
-	res->tDim1 = 0;
-	res->tDim2 = 0;
-
-}
-
-// Realiza la comprobación de la operación +, - binaria
-void tsOpSignBin(attrs o1, attrs op, attrs o2, attrs* res){
-
-    if (o1.type != o2.type) {
-	    printf("Semantic Error(%d): Expressions must be equals types.", line);
-  		return;
-  	}
-
-	if (o1.type != ENTERO && o1.type != FLOTANTE) {
-		printf("Semantic Error%d): Invalid type in op. Both must be equals.", line);
-		return;
-	}
-
-	if (isArray(o1) && isArray(o2)){
-
-		if(equalSize(o1,o2)){
-
-			res->type = o1.type;
-			res->nDim = o1.nDim;
-			res->tDim1 = o1.tDim1;
-			res->tDim2 = o1.tDim2;
-
-		} else {
-
-            printf("Semantic Error(%d): Size arrays must be same", line);
-			return;
-
-		}
-
-	} else {
-
-		if (isArray(o1) && !isArray(o2)) {
-
-			res->type = o1.type;
-			res->nDim = o1.nDim;
-			res->tDim1 = o1.tDim1;
-			res->tDim2 = o1.tDim2;
-
-		}
-
-		if (!isArray(o1) && isArray(o2)){
-
-			if (strcmp(op.lex,"-")==0){
-
-				printf("Semantic Error(%d): Operation not allowed.", line);
-				return;
-
-			} else {
-
-				res->type = o2.type;
-				res->nDim = o2.nDim;
-				res->tDim1 = o2.tDim1;
-				res->tDim2 = o2.tDim2;
-
-			}
-
-		}
-
-	}
-
-}
-
-// Realiza la comprobación de la operación *, /
-void tsOpMul(attrs o1, attrs op, attrs o2, attrs* res){
-
-    if (o1.type != o2.type) {
-		printf("Semantic Error(%d): Expressions must be same types.", line);
-		return;
-	}
-
-	if (o1.type != ENTERO && o1.type != FLOTANTE) {
-		printf("Semantic Error%d): Invalid type in op. Both must be same.", line);
-		return;
-	}
-
-	if (isArray(o1) && isArray(o2)){
-
-		if(equalSize(o1,o2)){
-
-			res->type = o1.type;
-			res->nDim = o1.nDim;
-			res->tDim1 = o1.tDim1;
-			res->tDim2 = o1.tDim2;
-
-		} else {
-
-            printf("Semantic Error(%d): Size arrays must be same", line);
-			return;
-
-		}
-
-	} else {
-
-		if (isArray(o1) && !isArray(o2)) {
-
-			res->type = o1.type;
-			res->nDim = o1.nDim;
-			res->tDim1 = o1.tDim1;
-			res->tDim2 = o1.tDim2;
-
-		}
-
-		if (!isArray(o1) && isArray(o2)){
-
-			if (strcmp(op.lex,"-")==0){
-
-				printf("Semantic Error(%d): Operation not allowed.", line);
-				return;
-
-			} else {
-
-				res->type = o2.type;
-				res->nDim = o2.nDim;
-				res->tDim1 = o2.tDim1;
-				res->tDim2 = o2.tDim2;
-
-			}
-
-		}
-
-	}
-
-}
-
-// Realiza la comprobación de la operación &&
-void tsOpAnd(attrs o1, attrs op, attrs o2, attrs* res){
-
-    if (o1.type != o2.type) {
-		printf("Semantic Error (%d): Expressions must be same types.", line);
-		return;
-	}
-	if (o1.type != BOOLEANO || isArray(o1) || isArray(o2)) {
-		printf("Semantic Error(%d):Invalid type in op. Both must be same. Expects BOOLEANO", line);
-		return;
-	}
-
-	res->type = BOOLEANO;
-	res->nDim = 0;
-	res->tDim1 = 0;
-	res->tDim2 = 0;
-
-}
-
-// Realiza la comprobación de la operación ||
-void tsOpOr(attrs o1, attrs op, attrs o2, attrs* res){
-
-    if (o1.type != o2.type) {
-		printf("Semantic Error (%d): Expressions must be same types.", line);
-		return;
-	}
-	if (o1.type != BOOLEANO || isArray(o1) || isArray(o2)) {
-		printf("Semantic Error(%d):Invalid type in op. Both must be same. Expects BOOLEANO", line);
-		return;
-	}
-
-	res->type = BOOLEANO;
-	res->nDim = 0;
-	res->tDim1 = 0;
-	res->tDim2 = 0;
-
-}
-
-// Realiza la comprobación de la operación ==, !=
-void tsOpEqual(attrs o1, attrs op, attrs o2, attrs* res){
-
-    if (o1.type != o2.type) {
-		printf("Semantic Error (%d): Expressions must be same types.", line);
-		return;
-	}
-	if (isArray(o1) || isArray(o2)) {
-		printf("Semantic Error(%d):Invalid type in op. Both must be same. Expects ENTERO or REAL.", line);
-		return;
-	}
-
-	res->type = BOOLEANO;
-	res->nDim = 0;
-	res->tDim1 = 0;
-	res->tDim2 = 0;
-
-}
-
-// Realiza la comprobación de la operación <, >, <=, >=, <>
-void tsOpRel(attrs o1, attrs op, attrs o2, attrs* res){
-
-    if (o1.type != o2.type) {
-
-		printf("Semantic Error (%d): Expressions must be same types.", line);
-		return;
-	}
-	if ((o1.type != ENTERO && o1.type != FLOTANTE) || isArray(o1) || isArray(o2)) {
-		printf("Semantic Error(%d):Invalid type in op. Both must be same. Expects ENTERO or REAL.", line);
-		return;
-	}
-
-	res->type = BOOLEANO;
-	res->nDim = 0;
-	res->tDim1 = 0;
-	res->tDim2 = 0;
-
-}
-
-
-
-
-
-
-// Realiza la comprobación de la llamada a una función
-void tsFunctionCall(attrs id, attrs* res){
-
-    int index = tsSearchName(id);
-
-	if(index==-1) {
-
-		currentFunction = -1;
-
-		printf("\nSemantic Error(%d)): Function: Id not found %s.\n", line, id.lex);
-
+void TS_AddParam(attrs e) {
+  int j = TOS - 1;
+  int found = 0;
+
+  while (j != currentFunction && !found){   // Comprobamos si ya existe un argumento de esa
+                                            // función con el mismo nombre
+    if (strcmp(ts[j].lex, e.lex) != 0) {
+      j--;
     } else {
+      found = 1;
+      printf("[SEMANTIC ERROR @ line %d] Declaration error. Param already exists: %s\n", line, e.lex);
+    }
+  }
 
-		if (nParam != ts[index].nParam) {
-			printf("Semantic Error(%d): Number of param not valid.\n", line);
-		} else {
+  if (!found) {
+    inTS inParam;
+    inParam.entry   = PARAM;
+    inParam.lex     = e.lex;
+    inParam.type    = currentType;
+    inParam.nParams = 0;
+    inParam.nDim    = e.nDim;
+    TS_AddEntry(inParam);
 
-			currentFunction = index;
-			res->lex = strdup(ts[index].lex);
-			res->type = ts[index].type;
-			res->nDim = ts[index].nDim;
-			res->tDim1 = ts[index].tDim1;
-			res->tDim2 = ts[index].tDim2;
-
-		}
-
-	}
-
+    if (currentFunction > -1)             // si no son los parámetros de entrada del programa
+      ts[currentFunction].nParams += 1;   // actualiza el número de parámetros de la función
+  }
 }
 
-// Realiza la comprobación de cada parámetro de una función
-void tsCheckParam(attrs param, int checkParam){
 
-    int posParam = (currentFunction + ts[currentFunction].nParam) - (checkParam - 1);
+void TS_CheckReturn(attrs expr, attrs *res) {
+  int index = currentFunction; // WIP tsGetNextFunction?
 
-	int error = ts[currentFunction].nParam - checkParam + 1;
+  if (index > -1) {
+    if (expr.type != ts[index].type) {
+      printf("[SEMANTIC ERROR @ line %d] Return type not equal to function type: %d\n", line, expr.type);
+      return;
+    }
+    attrs tmp;
+    tmp.nDim = ts[index].nDim;
 
-	if (param.type != ts[posParam].type) {
-		printf("Semantic Error(%d): Param type (%d) not valid.\n", line, error);
-		return;
-	}
+    if (!Check_EqualSize(expr, tmp)) {
+      printf("[SEMANTIC ERROR @ line %d] Return expression not same size as return function\n", line);
+    }
 
-	if (param.nDim != ts[posParam].nDim || param.tDim1 != ts[posParam].tDim1  || param.tDim2 != ts[posParam].tDim2) {
-		printf("Semantic Error(%d): Size param (%d) not valid.\n", line, error);
-		return;
-	}
-
+    res->type = expr.type;
+    res->nDim = expr.nDim;
+    return;
+  } else {
+    printf("[SEMANTIC ERROR @ line %d] Result not declared into function.\n", line);
+    return;
+  }
 }
 
-//
-////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////
-// Visualización
-//
-
-// Muestra una in de la tabla de símbolos
-void printIn(int row){
-
-    inTS e = ts[row];
-	printf("\n\nTipo Entrada: %d\nLexema: %s\nTipo Dato: %d\nNum Parametros: %d\nDimensiones[i][j]: %d[%d][%d]\n",
-		e.in, e.lex, e.type, e.nParam, e.nDim, e.tDim1, e.tDim2);
-
+void TS_GetById(attrs id, attrs *res) {
+  int index = TS_FindById(id);
+  if(index == -1) {   // No es ninguna variable de la TS
+    //if (TS[index].entry != FUNCTION)
+    printf("[SEMANTIC ERROR @ line %d] Search error. Id not found: %s\n", line, id.lex);
+  } else {
+    res->lex  = strdup(ts[index].lex);
+    res->type = ts[index].type;
+  }
 }
 
-// Muestra el type de la in
-void printInType(tIn type){
-
-
-
+int TS_GetType(attrs id) {
+  int index = TS_FindById(id);
+  if(index == -1) {   // No es ninguna variable de la TS
+    //if (TS[index].entry != FUNCTION)
+    printf("[SEMANTIC ERROR @ line %d] Search error. Id not found: %s\n", line, id.lex);
+    return -1;
+  } else {
+    return ts[index].type;
+  }
 }
 
-// Muestra el type del dato recibido
-void printDataType(tData type){
-
-
-
+void TS_FunctionCall(attrs *res) {
+  if (checkFunction == -1) {
+    //currentFunction = -1;
+  } else {
+    if (checkParams != ts[checkFunction].nParams) {
+      printf("[SEMANTIC ERROR @ line %d] Args error. Number of params not valid.\n", line);
+    } else {
+      res->lex  = strdup(ts[checkFunction].lex);
+      res->type = ts[checkFunction].type;
+      res->nDim = ts[checkFunction].nDim;
+    }
+  }
 }
 
-// Muestra la tabla de símbolos
-void printTS(){
+void TS_CheckParam(attrs param) {
+  checkParams += 1;
+  int formalParam = checkFunction + checkParams;
 
-    int j = 0;
-	char *t, *e;
-
-	printf("--------------------------------\n");
-	while(j <= LIMIT-1) {
-		if(ts[j].in == 0) { e = "MARK"; }
-		if(ts[j].in == 1) { e = "FUNCTION"; }
-		if(ts[j].in == 2) { e = "VAR"; }
-		if(ts[j].in == 3) { e = "FORM"; }
-
-		if(ts[j].type == 0) { t = "NO_ASIG"; }
-		if(ts[j].type == 1) { t = "ENTERO"; }
-		if(ts[j].type == 2) { t = "FLOTANTE"; }
-		if(ts[j].type == 3) { t = "CARACTER"; }
-		if(ts[j].type == 4) { t = "BOOLEANO"; }
-		if(ts[j].type == 5) { t = "STRING"; }
-		if(ts[j].type == 6) { t = "MATRIZ"; }
-		if(ts[j].type == 7) { t = "NA"; }
-		printf("----ELEMENTO %d-----------------\n", j);
-		printf("-Entrada: %-12s", e);
-		printf("-Lexema: %-12s", ts[j].lex);
-		printf("-type: %-10s", t);
-		printf("-nParam: %-4d", ts[j].nParam);
-		printf("-nDim: %-4d", ts[j].nDim);
-		printf("-tDim1: %-4d", ts[j].tDim1);
-		printf("-tDim2: %-4d\n", ts[j].tDim2);
-		j++;
-	}
-	printf("--------------------------------\n");
-
+  if (param.type != ts[formalParam].type) {
+    printf("[SEMANTIC ERROR @ line %d] Args error. Param type of %s not valid (type %d).\n", line, param.lex, param.type);
+    return;
+  }
 }
 
-// Muestra un atributo recibido
-void printAttr(attrs e, char *msg){
 
+void print_TS() {
+  int j = 0;
+  char *t, *e;
+
+  printf("------------------------------\n");
+
+  while (j <= TOS-1) {
+    if (ts[j].entry == 0) { e = "MARK"; }
+    if (ts[j].entry == 1) { e = "FUNCTION"; }
+    if (ts[j].entry == 2) { e = "VAR"; }
+    if (ts[j].entry == 3) { e = "PARAM"; }
+
+    if (ts[j].type == 0) { t = "NOT_ASSIGNED"; }
+    if (ts[j].type == 1) { t = "INT"; }
+    if (ts[j].type == 2) { t = "FLOAT"; }
+    if (ts[j].type == 3) { t = "CHAR"; }
+    if (ts[j].type == 4) { t = "BOOLEAN"; }
+    if (ts[j].type == 5) { t = "LIST_INT"; }
+    if (ts[j].type == 6) { t = "LIST_FLOAT"; }
+    if (ts[j].type == 7) { t = "LIST_CHAR"; }
+    if (ts[j].type == 8) { t = "LIST_BOOLEAN"; }
+
+    printf("[%d]\n", j);
+    printf("  -Entrada: %-12s", e);
+    printf("  -Lexema:  %-12s", ts[j].lex);
+    printf("  -type:    %-10s", t);
+    printf("  -nParams: %-4d", ts[j].nParams);
+
+    printf("------------------------------\n");
+    j++;
+  }
+}
+
+void print_Attrs(attrs e, char *msg) {
   char *t;
 
-	if(e.type == 0) { t = "NO_ASIG"; }
-	if(e.type == 1) { t = "ENTERO"; }
-	if(e.type == 2) { t = "FLOTANTE"; }
-	if(e.type == 3) { t = "CARACTER"; }
-	if(e.type == 4) { t = "BOOLEANO"; }
-	if(e.type == 5) { t = "STRING"; }
-	if(e.type == 6) { t = "MATRIZ"; }
-	if(e.type == 7) { t = "NA"; }
-	printf("------%s-------------------------\n", msg);
-	printf("-Atributos: %-4d", e.attr);
-	printf("-Lexema: %-12s", e.lex);
-	printf("-type: %-10s", t);
-	printf("-nDim: %-4d", e.nDim);
-	printf("-tDim1: %-4d", e.tDim1);
-	printf("-tDim2: %-4d\n", e.tDim2);
-	printf("-------------------------------\n");
+    if (e.type == 0) { t = "NOT_ASSIGNED"; }
+    if (e.type == 1) { t = "INT"; }
+    if (e.type == 2) { t = "FLOAT"; }
+    if (e.type == 3) { t = "CHAR"; }
+    if (e.type == 4) { t = "BOOLEAN"; }
+    if (e.type == 5) { t = "LIST_INT"; }
+    if (e.type == 6) { t = "LIST_FLOAT"; }
+    if (e.type == 7) { t = "LIST_CHAR"; }
+    if (e.type == 8) { t = "LIST_BOOLEAN"; }
 
+  printf("------------------------------\n", msg);
+  printf("%s", msg);
+  printf("  - Atributos: %-4d", e.attr);
+  printf("  - Lexema:    %-12s", e.lex);
+  printf("  - type:      %-10s", t);
+  printf("------------------------------\n");
+}
+
+
+int Check_EqualSize(attrs e1, attrs e2) {
+  return e1.nDim == e2.nDim;
+}
+
+void Check_ListSentence(attrs expr) {
+  if (!isList(expr))
+    printf("[SEMANTIC ERROR @ line %d] Expression is not of type LIST\n", line);
+}
+
+void Check_OpUnary(attrs op, attrs expr, attrs *res) {
+  switch (op.attr) {
+    case 0: // #
+      if (!isList(expr)) {
+        printf("[SEMANTIC ERROR @ line %d] Expression is not of type LIST\n", line);
+        return ;
+      }
+      res->type = INT;
+      res->nDim = 0;
+      break;
+    case 1: // ?
+      if (!isList(expr)) {
+        printf("[SEMANTIC ERROR @ line %d] Expression is not of type LIST\n", line);
+        return ;
+      }
+      res->type = listToType(expr.type);
+      res->nDim = 0;
+      break;
+    case 2: // !
+      if (expr.type != BOOLEAN) {
+        printf("[SEMANTIC ERROR @ line %d] Expression is not of type BOOLEAN\n");
+        return ;
+      }
+      res->type = BOOLEAN;
+      res->nDim = 0;
+      break;
+    default:
+      printf("[SEMANTIC ERROR @ line %d] Unary operator not recognized\n", line);
+  }
+}
+
+void Check_PlusMinus(attrs op, attrs expr, attrs *res) {
+  if (!(op.type == INT || op.type == FLOAT)) {
+    printf("[SEMANTIC ERROR @ line %d] Expression is not of type INT or FLOAT\n", line);
+    return ;
+  }
+  res->type = expr.type;
+  res->nDim = 0;
+}
+
+void Check_PlusMinusBinary(attrs expr1, attrs op, attrs expr2, attrs *res) {
+  // WIP sólo permitimos la suma y resta de enteros/flotantes (¿suma/resta de char/bool?)
+  if (!(expr1.type == INT || expr1.type == LIST_INT || expr1.type == FLOAT || expr1.type == LIST_FLOAT ||
+    expr2.type == INT || expr2.type == LIST_INT || expr2.type == FLOAT || expr2.type == LIST_FLOAT)) {
+    printf("[SEMANTIC ERROR @ line %d] Types not binary operable\n", line);
+    return ;
+  }
+
+  // casting int->float
+  int resType = INT;
+  if (expr1.type == FLOAT || expr1.type == LIST_FLOAT || expr2.type == FLOAT || expr2.type == LIST_FLOAT)
+    resType = FLOAT;
+
+  if (!isList(expr1) && !isList(expr2)) {
+    res->type = resType;
+    res->nDim = 0;
+  } else {
+    // alguno de ellos es array
+    if (isList(expr1) && !isList(expr2)) {
+      // lista+valor ó lista-valor (ambas operaciones posibles)
+      res->type = resType == INT ? LIST_INT : LIST_FLOAT;  // WIP comprobar si correcto en C
+      res->nDim = expr1.nDim;
+    } else if (!isList(expr1) && isList(expr2)) {
+      // sólo permitir valor+lista
+      if (strcmp(op.lex, "-") == 0) {  // WIP strcmp lex ó .attr ??
+        printf("[SEMANTIC ERROR @ line %d] Operation - not allowed between types INT/FLOAT and LIST OF INT/FLOAT\n", line);
+        return ;
+      }
+      res->type = resType == INT ? LIST_INT : LIST_FLOAT;   // WIP ídem
+      res->nDim = expr2.nDim;
+    } else {
+      printf("[SEMANTIC ERROR @ line %d] Types not binary operable\n", line);
+    }
+  }
+}
+
+void Check_OpBinaryList(attrs expr1, attrs op, attrs expr2, attrs *res) {
+  if (strcmp(op.lex, "**") == 0) {
+    if (isList(expr1) && isList(expr2)) {
+      // both must be of the same type
+      if (expr1.type == expr2.type) {
+        res->type = expr1.type;
+        res->nDim = expr1.nDim + expr2.nDim;
+      } else {
+        printf("[SEMANTIC ERROR @ line %d] Lists must be of same type\n", line);
+      }
+    } else {
+      printf("[SEMANTIC ERROR @ line %d] Types not binary operable by list operator\n", line);
+    }
+  } else if (strcmp(op.lex, "--") == 0) {
+    if (isList(expr1) && expr2.type == INT) {
+      res->type = expr1.type;
+      res->nDim = expr1.nDim - 1;
+    } else {
+      printf("[SEMANTIC ERROR @ line %d] Types not binary operable by list operator\n", line);
+    }
+  } else {
+    printf("[SEMANTIC ERROR @ line %d] Binary operator not recognized\n", line);
+  }
+}
+
+void Check_OpBinaryAndOr(attrs expr1, attrs op, attrs expr2, attrs *res) {
+  if (expr1.type == BOOLEAN && expr2.type == BOOLEAN) {
+    res->type = BOOLEAN;
+    res->nDim = 0;
+    return ;
+  }
+  printf("[SEMANTIC ERROR @ line %d] Types not binary operable by and/or operator. Expected both BOOLEAN\n", line);
+}
+
+void Check_OpBinaryEq(attrs expr1, attrs op, attrs expr2, attrs *res) {
+  if (isArray(expr1) || isArray(expr2)) {
+    printf("[SEMANTIC ERROR @ line %d] Types not binary operable by equality operator\n", line);
+    return ;
+  }
+  if (expr1.type == expr2.type) {
+    res->type = BOOLEAN;
+    res->nDim = 0;
+    return ;
+  }
+  printf("[SEMANTIC ERROR @ line %d] Types not binary operable by equality operator. Expected both same type\n", line);
+}
+
+void Check_OpBinaryRel(attrs expr1, attrs op, attrs expr2, attrs *res) {
+  if ((expr1.type == INT || expr1.type == FLOAT || expr1.type == CHAR) && (expr2.type == INT || expr2.type == FLOAT || expr2.type == CHAR)) {
+    res->type = BOOLEAN;
+    res->nDim = 0;
+    return ;
+  }
+  printf("[SEMANTIC ERROR @ line %d] Types not binary operable by relationship operator\n", line);
+}
+
+void Check_OpBinaryMul(attrs expr1, attrs op, attrs expr2, attrs *res) {
+  if (op.attr == 0) {  // %
+    // int % int
+    if (expr1.type == INT && expr2.type == INT) {
+      res->type = INT;
+      res->nDim = 0;
+    // list % int
+    } else if (isList(expr1) && expr2.type == INT) {
+      res->type = expr1.type;
+      res->nDim = atoi(expr2.lex); // WIP comprobar
+    } else {
+      printf("[SEMANTIC ERROR @ line %d] Types not binary operable by percentage operator\n", line);
+    }
+  } else {  // * /
+    // WIP sólo permitimos producto/división de enteros/flotantes (¿de char/bool?)
+    if (!(expr1.type == INT || expr1.type == LIST_INT || expr1.type == FLOAT || expr1.type == LIST_FLOAT ||
+      expr2.type == INT || expr2.type == LIST_INT || expr2.type == FLOAT || expr2.type == LIST_FLOAT)) {
+      printf("[SEMANTIC ERROR @ line %d] Types not binary operable\n", line);
+      return ;
+    }
+
+    // casting int->float
+    int resType = INT;
+    if (expr1.type == FLOAT || expr1.type == LIST_FLOAT || expr2.type == FLOAT || expr2.type == LIST_FLOAT)
+      resType = FLOAT;
+
+    if (!isList(expr1) && !isList(expr2)) {
+      res->type = resType;
+      res->nDim = 0;
+    } else {
+      // alguno de ellos es array
+      if (isList(expr1) && !isList(expr2)) {
+        // lista+valor ó lista-valor (ambas operaciones posibles)
+        res->type = resType == INT ? LIST_INT : LIST_FLOAT;  // WIP comprobar si correcto en C
+        res->nDim = expr1.nDim;
+      } else if (!isList(expr1) && isList(expr2)) {
+        // sólo permitir valor+lista
+        if (strcmp(op.lex, "/") == 0) {  // WIP strcmp lex ó .attr ??
+          printf("[SEMANTIC ERROR @ line %d] Operation - not allowed between types INT/FLOAT and LIST OF INT/FLOAT\n", line);
+          return ;
+        }
+        res->type = resType == INT ? LIST_INT : LIST_FLOAT;   // WIP ídem
+        res->nDim = expr2.nDim;
+      } else {
+        printf("[SEMANTIC ERROR @ line %d] Types not binary operable\n", line);
+      }
+    }
+  }
+}
+
+void Check_At(attrs expr1, attrs op, attrs expr2, attrs *res) {
+  if (isList(expr1) && expr2.type == INT) {
+    res->type = listToType(expr1.type);
+    res->nDim = 0;
+    return ;
+  }
+  printf("[SEMANTIC ERROR @ line %d] Types not binary operable by @. Expected LIST and INT\n", line);
+}
+
+void Check_ListTernary(attrs expr1, attrs op1, attrs expr2, attrs op2, attrs expr3, attrs *res) {
+  if (!isList(expr1)) {
+    printf("[SEMANTIC ERROR @ line %d] Types not ternary operable. Expected LIST in first expression\n", line);
+    return ;
+  }
+  if (listToType(expr1.type) != expr2.type) {
+    printf("[SEMANTIC ERROR @ line %d] Types not ternary operable. Expected type in second expression same as type of list in first expression\n", line);
+    return ;
+  }
+  if (expr3.type != INT) {
+    printf("[SEMANTIC ERROR @ line %d] Types not ternary operable. Expected INT in third expression\n", line);
+    return ;
+  }
+  res->type = expr2.type;
+  res->nDim = 0;
+}
+
+void Check_FunctionCall(attrs id, attrs *res) {
+  int index = TS_FindByName(id);
+
+  if (index == -1) {
+    currentFunction = -1;
+    printf("[SEMANTIC ERROR @ line %d] Function with name %s not found\n", line, id.lex);
+    return ;
+  }
+
+  TS_FunctionCall(res);
+}
+
+void VarList_Id(attrs id, attrs *res) {
+  if (decVar == 1)
+    TS_AddId(id);
+  else
+    TS_GetById(id, res);
 }

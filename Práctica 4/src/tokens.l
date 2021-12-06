@@ -25,10 +25,10 @@ float              [0-9]*\.[0-9]+
 ","                                 return COMMA;
 "begin_local"                       return BEGIN_LOCAL;
 "end_local"                         return END_LOCAL;
-"int"                               return TYPE;
-"bool"                              return TYPE;
-"char"                              return TYPE;
-"float"                             return TYPE;
+"int"                               {yyval.type = INT; return TYPE;}
+"bool"                              {yyval.type = BOOLEAN; return TYPE;}
+"char"                              {yyval.type = CHAR; return TYPE;}
+"float"                             {yyval.type = FLOAT; return TYPE;}
 "list of"                           return LIST_OF;
 "="                                 return ASSIGN;
 "if"                                return IF;
@@ -39,43 +39,42 @@ float              [0-9]*\.[0-9]+
 "input"                             return INPUT;
 "output"                            return OUTPUT;
 "return"                            return RETURN;
-"#"                                 {yylval.attr = 0;return OP_UNARY;}
-"?"									{yylval.attr = 1;return OP_UNARY;}
-"--"                                {yylval.attr = 0;return OP_BINARY; }                              
+"#"                                 {yylval.attr = 0; return OP_UNARY;}
+"?"																	{yylval.attr = 1; return OP_UNARY;}
+"--"                                {yylval.attr = 0; return OP_BINARY_LIST;}
+"**"                                {yylval.attr = 1; return OP_BINARY_LIST;}
 "++"                                return OP_TERNARY_1;
-"!"                                 {yylval.attr = 2;return OP_UNARY;}
-">>"                                {yylval.attr = 3;return OP_UNARY;}
-"<<"                                {yylval.attr = 4;return OP_UNARY;}
-"$"                                 {yylval.attr = 5;return OP_UNARY;}
-"%"                                 {yylval.attr = 0;return OP_BINARY_MUL;}
-"*"                                 {yylval.attr = 1;return OP_BINARY_MUL;}
-"/"                                 {yylval.attr = 2;return OP_BINARY_MUL;}
-"+"                                 {yylval.attr = 0;return PLUS_MINUS;}
-"-"                                 {yylval.attr = 1;return PLUS_MINUS;}
+"!"                                 {yylval.attr = 2; return OP_UNARY;}
+"$"                                 return OP_DOLLAR;
+">>"                                {yylval.attr = 0; return OP_LIST;}
+"<<"                                {yylval.attr = 1; return OP_LIST;}
+"%"                                 {yylval.attr = 0; return OP_BINARY_MUL;}
+"*"                                 {yylval.attr = 1; return OP_BINARY_MUL;}
+"/"                                 {yylval.attr = 2; return OP_BINARY_MUL;}
+"+"                                 {yylval.attr = 0; return PLUS_MINUS;}
+"-"                                 {yylval.attr = 1; return PLUS_MINUS;}
 "<"                                 {yylval.attr = 0; return OP_BINARY_REL;}
-">"                                 {yylval.attr = 1;return OP_BINARY_REL;}
-"<="                                {yylval.attr = 2;return OP_BINARY_REL;}
-">="                                {yylval.attr = 3;return OP_BINARY_REL;}
-"=="                                {yylval.attr = 0;return OP_BINARY_EQ;}
-"!="                                {yylval.attr = 1;return OP_BINARY_EQ;}
-"&"                                 {yylval.attr = 1;return OP_BINARY;}
+">"                                 {yylval.attr = 1; return OP_BINARY_REL;}
+"<="                                {yylval.attr = 2; return OP_BINARY_REL;}
+">="                                {yylval.attr = 3; return OP_BINARY_REL;}
+"=="                                {yylval.attr = 0; return OP_BINARY_EQ;}
+"!="                                {yylval.attr = 1; return OP_BINARY_EQ;}
 "&&"                                return OP_BINARY_AND;
 "||"                                return OP_BINARY_OR;
-"**"                                {yylval.attr = 2;return OP_BINARY;}
 "@"                                 return OP_TERNARY_2;
-[0-9]+                              {yylval.name = strdup(yytext); yylval.attr = 0;return CONST_INT;}
-\+[0-9]+                            {yylval.name = strdup(yytext); yylval.attr = 1;return CONST_INT;}
-\-[0-9]+                            {yylval.name = strdup(yytext); yylval.attr = 2;return CONST_INT;}
-{float}                             {yylval.name = strdup(yytext); yylval.attr = 3;return CONST_FLOAT;}
-\+{float}                           {yylval.name = strdup(yytext); yylval.attr = 4;return CONST_FLOAT;}
-\-{float}                           {yylval.name = strdup(yytext); yylval.attr = 5;return CONST_FLOAT;}
-"true"                              {yylval.attr = 0; yylval.name = strdup(yytext) ;return CONST_BOOL;}
-"false"                             {yylval.attr = 1; yylval.name = strdup(yytext) ;return CONST_BOOL;}
-\'[^\']\'                           {yylval.name = strdup(yytext); yylval.attr = 6;return CONST_CHAR;}
-\"[^\"]*\"                          {yylval.name = strdup(yytext); yylval.attr = 7;return STRING;}
+[0-9]+                              {yylval.name = strdup(yytext); yylval.attr = 0; return CONST_INT;}
+\+[0-9]+                            {yylval.name = strdup(yytext); yylval.attr = 1; return CONST_INT;}
+\-[0-9]+                            {yylval.name = strdup(yytext); yylval.attr = 2; return CONST_INT;}
+{float}                             {yylval.name = strdup(yytext); yylval.attr = 3; return CONST_FLOAT;}
+\+{float}                           {yylval.name = strdup(yytext); yylval.attr = 4; return CONST_FLOAT;}
+\-{float}                           {yylval.name = strdup(yytext); yylval.attr = 5; return CONST_FLOAT;}
+"true"                              {yylval.name = strdup(yytext); yylval.attr = 0; return CONST_BOOL;}
+"false"                             {yylval.name = strdup(yytext); yylval.attr = 1; return CONST_BOOL;}
+\'[^\']\'                           {yylval.name = strdup(yytext); yylval.attr = 6; return CONST_CHAR;}
+\"[^\"]*\"                          {yylval.name = strdup(yytext); yylval.attr = 7; return STRING;}
 {identificador}                     {yylval.lex = strdup(yytext);return IDENTIFIER;} 
 [\n]                                {;}
 [ \t]+                              {;}
-.                                   { printf(" \nError Léxico en Linea: %d. No se reconoce la palabra '%s'.\n", yylineno, yytext); }
+.                                   {printf("\n[LEXICAL ERROR @ line %d] No se reconoce la palabra '%s'\n", yylineno, yytext); }
 
 %%
