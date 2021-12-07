@@ -140,7 +140,7 @@ Sentencia_for : FOR IDENTIFIER ASSIGN expresion TO expresion Sentencia {
                   }
                 };
 Sentencia_entrada : INPUT lista_variables COLON
-                  : INPUT STRING COMMA lista_variables COLON ;
+                  : INPUT STRING COMMA lista_variables COLON ; // ESTOS DOS PUNTOS AQUI POR QUE??
 Sentencia_salida : OUTPUT Lista_expresiones_o_cadena COLON ;
 Lista_expresiones_o_cadena : Lista_expresiones_o_cadena COMMA expresion { nParams++; TS_CheckParams($1, nParam); }
                            | Lista_expresiones_o_cadena COMMA STRING { nParam++; tsCheckParam($1, nParam); }
