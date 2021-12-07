@@ -1,16 +1,20 @@
 /* A Bison parser, made by GNU Bison 3.5.1.  */
 
 /* Bison interface for Yacc-like parsers in C
+
    Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
    Inc.
+
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
+
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
@@ -23,6 +27,7 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
+
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
@@ -72,16 +77,18 @@ extern int yydebug;
     CONST_CHAR = 283,
     STRING = 284,
     IDENTIFIER = 285,
-    OP_BINARY = 286,
+    OP_BINARY_LIST = 286,
     OP_TERNARY_1 = 287,
     OP_TERNARY_2 = 288,
-    OP_BINARY_OR = 289,
-    OP_BINARY_AND = 290,
-    OP_BINARY_EQ = 291,
-    OP_BINARY_REL = 292,
-    PLUS_MINUS = 293,
-    OP_BINARY_MUL = 294,
-    OP_UNARY = 295
+    OP_LIST = 289,
+    OP_DOLLAR = 290,
+    OP_BINARY_OR = 291,
+    OP_BINARY_AND = 292,
+    OP_BINARY_EQ = 293,
+    OP_BINARY_REL = 294,
+    PLUS_MINUS = 295,
+    OP_BINARY_MUL = 296,
+    OP_UNARY = 297
   };
 #endif
 

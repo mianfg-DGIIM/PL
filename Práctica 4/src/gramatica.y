@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "gramatica.tab.h"
+#include "semantic.h"
 
 void yyerror(const char *msg);
 
@@ -49,7 +49,7 @@ que se esperaban en lugar de los que han producido el error
 %token CONST_CHAR;
 %token STRING;
 %token IDENTIFIER;
-%left OP_BINARY;
+%left OP_BINARY_LIST;
 %left OP_TERNARY_1;
 %left OP_TERNARY_2;
 %right OP_LIST OP_DOLLAR;
@@ -67,7 +67,7 @@ que se esperaban en lugar de los que han producido el error
 // REGLAS GRAMATICALES produciones
 
 Programa : MAIN bloque ;
-bloque : BLOCK_STAR { TS_AddMark(); }
+bloque : BLOCK_START { TS_AddMark(); }
          bloque_in
          BLOCK_END { TS_ClearBlock(); } ;
 bloque_in : Declar_de_variables_locales Declar_de_subprogs
@@ -110,10 +110,10 @@ Sentencia : bloque
           | Sentencia_lista ;
 Sentencia_asignacion : IDENTIFIER ASSIGN expresion COLON {
                          if (TS_GetType($1) != $3.type) {
-                           printf("[SEMANTIC ERROR @ line %d] Types are not equal: %s, %s\n", line, $1.type, $3.type);
+                           printf("[SEMANTIC ERROR @ line %d] In assignation: types are not equal\n", line);
                          }
                          if (!Check_EqualSize($1, $3)) {
-                           printf("[SEMANTIC ERROR @ line %d] Sizes are not equal\n", line); 
+                           printf("[SEMANTIC ERROR @ line %d] In assignation: sizes are not equal\n", line); 
                          }
                        } ;
 Sentencia_if : IF PARENT_START expresion PARENT_END Sentencia {
@@ -140,12 +140,12 @@ Sentencia_for : FOR IDENTIFIER ASSIGN expresion TO expresion Sentencia {
                   }
                 };
 Sentencia_entrada : INPUT lista_variables COLON
-                  : INPUT STRING COMMA lista_variables COLON ;
+                  | INPUT STRING COMMA lista_variables COLON ;
 Sentencia_salida : OUTPUT Lista_expresiones_o_cadena COLON ;
-Lista_expresiones_o_cadena : Lista_expresiones_o_cadena COMMA expresion { nParams++; TS_CheckParams($1, nParam); }
-                           | Lista_expresiones_o_cadena COMMA STRING { nParam++; tsCheckParam($1, nParam); }
-                           | expresion { nParam=1; tsCheckParam($1, nParam); }
-                           | STRING { nParam=1; tsCheckParam($1, nParam); };
+Lista_expresiones_o_cadena : Lista_expresiones_o_cadena COMMA expresion { nParams++; TS_CheckParam($1); }
+                           | Lista_expresiones_o_cadena COMMA STRING { nParams++; TS_CheckParam($1); }
+                           | expresion { nParams=1; TS_CheckParam($1); }
+                           | STRING { nParams=1; TS_CheckParam($1); };
 Sentencia_return : RETURN expresion { TS_CheckReturn($2, &$$); } COLON ;
 Sentencia_lista : expresion OP_LIST COLON { Check_ListSentence($1); }
                 | OP_DOLLAR expresion COLON { Check_ListSentence($2); } ;
@@ -159,7 +159,7 @@ expresion : PARENT_START expresion PARENT_END { $$.type = $2.type; $$.nDim = $2.
           | expresion OP_BINARY_MUL expresion { Check_OpBinaryMul($1, $2, $3, &$$); }
           | expresion PLUS_MINUS expresion { Check_PlusMinusBinary($1, $2, $3, &$$); }
           | PLUS_MINUS expresion { Check_PlusMinus($1, $2, &$$); } %prec OP_UNARY
-          | expresion OP_TERNARY_2 expresion { Check_At($1, $2, &$$); }
+          | expresion OP_TERNARY_2 expresion { Check_At($1, $2, $3, &$$); }
           | expresion OP_TERNARY_1 expresion OP_TERNARY_2 expresion { Check_ListTernary($1, $2, $3, $4, $5, &$$); }
           | IDENTIFIER { decVar = 0; }
           | constante { $$.type = $1.type; $$.nDim = $1.nDim; }
@@ -171,10 +171,10 @@ Lista_expresiones : Lista_expresiones COMMA expresion { TS_CheckParam($3); }
                   | expresion { /* WIP correct? -> */ checkParams = 0; TS_CheckParam($1); } ;
 constante : constante_base
           | constante_lista ;
-constante_base : CONST_INT { $$.type = INT }
-               | CONST_FLOAT { $$.type = FLOAT }
-               | CONST_BOOL { $$.type = BOOLEAN }
-               | CONST_CHAR { $$.type = CHAR };
+constante_base : CONST_INT { $$.type = INT; }
+               | CONST_FLOAT { $$.type = FLOAT; }
+               | CONST_BOOL { $$.type = BOOLEAN; }
+               | CONST_CHAR { $$.type = CHAR; } ;
 constante_lista : BRACKET_START constante_lista_int BRACKET_END { $$.type = LIST_INT; $$.nDim = $2.nDim; }
                 | BRACKET_START constante_lista_float BRACKET_END { $$.type = LIST_FLOAT; $$.nDim = $2.nDim; }
                 | BRACKET_START constante_lista_bool BRACKET_END { $$.type = LIST_BOOLEAN; $$.nDim = $2.nDim; }

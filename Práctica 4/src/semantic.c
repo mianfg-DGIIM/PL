@@ -7,7 +7,7 @@ int      decVar          = 0;
 int      decParam        = 0;
 int      esFunc          = 0;
 tData    currentType     = NOT_ASSIGNED;
-//int      nParams         = 0;
+int      nParams         = 0;
 int      checkParams     = 0;
 int      checkFunction   = 0;
 int      currentFunction = -1;
@@ -420,7 +420,7 @@ void print_Attrs(attrs e, char *msg) {
     if (e.type == 7) { t = "LIST_CHAR"; }
     if (e.type == 8) { t = "LIST_BOOLEAN"; }
 
-  printf("------------------------------\n", msg);
+  printf("------------------------------\n");
   printf("%s", msg);
   printf("  - Atributos: %-4d", e.attr);
   printf("  - Lexema:    %-12s", e.lex);
@@ -458,7 +458,7 @@ void Check_OpUnary(attrs op, attrs expr, attrs *res) {
       break;
     case 2: // !
       if (expr.type != BOOLEAN) {
-        printf("[SEMANTIC ERROR @ line %d] Expression is not of type BOOLEAN\n");
+        printf("[SEMANTIC ERROR @ line %d] Expression is not of type BOOLEAN\n", line);
         return ;
       }
       res->type = BOOLEAN;
@@ -549,7 +549,7 @@ void Check_OpBinaryAndOr(attrs expr1, attrs op, attrs expr2, attrs *res) {
 }
 
 void Check_OpBinaryEq(attrs expr1, attrs op, attrs expr2, attrs *res) {
-  if (isArray(expr1) || isArray(expr2)) {
+  if (isList(expr1) || isList(expr2)) {
     printf("[SEMANTIC ERROR @ line %d] Types not binary operable by equality operator\n", line);
     return ;
   }

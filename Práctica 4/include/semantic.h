@@ -52,7 +52,7 @@ typedef struct {
   unsigned int nDim;  /**< Dimensión de la lista */
 } attrs;
 
-#define YYSTYPE attrs   /** En adelante, cada símbolo tiene una estructura de tipo atributos */
+#define YYSTYPE attrs   /** En adelante, cada símbolo tiene una estructura de tipo attrs */
 #define MAX_STACK 1000  /** Tamaño máximo de la tabla de símbolos */
 
 /**
@@ -255,7 +255,7 @@ void print_Attrs(attrs e, char *msg);
 
 
 int Check_EqualSize(attrs e1, attrs e2);
-void Check_ListSequence(attrs expr);
+void Check_ListSentence(attrs expr);
 void Check_OpUnary(attrs op, attrs expr, attrs *res);
 void Check_PlusMinus(attrs op, attrs expr, attrs *res);
 void Check_PlusMinusBinary(attrs expr1, attrs op, attrs expr2, attrs *res);
