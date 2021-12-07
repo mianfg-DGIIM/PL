@@ -26,5 +26,5 @@ all:
 	make practica4
 
 clean:
-	rm -rf $(BIN)/practica3 $(OBJ)/* $(SRC)/gramatica.tab.c $(SRC)/lex.yy.c
-	rm -rf $(BIN)/practica3.exe
+	rm -rf $(BIN)/practica4 $(OBJ)/* $(SRC)/gramatica.tab.c $(SRC)/lex.yy.c
+	rm -rf $(BIN)/practica4.exe
