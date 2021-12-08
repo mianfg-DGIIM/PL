@@ -14,20 +14,42 @@ int      currentFunction = -1;
 
 
 tData getListType(tData type) {
-  return type;
   switch (type) {
     case INT:
       return LIST_INT;
-      break;
     case FLOAT:
       return LIST_FLOAT;
-      break;
     case CHAR:
       return LIST_CHAR;
-      break;
     case BOOLEAN:
       return LIST_BOOLEAN;
-      break;
+    default:
+      return type;
+  }
+}
+
+const char* tDataToString(tData type) {
+  switch (type) {
+    case NOT_ASSIGNED:
+      return "NOT ASSIGNED";
+    case INT:
+      return "INT";
+    case FLOAT:
+      return "FLOAT";
+    case CHAR:
+      return "CHAR";
+    case BOOLEAN:
+      return "BOOLEAN";
+    case LIST_INT:
+      return "LIST OF INT";
+    case LIST_FLOAT:
+      return "LIST OF FLOAT";
+    case LIST_CHAR:
+      return "LIST OF CHAR";
+    case LIST_BOOLEAN:
+      return "LIST OF BOOLEAN";
+    default:
+      return "";
   }
 }
 
@@ -62,14 +84,14 @@ int TS_AddEntry(inTS in) {
     ts[TOS].type    = in.type;
     ts[TOS].nParams = in.nParams;
     ts[TOS].nDim    = in.nDim;
-    ts[TOS].ended   = in.ended;
+    // WIP -> ts[TOS].ended   = in.ended;
 
     TOS++;          // Se aumenta el contador de entradas
-    //printTS();    // Se muestra la tabla de símbolos por pantalla
+    //print_TS();    // Se muestra la tabla de símbolos por pantalla
 
     return 1;
   } else {
-    printf("[SEMANTIC ERROR @ line %d] Symbol table overflow", line);
+    printf("{94}[SEMANTIC ERROR @ line %d] Symbol table overflow", line);
     return -1;
   }
 }
@@ -79,7 +101,7 @@ int TS_DeleteEntry() {
     TOS--;
     return 1;
   } else {
-    printf("[SEMANTIC ERROR @ line %d] Empty symbol table", line);
+    printf("{104}[SEMANTIC ERROR @ line %d] Empty symbol table", line);
     return -1;
   }
 }
@@ -126,23 +148,23 @@ int TS_ClearBlock() {
   currentTOS = TOS;
   currentTOS--;
 
-  if (ts[currentTOS].entry == PARAM) {       // si el bloque es una función, actualizamos la
-                                              // función actual
+  if (ts[currentTOS].entry == PARAM) {      // si el bloque es una función, actualizamos la
+                                             // función actual
     while (ts[currentTOS].entry == PARAM) {
       currentTOS--;
     }
   }
-  if (ts[currentTOS].entry == FUNCTION) {    // busca en la TS la última función definida no finalizada por declarar para
-                                              // convertirla en la actual (es su ámbito ahora)
-    ts[currentTOS].ended = 1;                 // señalamos que esta función ha finalizado, pues
-                                              // hemos eliminado el cuerpo de dicha función
+  if (ts[currentTOS].entry == FUNCTION) {   // busca en la TS la última función definida no finalizada por declarar para
+                                             // convertirla en la actual (es su ámbito ahora)
+    ts[currentTOS].ended = 1;                // señalamos que esta función ha finalizado, pues
+                                             // hemos eliminado el cuerpo de dicha función
     updateCurrentFunction(currentTOS);
   }
 
   return ret;
 }
 
-void updateCurrentFunction(int lastFunc){
+void updateCurrentFunction(int lastFunc) {
   lastFunc--;
   while (ts[lastFunc].entry != FUNCTION && lastFunc > 0){
     lastFunc--;
@@ -163,9 +185,13 @@ int TS_FindById(attrs e) {
   if (TOS == 0)
     return -1;
   
+  //print_TS();
+  
   while (i > 0 /* && ts[i].entry != MARK */) {
-    if (ts[i].entry == VAR && strcmp(e.lex, ts[i].lex) == 0)
+    if (ts[i].entry == VAR && strcmp(e.lex, ts[i].lex) == 0) {
+      //printf("ATRIBUTO FINDBYID. lex=%s, type=%d, entry=%d\n", ts[i].lex, ts[i].type, ts[i].entry);
       return i;
+    }
     i--;
   }
 
@@ -202,7 +228,7 @@ void TS_AddId(attrs e) {
     // Comparamos con los parámetros formales de la fución actual
     for (index = currentFunction+1; index < currentFunction+1+numparams; index++) {
       if (strcmp(ts[index].lex, e.lex) == 0) {  // Su nombre es el de un argumento de la función
-        printf("[SEMANTIC ERROR @ line %d] Declaration error. Id already exists: %s\n", line, e.lex);
+        printf("{232}[SEMANTIC ERROR @ line %d] Declaration error. Id already exists: %s\n", line, e.lex);
         return;
       }
     }
@@ -215,7 +241,7 @@ void TS_AddId(attrs e) {
         j--;
       } else {
         found = 1;
-        printf("[SEMANTIC ERROR @ line %d] Declaration error. Id already exists: %s\n", line, e.lex);
+        printf("{245}[SEMANTIC ERROR @ line %d] Declaration error. Id already exists: %s\n", line, e.lex);
         return;
       }
     }
@@ -266,9 +292,10 @@ void TS_AddFunction(attrs e) {
 
   inFunction.entry   = FUNCTION;
   inFunction.lex     = e.lex;
-  inFunction.type    = currentType; // WIP e.type?
+  inFunction.type    = currentType;
   inFunction.nParams = 0;   // lo actualizaremos a continuación
   inFunction.nDim    = 0;
+  inFunction.ended   = 0;
 
   currentFunction = TOS;    // actualizamos la función actual
   TS_AddEntry(inFunction);
@@ -284,7 +311,7 @@ void TS_AddParam(attrs e) {
       j--;
     } else {
       found = 1;
-      printf("[SEMANTIC ERROR @ line %d] Declaration error. Param already exists: %s\n", line, e.lex);
+      printf("{315}[SEMANTIC ERROR @ line %d] Declaration error. Param already exists: %s\n", line, e.lex);
     }
   }
 
@@ -304,25 +331,26 @@ void TS_AddParam(attrs e) {
 
 
 void TS_CheckReturn(attrs expr, attrs *res) {
-  int index = currentFunction; // WIP tsGetNextFunction?
+  int index = currentFunction;
 
   if (index > -1) {
     if (expr.type != ts[index].type) {
-      printf("[SEMANTIC ERROR @ line %d] Return type not equal to function type: %d\n", line, expr.type);
+      printf("{340}[SEMANTIC ERROR @ line %d] Return type of %s not equal to function type of %s\n",
+        line, tDataToString(expr.type), tDataToString(ts[index].type));
       return;
     }
     attrs tmp;
     tmp.nDim = ts[index].nDim;
 
     if (!Check_EqualSize(expr, tmp)) {
-      printf("[SEMANTIC ERROR @ line %d] Return expression not same size as return function\n", line);
+      printf("{348}[SEMANTIC ERROR @ line %d] Return expression not same size as return function\n", line);
     }
 
     res->type = expr.type;
     res->nDim = expr.nDim;
     return;
   } else {
-    printf("[SEMANTIC ERROR @ line %d] Result not declared into function.\n", line);
+    printf("{355}[SEMANTIC ERROR @ line %d] Result not declared into function\n", line);
     return;
   }
 }
@@ -331,7 +359,7 @@ void TS_GetById(attrs id, attrs *res) {
   int index = TS_FindById(id);
   if(index == -1) {   // No es ninguna variable de la TS
     //if (TS[index].entry != FUNCTION)
-    printf("[SEMANTIC ERROR @ line %d] Search error. Id not found: %s\n", line, id.lex);
+    printf("{364}[SEMANTIC ERROR @ line %d] Search error. Id not found: %s\n", line, id.lex);
   } else {
     res->lex  = strdup(ts[index].lex);
     res->type = ts[index].type;
@@ -342,7 +370,7 @@ int TS_GetType(attrs id) {
   int index = TS_FindById(id);
   if(index == -1) {   // No es ninguna variable de la TS
     //if (TS[index].entry != FUNCTION)
-    printf("[SEMANTIC ERROR @ line %d] Search error. Id not found: %s\n", line, id.lex);
+    printf("{375}[SEMANTIC ERROR @ line %d] Search error. Id not found: %s\n", line, id.lex);
     return -1;
   } else {
     return ts[index].type;
@@ -350,25 +378,26 @@ int TS_GetType(attrs id) {
 }
 
 void TS_FunctionCall(attrs *res) {
-  if (checkFunction == -1) {
-    //currentFunction = -1;
-  } else {
-    if (checkParams != ts[checkFunction].nParams) {
-      printf("[SEMANTIC ERROR @ line %d] Args error. Number of params not valid.\n", line);
+  //print_TS();
+  if (currentFunction != -1) {
+    if (checkParams != ts[currentFunction].nParams) {
+      printf("{386}[SEMANTIC ERROR @ line %d] Args error. Number of params not valid. Expected %d, but got %d\n",
+        line, ts[currentFunction].nParams, checkParams);
     } else {
-      res->lex  = strdup(ts[checkFunction].lex);
-      res->type = ts[checkFunction].type;
-      res->nDim = ts[checkFunction].nDim;
+      res->lex  = strdup(ts[currentFunction].lex);
+      res->type = ts[currentFunction].type;
+      res->nDim = ts[currentFunction].nDim;
     }
   }
 }
 
 void TS_CheckParam(attrs param) {
   checkParams += 1;
-  int formalParam = checkFunction + checkParams;
+  int formalParam = currentFunction + checkParams;
 
   if (param.type != ts[formalParam].type) {
-    printf("[SEMANTIC ERROR @ line %d] Args error. Param type of %s not valid (type %d).\n", line, param.lex, param.type);
+    printf("{403}[SEMANTIC ERROR @ line %d] Args error. Param type not valid. Expected %s, but got %s\n",
+      line, tDataToString(ts[formalParam].type), tDataToString(param.type));
     return;
   }
 }
@@ -397,14 +426,17 @@ void print_TS() {
     if (ts[j].type == 8) { t = "LIST_BOOLEAN"; }
 
     printf("[%d]\n", j);
-    printf("  -Entrada: %-12s", e);
-    printf("  -Lexema:  %-12s", ts[j].lex);
-    printf("  -type:    %-10s", t);
-    printf("  -nParams: %-4d", ts[j].nParams);
+    printf("  -Entrada: %-12s\n", e);
+    printf("  -Lexema:  %-12s\n", ts[j].lex);
+    printf("  -type:    %-10s\n", t);
+    printf("  -nParams: %-4d\n", ts[j].nParams);
 
     printf("------------------------------\n");
     j++;
   }
+  char strvar[100];
+  printf("(Insert any value to continue:) ");
+  fgets (strvar, 100, stdin);
 }
 
 void print_Attrs(attrs e, char *msg) {
@@ -421,10 +453,10 @@ void print_Attrs(attrs e, char *msg) {
     if (e.type == 8) { t = "LIST_BOOLEAN"; }
 
   printf("------------------------------\n");
-  printf("%s", msg);
-  printf("  - Atributos: %-4d", e.attr);
-  printf("  - Lexema:    %-12s", e.lex);
-  printf("  - type:      %-10s", t);
+  printf("%s\n", msg);
+  printf("  - Atributos: %-4d\n", e.attr);
+  printf("  - Lexema:    %-12s\n", e.lex);
+  printf("  - type:      %-10s\n", t);
   printf("------------------------------\n");
 }
 
@@ -435,14 +467,15 @@ int Check_EqualSize(attrs e1, attrs e2) {
 
 void Check_ListSentence(attrs expr) {
   if (!isList(expr))
-    printf("[SEMANTIC ERROR @ line %d] Expression is not of type LIST\n", line);
+    printf("{474}[SEMANTIC ERROR @ line %d] Expression is not of type LIST, but type %s\n", line, tDataToString(expr.type));
 }
 
 void Check_OpUnary(attrs op, attrs expr, attrs *res) {
   switch (op.attr) {
     case 0: // #
       if (!isList(expr)) {
-        printf("[SEMANTIC ERROR @ line %d] Expression is not of type LIST\n", line);
+        printf("{481}[SEMANTIC ERROR @ line %d] Unary operator # expects expression of type #[LIST], but got type #[%s]\n",
+          line, tDataToString(expr.type));
         return ;
       }
       res->type = INT;
@@ -450,7 +483,8 @@ void Check_OpUnary(attrs op, attrs expr, attrs *res) {
       break;
     case 1: // ?
       if (!isList(expr)) {
-        printf("[SEMANTIC ERROR @ line %d] Expression is not of type LIST\n", line);
+        printf("{490}[SEMANTIC ERROR @ line %d] Unary operator ? expects expression of type ?[LIST], but got type ?[%s]\n",
+          line, tDataToString(expr.type));
         return ;
       }
       res->type = listToType(expr.type);
@@ -458,20 +492,23 @@ void Check_OpUnary(attrs op, attrs expr, attrs *res) {
       break;
     case 2: // !
       if (expr.type != BOOLEAN) {
-        printf("[SEMANTIC ERROR @ line %d] Expression is not of type BOOLEAN\n", line);
+        printf("{499}[SEMANTIC ERROR @ line %d] Unary operator ! expects expression of type ![BOOLEAN], but got type ![%s]\n",
+          line, tDataToString(expr.type));
         return ;
       }
       res->type = BOOLEAN;
       res->nDim = 0;
       break;
     default:
-      printf("[SEMANTIC ERROR @ line %d] Unary operator not recognized\n", line);
+      // won't reach here
+      printf("{508}[SEMANTIC ERROR @ line %d] Unary operator %s not recognized\n", line, op.lex);
   }
 }
 
 void Check_PlusMinus(attrs op, attrs expr, attrs *res) {
-  if (!(op.type == INT || op.type == FLOAT)) {
-    printf("[SEMANTIC ERROR @ line %d] Expression is not of type INT or FLOAT\n", line);
+  if (!(expr.type == INT || expr.type == FLOAT)) {
+    printf("{514}[SEMANTIC ERROR @ line %d] Unary operator %s expects expression of type %s[INT|FLOAT], but got type %s[%s]\n",
+      line, op.lex, op.lex, op.lex, tDataToString(expr.type));
     return ;
   }
   res->type = expr.type;
@@ -482,7 +519,8 @@ void Check_PlusMinusBinary(attrs expr1, attrs op, attrs expr2, attrs *res) {
   // WIP sólo permitimos la suma y resta de enteros/flotantes (¿suma/resta de char/bool?)
   if (!(expr1.type == INT || expr1.type == LIST_INT || expr1.type == FLOAT || expr1.type == LIST_FLOAT ||
     expr2.type == INT || expr2.type == LIST_INT || expr2.type == FLOAT || expr2.type == LIST_FLOAT)) {
-    printf("[SEMANTIC ERROR @ line %d] Types not binary operable\n", line);
+    printf("{526}[SEMANTIC ERROR @ line %d] Binary operator %s expects expressions of types [INT|FLOAT|LIST OF INT|LIST OF FLOAT]%s[INT|FLOAT|LIST OF INT|LIST OF FLOAT], but got types [%s]%s[%s]\n",
+      line, op.lex, op.lex, tDataToString(expr1.type), op.lex, tDataToString(expr2.type));
     return ;
   }
 
@@ -502,40 +540,43 @@ void Check_PlusMinusBinary(attrs expr1, attrs op, attrs expr2, attrs *res) {
       res->nDim = expr1.nDim;
     } else if (!isList(expr1) && isList(expr2)) {
       // sólo permitir valor+lista
-      if (strcmp(op.lex, "-") == 0) {  // WIP strcmp lex ó .attr ??
-        printf("[SEMANTIC ERROR @ line %d] Operation - not allowed between types INT/FLOAT and LIST OF INT/FLOAT\n", line);
+      if (op.attr == 1) {
+        printf("{550}[SEMANTIC ERROR @ line %d] Binary operator - does not allow expressions of types [NOT LIST]-[LIST], but got types [%s]-[%s]\n",
+          line, tDataToString(expr1.type), tDataToString(expr2.type));
         return ;
       }
       res->type = resType == INT ? LIST_INT : LIST_FLOAT;   // WIP ídem
       res->nDim = expr2.nDim;
     } else {
-      printf("[SEMANTIC ERROR @ line %d] Types not binary operable\n", line);
+      printf("{557}[SEMANTIC ERROR @ line %d] Binary operator %s does not allow expressions of types [LIST]%s[LIST], but got types [%s]%s[%s]\n",
+        line, op.lex, op.lex, tDataToString(expr1.type), op.lex, tDataToString(expr2.type));
     }
   }
 }
 
 void Check_OpBinaryList(attrs expr1, attrs op, attrs expr2, attrs *res) {
-  if (strcmp(op.lex, "**") == 0) {
+  if (op.attr == 1) { // **
     if (isList(expr1) && isList(expr2)) {
       // both must be of the same type
       if (expr1.type == expr2.type) {
         res->type = expr1.type;
         res->nDim = expr1.nDim + expr2.nDim;
       } else {
-        printf("[SEMANTIC ERROR @ line %d] Lists must be of same type\n", line);
+        printf("{571}[SEMANTIC ERROR @ line %d] Binay operator ** expects expressions of types [LIST OF x]**[LIST OF x] (lists of same type), but got [%s]**[%s]\n",
+          line, tDataToString(expr1.type), tDataToString(expr2.type));
       }
     } else {
-      printf("[SEMANTIC ERROR @ line %d] Types not binary operable by list operator\n", line);
+      printf("{575}[SEMANTIC ERROR @ line %d] Binary operator ** expects expressions of types [LIST]**[LIST], but got [%s]**[%s]\n",
+        line, tDataToString(expr1.type), tDataToString(expr2.type));
     }
-  } else if (strcmp(op.lex, "--") == 0) {
+  } else { // --
     if (isList(expr1) && expr2.type == INT) {
       res->type = expr1.type;
       res->nDim = expr1.nDim - 1;
     } else {
-      printf("[SEMANTIC ERROR @ line %d] Types not binary operable by list operator\n", line);
+      printf("{583}[SEMANTIC ERROR @ line %d] Binary operator -- expects expressions of types [LIST]--[INT], but got [%s]--[%s]\n",
+        line, tDataToString(expr1.type), tDataToString(expr2.type));
     }
-  } else {
-    printf("[SEMANTIC ERROR @ line %d] Binary operator not recognized\n", line);
   }
 }
 
@@ -545,12 +586,14 @@ void Check_OpBinaryAndOr(attrs expr1, attrs op, attrs expr2, attrs *res) {
     res->nDim = 0;
     return ;
   }
-  printf("[SEMANTIC ERROR @ line %d] Types not binary operable by and/or operator. Expected both BOOLEAN\n", line);
+  printf("{598}[SEMANTIC ERROR @ line %d] Binary operator %s expects expressions of types [BOOLEAN]%s[BOOLEAN], but got [%s]%s[%s]\n",
+    line, op.lex, op.lex, tDataToString(expr1.type), op.lex, tDataToString(expr2.type));
 }
 
 void Check_OpBinaryEq(attrs expr1, attrs op, attrs expr2, attrs *res) {
   if (isList(expr1) || isList(expr2)) {
-    printf("[SEMANTIC ERROR @ line %d] Types not binary operable by equality operator\n", line);
+    printf("{604}[SEMANTIC ERROR @ line %d] Binary operator %s expects expressions of types [NOT LIST]%s[NOT LIST], but got [%s]%s[%s]\n",
+      line, op.lex, op.lex, tDataToString(expr1.type), op.lex, tDataToString(expr2.type));
     return ;
   }
   if (expr1.type == expr2.type) {
@@ -558,7 +601,8 @@ void Check_OpBinaryEq(attrs expr1, attrs op, attrs expr2, attrs *res) {
     res->nDim = 0;
     return ;
   }
-  printf("[SEMANTIC ERROR @ line %d] Types not binary operable by equality operator. Expected both same type\n", line);
+  printf("{613}[SEMANTIC ERROR @ line %d] Binary operator %s expects expressions of types [x]%s[x] (same type), but got [%s]%s[%s]\n",
+    line, op.lex, op.lex, tDataToString(expr1.type), op.lex, tDataToString(expr2.type));
 }
 
 void Check_OpBinaryRel(attrs expr1, attrs op, attrs expr2, attrs *res) {
@@ -567,7 +611,8 @@ void Check_OpBinaryRel(attrs expr1, attrs op, attrs expr2, attrs *res) {
     res->nDim = 0;
     return ;
   }
-  printf("[SEMANTIC ERROR @ line %d] Types not binary operable by relationship operator\n", line);
+  printf("{623}[SEMANTIC ERROR @ line %d] Binary operator %s expects expressions of types [INT|FLOAT|CHAR]%s[INT|FLOAT|CHAR], but got [%s]%s[%s]\n",
+    line, op.lex, op.lex, tDataToString(expr1.type), op.lex, tDataToString(expr2.type));
 }
 
 void Check_OpBinaryMul(attrs expr1, attrs op, attrs expr2, attrs *res) {
@@ -581,13 +626,15 @@ void Check_OpBinaryMul(attrs expr1, attrs op, attrs expr2, attrs *res) {
       res->type = expr1.type;
       res->nDim = atoi(expr2.lex); // WIP comprobar
     } else {
-      printf("[SEMANTIC ERROR @ line %d] Types not binary operable by percentage operator\n", line);
+      printf("{675}[SEMANTIC ERROR @ line %d] Binary operator %s expects expressions of types [INT]%s[INT] or [LIST]%s[INT], but got [%s]%s[%s]\n",
+        line, op.lex, op.lex, op.lex, tDataToString(expr1.type), op.lex, tDataToString(expr2.type));
     }
   } else {  // * /
     // WIP sólo permitimos producto/división de enteros/flotantes (¿de char/bool?)
-    if (!(expr1.type == INT || expr1.type == LIST_INT || expr1.type == FLOAT || expr1.type == LIST_FLOAT ||
-      expr2.type == INT || expr2.type == LIST_INT || expr2.type == FLOAT || expr2.type == LIST_FLOAT)) {
-      printf("[SEMANTIC ERROR @ line %d] Types not binary operable\n", line);
+    if (!(expr1.type == INT || expr1.type == LIST_INT || expr1.type == FLOAT || expr1.type == LIST_FLOAT) ||
+      !(expr2.type == INT || expr2.type == LIST_INT || expr2.type == FLOAT || expr2.type == LIST_FLOAT)) {
+      printf("{632}[SEMANTIC ERROR @ line %d] Binary operator %s expects expressions of types [INT|FLOAT|LIST OF INT|LIST OF FLOAT]%s[INT|FLOAT|LIST OF INT|LIST OF FLOAT], but got [%s]%s[%s]\n",
+        line, op.lex, op.lex, tDataToString(expr1.type), op.lex, tDataToString(expr2.type));
       return ;
     }
 
@@ -607,14 +654,16 @@ void Check_OpBinaryMul(attrs expr1, attrs op, attrs expr2, attrs *res) {
         res->nDim = expr1.nDim;
       } else if (!isList(expr1) && isList(expr2)) {
         // sólo permitir valor+lista
-        if (strcmp(op.lex, "/") == 0) {  // WIP strcmp lex ó .attr ??
-          printf("[SEMANTIC ERROR @ line %d] Operation - not allowed between types INT/FLOAT and LIST OF INT/FLOAT\n", line);
+        if (op.attr == 2) {
+          printf("{654}[SEMANTIC ERROR @ line %d] Binary operator / does not allow expressions of types [NOT LIST]/[LIST], but got [%s]/[%s]\n",
+            line, tDataToString(expr1.type), tDataToString(expr2.type));
           return ;
         }
         res->type = resType == INT ? LIST_INT : LIST_FLOAT;   // WIP ídem
         res->nDim = expr2.nDim;
       } else {
-        printf("[SEMANTIC ERROR @ line %d] Types not binary operable\n", line);
+        printf("{661}[SEMANTIC ERROR @ line %d] Binary operator %s does not allow expressions of types [LIST]%s[LIST], but got types [%s]%s[%s]\n",
+          line, op.lex, op.lex, tDataToString(expr1.type), op.lex, tDataToString(expr2.type));
       }
     }
   }
@@ -626,36 +675,25 @@ void Check_At(attrs expr1, attrs op, attrs expr2, attrs *res) {
     res->nDim = 0;
     return ;
   }
-  printf("[SEMANTIC ERROR @ line %d] Types not binary operable by @. Expected LIST and INT\n", line);
+  printf("{687}[SEMANTIC ERROR @ line %d] Binary operator @ expects expressions of types [LIST]@[INT], but got [%s]@[%s]\n",
+    line, tDataToString(expr1.type), tDataToString(expr2.type));
 }
 
 void Check_ListTernary(attrs expr1, attrs op1, attrs expr2, attrs op2, attrs expr3, attrs *res) {
-  if (!isList(expr1)) {
-    printf("[SEMANTIC ERROR @ line %d] Types not ternary operable. Expected LIST in first expression\n", line);
+  if (!isList(expr1) || listToType(expr1.type) != expr2.type || expr3.type != INT) {
+    printf("{693}[SEMANTIC ERROR @ line %d] Ternary operator ++ @ expects expressions of types [LIST OF x]++[x]@[INT], but got types [%s]++[%s]@[%s]\n",
+      line, tDataToString(expr1.type), tDataToString(expr2.type), tDataToString(expr3.type));
     return ;
   }
-  if (listToType(expr1.type) != expr2.type) {
-    printf("[SEMANTIC ERROR @ line %d] Types not ternary operable. Expected type in second expression same as type of list in first expression\n", line);
-    return ;
-  }
-  if (expr3.type != INT) {
-    printf("[SEMANTIC ERROR @ line %d] Types not ternary operable. Expected INT in third expression\n", line);
-    return ;
-  }
-  res->type = expr2.type;
-  res->nDim = 0;
+  res->type = expr1.type;
+  res->nDim = expr1.nDim + 1;
 }
 
-void Check_FunctionCall(attrs id, attrs *res) {
-  int index = TS_FindByName(id);
+void Check_FunctionCall(attrs id) {
+  currentFunction = TS_FindByName(id);
 
-  if (index == -1) {
-    currentFunction = -1;
-    printf("[SEMANTIC ERROR @ line %d] Function with name %s not found\n", line, id.lex);
-    return ;
-  }
-
-  TS_FunctionCall(res);
+  if (currentFunction == -1)
+    printf("{706}[SEMANTIC ERROR @ line %d] Function with name %s not found\n", line, id.lex);
 }
 
 void VarList_Id(attrs id, attrs *res) {

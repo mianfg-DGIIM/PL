@@ -129,6 +129,13 @@ extern int currentFunction;
 tData getListType(tData type);
 
 /**
+ * @brief Devuelve el string correspondiente al tipo, para print
+ * @param type: Tipo
+ * @return String correspondiente al tipo
+ */
+const char* tDataToString(tData type);
+
+/**
  * @brief Guarda el tipo del atributo leído (la variable)
  * @param value: Atributo leído
  */
@@ -266,6 +273,6 @@ void Check_OpBinaryRel(attrs expr1, attrs op, attrs expr2, attrs *res);
 void Check_OpBinaryMul(attrs expr1, attrs op, attrs expr2, attrs *res);
 void Check_At(attrs expr1, attrs op, attrs expr2, attrs *res);
 void Check_ListTernary(attrs expr1, attrs op1, attrs expr2, attrs op2, attrs expr3, attrs *res);
-void Check_FunctionCall(attrs id, attrs *res);
+void Check_FunctionCall(attrs id);
 
 void VarList_Id(attrs id, attrs *res);

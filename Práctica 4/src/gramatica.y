@@ -77,7 +77,7 @@ Declar_de_subprogs : Declar_de_subprogs Declar_subprog
 Declar_subprog : Cabecera_subprograma { esFunc = 1; }
                  bloque { esFunc = 0; } ;
 tipo : TYPE { $$.type = $1.type; }
-     | LIST_OF TYPE { $$.type = getListType($1.type); }
+     | LIST_OF TYPE { $$.type = getListType($2.type); }
 Cabecera_subprograma : tipo IDENTIFIER { setType($1); decParam = 1; TS_AddFunction($2); }
                        PARENT_START
                        lista_de_parametros
@@ -109,6 +109,10 @@ Sentencia : bloque
           | Sentencia_return
           | Sentencia_lista ;
 Sentencia_asignacion : IDENTIFIER ASSIGN expresion COLON {
+                         //printf("Sentencia_asignacion (%d). Printing info.\n", line);
+                         //print_Attrs($1, "IDENTIFIER");
+                         //print_Attrs($3, "expresion");
+                         //printf("Result: TS_GetType(IDENTIFIER)=%d, expresion.type=%d\n", TS_GetType($1), $3.type);
                          if (TS_GetType($1) != $3.type) {
                            printf("[SEMANTIC ERROR @ line %d] In assignation: types are not equal\n", line);
                          }
@@ -161,12 +165,14 @@ expresion : PARENT_START expresion PARENT_END { $$.type = $2.type; $$.nDim = $2.
           | PLUS_MINUS expresion { Check_PlusMinus($1, $2, &$$); } %prec OP_UNARY
           | expresion OP_TERNARY_2 expresion { Check_At($1, $2, $3, &$$); }
           | expresion OP_TERNARY_1 expresion OP_TERNARY_2 expresion { Check_ListTernary($1, $2, $3, $4, $5, &$$); }
-          | IDENTIFIER { decVar = 0; }
+          | IDENTIFIER { $$.type = TS_GetType($1); decVar = 0; }
           | constante { $$.type = $1.type; $$.nDim = $1.nDim; }
           | funcion { $$.type = $1.type; $$.nDim = $1.nDim; currentFunction = -1; }
           | error ;
-funcion : IDENTIFIER PARENT_START Lista_expresiones PARENT_END { Check_FunctionCall($1, &$$); }
-        | IDENTIFIER PARENT_START PARENT_END { Check_FunctionCall($1, &$$); } ;
+funcion : cabecera_funcion argumentos_funcion ;
+cabecera_funcion : IDENTIFIER PARENT_START { Check_FunctionCall($1); } ;
+argumentos_funcion : Lista_expresiones PARENT_END { TS_FunctionCall(&$$); }
+                   | PARENT_END { TS_FunctionCall(&$$); };
 Lista_expresiones : Lista_expresiones COMMA expresion { TS_CheckParam($3); }
                   | expresion { /* WIP correct? -> */ checkParams = 0; TS_CheckParam($1); } ;
 constante : constante_base

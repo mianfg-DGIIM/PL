@@ -19,7 +19,7 @@ main {
         char funcionB (char b1, bool b2)
         {
             begin_local
-                float xf, xf2;
+                float xf, x2;
             end_local
 
             float funcionC (bool c1, int c2) {
@@ -35,6 +35,8 @@ main {
                 }
                 return x1 ;
             }
+
+            pf = pf * pf;
 
             xf = funcionC (true, 10);
             x2 = xf*(funcionC(false,1)-funcionC(true, 23))/ 10.0;
@@ -76,8 +78,5 @@ main {
         }
     }
 
-    ve = (ve2 * ve / 2) / 3 * ve2;
-
-    pe = pe ++ 10 @ pe2;
-    if (?pe == 5) pruebaint = 7;
+    
 }

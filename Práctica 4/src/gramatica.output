@@ -6,10 +6,10 @@ Rules useless in parser due to conflicts
 State 12 conflicts: 1 shift/reduce
 State 16 conflicts: 1 shift/reduce
 State 30 conflicts: 1 reduce/reduce
-State 72 conflicts: 1 shift/reduce
-State 164 conflicts: 1 shift/reduce
-State 169 conflicts: 3 reduce/reduce
-State 177 conflicts: 8 reduce/reduce
+State 73 conflicts: 1 shift/reduce
+State 167 conflicts: 1 shift/reduce
+State 171 conflicts: 3 reduce/reduce
+State 179 conflicts: 8 reduce/reduce
 
 
 Grammar
@@ -126,36 +126,40 @@ Grammar
    74          | funcion
    75          | error
 
-   76 funcion: IDENTIFIER PARENT_START Lista_expresiones PARENT_END
-   77        | IDENTIFIER PARENT_START PARENT_END
+   76 funcion: cabecera_funcion argumentos_funcion
 
-   78 Lista_expresiones: Lista_expresiones COMMA expresion
-   79                  | expresion
+   77 cabecera_funcion: IDENTIFIER PARENT_START
 
-   80 constante: constante_base
-   81          | constante_lista
+   78 argumentos_funcion: Lista_expresiones PARENT_END
+   79                   | PARENT_END
 
-   82 constante_base: CONST_INT
-   83               | CONST_FLOAT
-   84               | CONST_BOOL
-   85               | CONST_CHAR
+   80 Lista_expresiones: Lista_expresiones COMMA expresion
+   81                  | expresion
 
-   86 constante_lista: BRACKET_START constante_lista_int BRACKET_END
-   87                | BRACKET_START constante_lista_float BRACKET_END
-   88                | BRACKET_START constante_lista_bool BRACKET_END
-   89                | BRACKET_START constante_lista_char BRACKET_END
+   82 constante: constante_base
+   83          | constante_lista
 
-   90 constante_lista_int: constante_lista_int COMMA CONST_INT
-   91                    | CONST_INT
+   84 constante_base: CONST_INT
+   85               | CONST_FLOAT
+   86               | CONST_BOOL
+   87               | CONST_CHAR
 
-   92 constante_lista_float: constante_lista_float COMMA CONST_FLOAT
-   93                      | CONST_FLOAT
+   88 constante_lista: BRACKET_START constante_lista_int BRACKET_END
+   89                | BRACKET_START constante_lista_float BRACKET_END
+   90                | BRACKET_START constante_lista_bool BRACKET_END
+   91                | BRACKET_START constante_lista_char BRACKET_END
 
-   94 constante_lista_bool: constante_lista_bool COMMA CONST_BOOL
-   95                     | CONST_BOOL
+   92 constante_lista_int: constante_lista_int COMMA CONST_INT
+   93                    | CONST_INT
 
-   96 constante_lista_char: constante_lista_char COMMA CONST_CHAR
-   97                     | CONST_CHAR
+   94 constante_lista_float: constante_lista_float COMMA CONST_FLOAT
+   95                      | CONST_FLOAT
+
+   96 constante_lista_bool: constante_lista_bool COMMA CONST_BOOL
+   97                     | CONST_BOOL
+
+   98 constante_lista_char: constante_lista_char COMMA CONST_CHAR
+   99                     | CONST_CHAR
 
 
 Terminals, with rules where they appear
@@ -165,12 +169,12 @@ Terminals, with rules where they appear
     MAIN (258) 1
     BLOCK_START (259) 3
     BLOCK_END (260) 3
-    PARENT_START (261) 13 15 45 46 47 60 76 77
-    PARENT_END (262) 13 15 45 46 47 60 76 77
-    BRACKET_START (263) 86 87 88 89
-    BRACKET_END (264) 86 87 88 89
+    PARENT_START (261) 13 15 45 46 47 60 77
+    PARENT_END (262) 13 15 45 46 47 60 78 79
+    BRACKET_START (263) 88 89 90 91
+    BRACKET_END (264) 88 89 90 91
     COLON (265) 23 44 49 50 51 57 58 59
-    COMMA (266) 26 29 50 52 53 78 90 92 94 96
+    COMMA (266) 26 29 50 52 53 80 92 94 96 98
     BEGIN_LOCAL (267) 18
     END_LOCAL (268) 18
     TYPE (269) 10 11
@@ -184,12 +188,12 @@ Terminals, with rules where they appear
     INPUT (277) 49 50
     OUTPUT (278) 51
     RETURN (279) 57
-    CONST_INT (280) 82 90 91
-    CONST_FLOAT (281) 83 92 93
-    CONST_BOOL (282) 84 94 95
-    CONST_CHAR (283) 85 96 97
+    CONST_INT (280) 84 92 93
+    CONST_FLOAT (281) 85 94 95
+    CONST_BOOL (282) 86 96 97
+    CONST_CHAR (283) 87 98 99
     STRING (284) 50 53 55
-    IDENTIFIER (285) 13 15 26 27 29 30 44 48 72 76 77
+    IDENTIFIER (285) 13 15 26 27 29 30 44 48 72 77
     OP_BINARY_LIST (286) 62
     OP_TERNARY_1 (287) 71
     OP_TERNARY_2 (288) 70 71
@@ -306,34 +310,40 @@ Nonterminals, with rules where they appear
         on right: 43
     expresion (76)
         on left: 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75
-        on right: 44 45 46 47 48 52 54 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 78 79
+        on right: 44 45 46 47 48 52 54 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 80 81
     funcion (77)
-        on left: 76 77
+        on left: 76
         on right: 74
-    Lista_expresiones (78)
+    cabecera_funcion (78)
+        on left: 77
+        on right: 76
+    argumentos_funcion (79)
         on left: 78 79
-        on right: 76 78
-    constante (79)
+        on right: 76
+    Lista_expresiones (80)
         on left: 80 81
+        on right: 78 80
+    constante (81)
+        on left: 82 83
         on right: 73
-    constante_base (80)
-        on left: 82 83 84 85
-        on right: 80
-    constante_lista (81)
-        on left: 86 87 88 89
-        on right: 81
-    constante_lista_int (82)
-        on left: 90 91
-        on right: 86 90
-    constante_lista_float (83)
+    constante_base (82)
+        on left: 84 85 86 87
+        on right: 82
+    constante_lista (83)
+        on left: 88 89 90 91
+        on right: 83
+    constante_lista_int (84)
         on left: 92 93
-        on right: 87 92
-    constante_lista_bool (84)
+        on right: 88 92
+    constante_lista_float (85)
         on left: 94 95
-        on right: 88 94
-    constante_lista_char (85)
+        on right: 89 94
+    constante_lista_bool (86)
         on left: 96 97
-        on right: 89 96
+        on right: 90 96
+    constante_lista_char (87)
+        on left: 98 99
+        on right: 91 98
 
 
 State 0
@@ -611,9 +621,10 @@ State 24
     Sentencia_lista       go to state 59
     expresion             go to state 60
     funcion               go to state 61
-    constante             go to state 62
-    constante_base        go to state 63
-    constante_lista       go to state 64
+    cabecera_funcion      go to state 62
+    constante             go to state 63
+    constante_base        go to state 64
+    constante_lista       go to state 65
 
 
 State 25
@@ -634,10 +645,10 @@ State 27
 
    23 Cuerpo_declar_variables: tipo $@6 . lista_variables COLON
 
-    error       shift, and go to state 65
-    IDENTIFIER  shift, and go to state 66
+    error       shift, and go to state 66
+    IDENTIFIER  shift, and go to state 67
 
-    lista_variables  go to state 67
+    lista_variables  go to state 68
 
 
 State 28
@@ -663,8 +674,8 @@ State 30
     PARENT_START  [reduce using rule 14 ($@4)]
     $default      reduce using rule 12 ($@3)
 
-    $@3  go to state 68
-    $@4  go to state 69
+    $@3  go to state 69
+    $@4  go to state 70
 
 
 State 31
@@ -673,7 +684,7 @@ State 31
 
     BLOCK_START  shift, and go to state 3
 
-    bloque  go to state 70
+    bloque  go to state 71
 
 
 State 32
@@ -700,7 +711,7 @@ State 32
     OP_UNARY       shift, and go to state 49
 
     bloque                go to state 50
-    Sentencia             go to state 71
+    Sentencia             go to state 72
     Sentencia_asignacion  go to state 52
     Sentencia_if          go to state 53
     Sentencia_while       go to state 54
@@ -711,9 +722,10 @@ State 32
     Sentencia_lista       go to state 59
     expresion             go to state 60
     funcion               go to state 61
-    constante             go to state 62
-    constante_base        go to state 63
-    constante_lista       go to state 64
+    cabecera_funcion      go to state 62
+    constante             go to state 63
+    constante_base        go to state 64
+    constante_lista       go to state 65
 
 
 State 33
@@ -734,33 +746,34 @@ State 34
     CONST_FLOAT    shift, and go to state 43
     CONST_BOOL     shift, and go to state 44
     CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
+    IDENTIFIER     shift, and go to state 73
     PLUS_MINUS     shift, and go to state 48
     OP_UNARY       shift, and go to state 49
 
-    expresion        go to state 73
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
+    expresion         go to state 74
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
 
 
 State 35
 
-   86 constante_lista: BRACKET_START . constante_lista_int BRACKET_END
-   87                | BRACKET_START . constante_lista_float BRACKET_END
-   88                | BRACKET_START . constante_lista_bool BRACKET_END
-   89                | BRACKET_START . constante_lista_char BRACKET_END
+   88 constante_lista: BRACKET_START . constante_lista_int BRACKET_END
+   89                | BRACKET_START . constante_lista_float BRACKET_END
+   90                | BRACKET_START . constante_lista_bool BRACKET_END
+   91                | BRACKET_START . constante_lista_char BRACKET_END
 
-    CONST_INT    shift, and go to state 74
-    CONST_FLOAT  shift, and go to state 75
-    CONST_BOOL   shift, and go to state 76
-    CONST_CHAR   shift, and go to state 77
+    CONST_INT    shift, and go to state 75
+    CONST_FLOAT  shift, and go to state 76
+    CONST_BOOL   shift, and go to state 77
+    CONST_CHAR   shift, and go to state 78
 
-    constante_lista_int    go to state 78
-    constante_lista_float  go to state 79
-    constante_lista_bool   go to state 80
-    constante_lista_char   go to state 81
+    constante_lista_int    go to state 79
+    constante_lista_float  go to state 80
+    constante_lista_bool   go to state 81
+    constante_lista_char   go to state 82
 
 
 State 36
@@ -768,21 +781,21 @@ State 36
    45 Sentencia_if: IF . PARENT_START expresion PARENT_END Sentencia
    46             | IF . PARENT_START expresion PARENT_END Sentencia ELSE Sentencia
 
-    PARENT_START  shift, and go to state 82
+    PARENT_START  shift, and go to state 83
 
 
 State 37
 
    47 Sentencia_while: WHILE . PARENT_START expresion PARENT_END Sentencia
 
-    PARENT_START  shift, and go to state 83
+    PARENT_START  shift, and go to state 84
 
 
 State 38
 
    48 Sentencia_for: FOR . IDENTIFIER ASSIGN expresion TO expresion Sentencia
 
-    IDENTIFIER  shift, and go to state 84
+    IDENTIFIER  shift, and go to state 85
 
 
 State 39
@@ -790,11 +803,11 @@ State 39
    49 Sentencia_entrada: INPUT . lista_variables COLON
    50                  | INPUT . STRING COMMA lista_variables COLON
 
-    error       shift, and go to state 65
-    STRING      shift, and go to state 85
-    IDENTIFIER  shift, and go to state 66
+    error       shift, and go to state 66
+    STRING      shift, and go to state 86
+    IDENTIFIER  shift, and go to state 67
 
-    lista_variables  go to state 86
+    lista_variables  go to state 87
 
 
 State 40
@@ -808,17 +821,18 @@ State 40
     CONST_FLOAT    shift, and go to state 43
     CONST_BOOL     shift, and go to state 44
     CONST_CHAR     shift, and go to state 45
-    STRING         shift, and go to state 87
-    IDENTIFIER     shift, and go to state 72
+    STRING         shift, and go to state 88
+    IDENTIFIER     shift, and go to state 73
     PLUS_MINUS     shift, and go to state 48
     OP_UNARY       shift, and go to state 49
 
-    Lista_expresiones_o_cadena  go to state 88
-    expresion                   go to state 89
+    Lista_expresiones_o_cadena  go to state 89
+    expresion                   go to state 90
     funcion                     go to state 61
-    constante                   go to state 62
-    constante_base              go to state 63
-    constante_lista             go to state 64
+    cabecera_funcion            go to state 62
+    constante                   go to state 63
+    constante_base              go to state 64
+    constante_lista             go to state 65
 
 
 State 41
@@ -832,54 +846,54 @@ State 41
     CONST_FLOAT    shift, and go to state 43
     CONST_BOOL     shift, and go to state 44
     CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
+    IDENTIFIER     shift, and go to state 73
     PLUS_MINUS     shift, and go to state 48
     OP_UNARY       shift, and go to state 49
 
-    expresion        go to state 90
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
+    expresion         go to state 91
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
 
 
 State 42
 
-   82 constante_base: CONST_INT .
-
-    $default  reduce using rule 82 (constante_base)
-
-
-State 43
-
-   83 constante_base: CONST_FLOAT .
-
-    $default  reduce using rule 83 (constante_base)
-
-
-State 44
-
-   84 constante_base: CONST_BOOL .
+   84 constante_base: CONST_INT .
 
     $default  reduce using rule 84 (constante_base)
 
 
-State 45
+State 43
 
-   85 constante_base: CONST_CHAR .
+   85 constante_base: CONST_FLOAT .
 
     $default  reduce using rule 85 (constante_base)
+
+
+State 44
+
+   86 constante_base: CONST_BOOL .
+
+    $default  reduce using rule 86 (constante_base)
+
+
+State 45
+
+   87 constante_base: CONST_CHAR .
+
+    $default  reduce using rule 87 (constante_base)
 
 
 State 46
 
    44 Sentencia_asignacion: IDENTIFIER . ASSIGN expresion COLON
    72 expresion: IDENTIFIER .
-   76 funcion: IDENTIFIER . PARENT_START Lista_expresiones PARENT_END
-   77        | IDENTIFIER . PARENT_START PARENT_END
+   77 cabecera_funcion: IDENTIFIER . PARENT_START
 
-    PARENT_START  shift, and go to state 91
-    ASSIGN        shift, and go to state 92
+    PARENT_START  shift, and go to state 92
+    ASSIGN        shift, and go to state 93
 
     $default  reduce using rule 72 (expresion)
 
@@ -895,15 +909,16 @@ State 47
     CONST_FLOAT    shift, and go to state 43
     CONST_BOOL     shift, and go to state 44
     CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
+    IDENTIFIER     shift, and go to state 73
     PLUS_MINUS     shift, and go to state 48
     OP_UNARY       shift, and go to state 49
 
-    expresion        go to state 93
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
+    expresion         go to state 94
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
 
 
 State 48
@@ -917,15 +932,16 @@ State 48
     CONST_FLOAT    shift, and go to state 43
     CONST_BOOL     shift, and go to state 44
     CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
+    IDENTIFIER     shift, and go to state 73
     PLUS_MINUS     shift, and go to state 48
     OP_UNARY       shift, and go to state 49
 
-    expresion        go to state 94
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
+    expresion         go to state 95
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
 
 
 State 49
@@ -939,15 +955,16 @@ State 49
     CONST_FLOAT    shift, and go to state 43
     CONST_BOOL     shift, and go to state 44
     CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
+    IDENTIFIER     shift, and go to state 73
     PLUS_MINUS     shift, and go to state 48
     OP_UNARY       shift, and go to state 49
 
-    expresion        go to state 95
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
+    expresion         go to state 96
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
 
 
 State 50
@@ -1033,16 +1050,16 @@ State 60
    70          | expresion . OP_TERNARY_2 expresion
    71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
 
-    OP_BINARY_LIST  shift, and go to state 96
-    OP_TERNARY_1    shift, and go to state 97
-    OP_TERNARY_2    shift, and go to state 98
-    OP_LIST         shift, and go to state 99
-    OP_BINARY_OR    shift, and go to state 100
-    OP_BINARY_AND   shift, and go to state 101
-    OP_BINARY_EQ    shift, and go to state 102
-    OP_BINARY_REL   shift, and go to state 103
-    PLUS_MINUS      shift, and go to state 104
-    OP_BINARY_MUL   shift, and go to state 105
+    OP_BINARY_LIST  shift, and go to state 97
+    OP_TERNARY_1    shift, and go to state 98
+    OP_TERNARY_2    shift, and go to state 99
+    OP_LIST         shift, and go to state 100
+    OP_BINARY_OR    shift, and go to state 101
+    OP_BINARY_AND   shift, and go to state 102
+    OP_BINARY_EQ    shift, and go to state 103
+    OP_BINARY_REL   shift, and go to state 104
+    PLUS_MINUS      shift, and go to state 105
+    OP_BINARY_MUL   shift, and go to state 106
 
 
 State 61
@@ -1054,89 +1071,114 @@ State 61
 
 State 62
 
+   76 funcion: cabecera_funcion . argumentos_funcion
+
+    error          shift, and go to state 33
+    PARENT_START   shift, and go to state 34
+    PARENT_END     shift, and go to state 107
+    BRACKET_START  shift, and go to state 35
+    CONST_INT      shift, and go to state 42
+    CONST_FLOAT    shift, and go to state 43
+    CONST_BOOL     shift, and go to state 44
+    CONST_CHAR     shift, and go to state 45
+    IDENTIFIER     shift, and go to state 73
+    PLUS_MINUS     shift, and go to state 48
+    OP_UNARY       shift, and go to state 49
+
+    expresion           go to state 108
+    funcion             go to state 61
+    cabecera_funcion    go to state 62
+    argumentos_funcion  go to state 109
+    Lista_expresiones   go to state 110
+    constante           go to state 63
+    constante_base      go to state 64
+    constante_lista     go to state 65
+
+
+State 63
+
    73 expresion: constante .
 
     $default  reduce using rule 73 (expresion)
 
 
-State 63
-
-   80 constante: constante_base .
-
-    $default  reduce using rule 80 (constante)
-
-
 State 64
 
-   81 constante: constante_lista .
+   82 constante: constante_base .
 
-    $default  reduce using rule 81 (constante)
+    $default  reduce using rule 82 (constante)
 
 
 State 65
+
+   83 constante: constante_lista .
+
+    $default  reduce using rule 83 (constante)
+
+
+State 66
 
    28 lista_variables: error .
 
     $default  reduce using rule 28 (lista_variables)
 
 
-State 66
+State 67
 
    27 lista_variables: IDENTIFIER .
 
     $default  reduce using rule 27 (lista_variables)
 
 
-State 67
+State 68
 
    23 Cuerpo_declar_variables: tipo $@6 lista_variables . COLON
    26 lista_variables: lista_variables . COMMA IDENTIFIER
 
-    COLON  shift, and go to state 106
-    COMMA  shift, and go to state 107
-
-
-State 68
-
-   13 Cabecera_subprograma: tipo IDENTIFIER $@3 . PARENT_START lista_de_parametros PARENT_END
-
-    PARENT_START  shift, and go to state 108
+    COLON  shift, and go to state 111
+    COMMA  shift, and go to state 112
 
 
 State 69
 
-   15 Cabecera_subprograma: tipo IDENTIFIER $@4 . PARENT_START PARENT_END
+   13 Cabecera_subprograma: tipo IDENTIFIER $@3 . PARENT_START lista_de_parametros PARENT_END
 
-    PARENT_START  shift, and go to state 109
+    PARENT_START  shift, and go to state 113
 
 
 State 70
+
+   15 Cabecera_subprograma: tipo IDENTIFIER $@4 . PARENT_START PARENT_END
+
+    PARENT_START  shift, and go to state 114
+
+
+State 71
 
     9 Declar_subprog: Cabecera_subprograma $@2 bloque .
 
     $default  reduce using rule 9 (Declar_subprog)
 
 
-State 71
+State 72
 
    32 Sentencias: Sentencias $@7 Sentencia .
 
     $default  reduce using rule 32 (Sentencias)
 
 
-State 72
+State 73
 
    72 expresion: IDENTIFIER .
-   76 funcion: IDENTIFIER . PARENT_START Lista_expresiones PARENT_END
-   77        | IDENTIFIER . PARENT_START PARENT_END
+   77 cabecera_funcion: IDENTIFIER . PARENT_START
 
-    PARENT_START  shift, and go to state 91
+    PARENT_START  shift, and go to state 92
 
     PARENT_START  [reduce using rule 72 (expresion)]
     $default      reduce using rule 72 (expresion)
 
 
-State 73
+State 74
 
    60 expresion: PARENT_START expresion . PARENT_END
    62          | expresion . OP_BINARY_LIST expresion
@@ -1149,83 +1191,83 @@ State 73
    70          | expresion . OP_TERNARY_2 expresion
    71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
 
-    PARENT_END      shift, and go to state 110
-    OP_BINARY_LIST  shift, and go to state 96
-    OP_TERNARY_1    shift, and go to state 97
-    OP_TERNARY_2    shift, and go to state 98
-    OP_BINARY_OR    shift, and go to state 100
-    OP_BINARY_AND   shift, and go to state 101
-    OP_BINARY_EQ    shift, and go to state 102
-    OP_BINARY_REL   shift, and go to state 103
-    PLUS_MINUS      shift, and go to state 104
-    OP_BINARY_MUL   shift, and go to state 105
-
-
-State 74
-
-   91 constante_lista_int: CONST_INT .
-
-    $default  reduce using rule 91 (constante_lista_int)
+    PARENT_END      shift, and go to state 115
+    OP_BINARY_LIST  shift, and go to state 97
+    OP_TERNARY_1    shift, and go to state 98
+    OP_TERNARY_2    shift, and go to state 99
+    OP_BINARY_OR    shift, and go to state 101
+    OP_BINARY_AND   shift, and go to state 102
+    OP_BINARY_EQ    shift, and go to state 103
+    OP_BINARY_REL   shift, and go to state 104
+    PLUS_MINUS      shift, and go to state 105
+    OP_BINARY_MUL   shift, and go to state 106
 
 
 State 75
 
-   93 constante_lista_float: CONST_FLOAT .
+   93 constante_lista_int: CONST_INT .
 
-    $default  reduce using rule 93 (constante_lista_float)
+    $default  reduce using rule 93 (constante_lista_int)
 
 
 State 76
 
-   95 constante_lista_bool: CONST_BOOL .
+   95 constante_lista_float: CONST_FLOAT .
 
-    $default  reduce using rule 95 (constante_lista_bool)
+    $default  reduce using rule 95 (constante_lista_float)
 
 
 State 77
 
-   97 constante_lista_char: CONST_CHAR .
+   97 constante_lista_bool: CONST_BOOL .
 
-    $default  reduce using rule 97 (constante_lista_char)
+    $default  reduce using rule 97 (constante_lista_bool)
 
 
 State 78
 
-   86 constante_lista: BRACKET_START constante_lista_int . BRACKET_END
-   90 constante_lista_int: constante_lista_int . COMMA CONST_INT
+   99 constante_lista_char: CONST_CHAR .
 
-    BRACKET_END  shift, and go to state 111
-    COMMA        shift, and go to state 112
+    $default  reduce using rule 99 (constante_lista_char)
 
 
 State 79
 
-   87 constante_lista: BRACKET_START constante_lista_float . BRACKET_END
-   92 constante_lista_float: constante_lista_float . COMMA CONST_FLOAT
+   88 constante_lista: BRACKET_START constante_lista_int . BRACKET_END
+   92 constante_lista_int: constante_lista_int . COMMA CONST_INT
 
-    BRACKET_END  shift, and go to state 113
-    COMMA        shift, and go to state 114
+    BRACKET_END  shift, and go to state 116
+    COMMA        shift, and go to state 117
 
 
 State 80
 
-   88 constante_lista: BRACKET_START constante_lista_bool . BRACKET_END
-   94 constante_lista_bool: constante_lista_bool . COMMA CONST_BOOL
+   89 constante_lista: BRACKET_START constante_lista_float . BRACKET_END
+   94 constante_lista_float: constante_lista_float . COMMA CONST_FLOAT
 
-    BRACKET_END  shift, and go to state 115
-    COMMA        shift, and go to state 116
+    BRACKET_END  shift, and go to state 118
+    COMMA        shift, and go to state 119
 
 
 State 81
 
-   89 constante_lista: BRACKET_START constante_lista_char . BRACKET_END
-   96 constante_lista_char: constante_lista_char . COMMA CONST_CHAR
+   90 constante_lista: BRACKET_START constante_lista_bool . BRACKET_END
+   96 constante_lista_bool: constante_lista_bool . COMMA CONST_BOOL
 
-    BRACKET_END  shift, and go to state 117
-    COMMA        shift, and go to state 118
+    BRACKET_END  shift, and go to state 120
+    COMMA        shift, and go to state 121
 
 
 State 82
+
+   91 constante_lista: BRACKET_START constante_lista_char . BRACKET_END
+   98 constante_lista_char: constante_lista_char . COMMA CONST_CHAR
+
+    BRACKET_END  shift, and go to state 122
+    COMMA        shift, and go to state 123
+
+
+State 83
 
    45 Sentencia_if: IF PARENT_START . expresion PARENT_END Sentencia
    46             | IF PARENT_START . expresion PARENT_END Sentencia ELSE Sentencia
@@ -1237,18 +1279,19 @@ State 82
     CONST_FLOAT    shift, and go to state 43
     CONST_BOOL     shift, and go to state 44
     CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
+    IDENTIFIER     shift, and go to state 73
     PLUS_MINUS     shift, and go to state 48
     OP_UNARY       shift, and go to state 49
 
-    expresion        go to state 119
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
+    expresion         go to state 124
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
 
 
-State 83
+State 84
 
    47 Sentencia_while: WHILE PARENT_START . expresion PARENT_END Sentencia
 
@@ -1259,58 +1302,59 @@ State 83
     CONST_FLOAT    shift, and go to state 43
     CONST_BOOL     shift, and go to state 44
     CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
+    IDENTIFIER     shift, and go to state 73
     PLUS_MINUS     shift, and go to state 48
     OP_UNARY       shift, and go to state 49
 
-    expresion        go to state 120
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
-
-
-State 84
-
-   48 Sentencia_for: FOR IDENTIFIER . ASSIGN expresion TO expresion Sentencia
-
-    ASSIGN  shift, and go to state 121
+    expresion         go to state 125
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
 
 
 State 85
 
-   50 Sentencia_entrada: INPUT STRING . COMMA lista_variables COLON
+   48 Sentencia_for: FOR IDENTIFIER . ASSIGN expresion TO expresion Sentencia
 
-    COMMA  shift, and go to state 122
+    ASSIGN  shift, and go to state 126
 
 
 State 86
 
-   26 lista_variables: lista_variables . COMMA IDENTIFIER
-   49 Sentencia_entrada: INPUT lista_variables . COLON
+   50 Sentencia_entrada: INPUT STRING . COMMA lista_variables COLON
 
-    COLON  shift, and go to state 123
-    COMMA  shift, and go to state 107
+    COMMA  shift, and go to state 127
 
 
 State 87
+
+   26 lista_variables: lista_variables . COMMA IDENTIFIER
+   49 Sentencia_entrada: INPUT lista_variables . COLON
+
+    COLON  shift, and go to state 128
+    COMMA  shift, and go to state 112
+
+
+State 88
 
    55 Lista_expresiones_o_cadena: STRING .
 
     $default  reduce using rule 55 (Lista_expresiones_o_cadena)
 
 
-State 88
+State 89
 
    51 Sentencia_salida: OUTPUT Lista_expresiones_o_cadena . COLON
    52 Lista_expresiones_o_cadena: Lista_expresiones_o_cadena . COMMA expresion
    53                           | Lista_expresiones_o_cadena . COMMA STRING
 
-    COLON  shift, and go to state 124
-    COMMA  shift, and go to state 125
+    COLON  shift, and go to state 129
+    COMMA  shift, and go to state 130
 
 
-State 89
+State 90
 
    54 Lista_expresiones_o_cadena: expresion .
    62 expresion: expresion . OP_BINARY_LIST expresion
@@ -1323,20 +1367,20 @@ State 89
    70          | expresion . OP_TERNARY_2 expresion
    71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
 
-    OP_BINARY_LIST  shift, and go to state 96
-    OP_TERNARY_1    shift, and go to state 97
-    OP_TERNARY_2    shift, and go to state 98
-    OP_BINARY_OR    shift, and go to state 100
-    OP_BINARY_AND   shift, and go to state 101
-    OP_BINARY_EQ    shift, and go to state 102
-    OP_BINARY_REL   shift, and go to state 103
-    PLUS_MINUS      shift, and go to state 104
-    OP_BINARY_MUL   shift, and go to state 105
+    OP_BINARY_LIST  shift, and go to state 97
+    OP_TERNARY_1    shift, and go to state 98
+    OP_TERNARY_2    shift, and go to state 99
+    OP_BINARY_OR    shift, and go to state 101
+    OP_BINARY_AND   shift, and go to state 102
+    OP_BINARY_EQ    shift, and go to state 103
+    OP_BINARY_REL   shift, and go to state 104
+    PLUS_MINUS      shift, and go to state 105
+    OP_BINARY_MUL   shift, and go to state 106
 
     $default  reduce using rule 54 (Lista_expresiones_o_cadena)
 
 
-State 90
+State 91
 
    57 Sentencia_return: RETURN expresion . @9 COLON
    62 expresion: expresion . OP_BINARY_LIST expresion
@@ -1349,47 +1393,29 @@ State 90
    70          | expresion . OP_TERNARY_2 expresion
    71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
 
-    OP_BINARY_LIST  shift, and go to state 96
-    OP_TERNARY_1    shift, and go to state 97
-    OP_TERNARY_2    shift, and go to state 98
-    OP_BINARY_OR    shift, and go to state 100
-    OP_BINARY_AND   shift, and go to state 101
-    OP_BINARY_EQ    shift, and go to state 102
-    OP_BINARY_REL   shift, and go to state 103
-    PLUS_MINUS      shift, and go to state 104
-    OP_BINARY_MUL   shift, and go to state 105
+    OP_BINARY_LIST  shift, and go to state 97
+    OP_TERNARY_1    shift, and go to state 98
+    OP_TERNARY_2    shift, and go to state 99
+    OP_BINARY_OR    shift, and go to state 101
+    OP_BINARY_AND   shift, and go to state 102
+    OP_BINARY_EQ    shift, and go to state 103
+    OP_BINARY_REL   shift, and go to state 104
+    PLUS_MINUS      shift, and go to state 105
+    OP_BINARY_MUL   shift, and go to state 106
 
     $default  reduce using rule 56 (@9)
 
-    @9  go to state 126
-
-
-State 91
-
-   76 funcion: IDENTIFIER PARENT_START . Lista_expresiones PARENT_END
-   77        | IDENTIFIER PARENT_START . PARENT_END
-
-    error          shift, and go to state 33
-    PARENT_START   shift, and go to state 34
-    PARENT_END     shift, and go to state 127
-    BRACKET_START  shift, and go to state 35
-    CONST_INT      shift, and go to state 42
-    CONST_FLOAT    shift, and go to state 43
-    CONST_BOOL     shift, and go to state 44
-    CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
-    PLUS_MINUS     shift, and go to state 48
-    OP_UNARY       shift, and go to state 49
-
-    expresion          go to state 128
-    funcion            go to state 61
-    Lista_expresiones  go to state 129
-    constante          go to state 62
-    constante_base     go to state 63
-    constante_lista    go to state 64
+    @9  go to state 131
 
 
 State 92
+
+   77 cabecera_funcion: IDENTIFIER PARENT_START .
+
+    $default  reduce using rule 77 (cabecera_funcion)
+
+
+State 93
 
    44 Sentencia_asignacion: IDENTIFIER ASSIGN . expresion COLON
 
@@ -1400,18 +1426,19 @@ State 92
     CONST_FLOAT    shift, and go to state 43
     CONST_BOOL     shift, and go to state 44
     CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
+    IDENTIFIER     shift, and go to state 73
     PLUS_MINUS     shift, and go to state 48
     OP_UNARY       shift, and go to state 49
 
-    expresion        go to state 130
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
+    expresion         go to state 132
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
 
 
-State 93
+State 94
 
    59 Sentencia_lista: OP_DOLLAR expresion . COLON
    62 expresion: expresion . OP_BINARY_LIST expresion
@@ -1424,19 +1451,19 @@ State 93
    70          | expresion . OP_TERNARY_2 expresion
    71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
 
-    COLON           shift, and go to state 131
-    OP_BINARY_LIST  shift, and go to state 96
-    OP_TERNARY_1    shift, and go to state 97
-    OP_TERNARY_2    shift, and go to state 98
-    OP_BINARY_OR    shift, and go to state 100
-    OP_BINARY_AND   shift, and go to state 101
-    OP_BINARY_EQ    shift, and go to state 102
-    OP_BINARY_REL   shift, and go to state 103
-    PLUS_MINUS      shift, and go to state 104
-    OP_BINARY_MUL   shift, and go to state 105
+    COLON           shift, and go to state 133
+    OP_BINARY_LIST  shift, and go to state 97
+    OP_TERNARY_1    shift, and go to state 98
+    OP_TERNARY_2    shift, and go to state 99
+    OP_BINARY_OR    shift, and go to state 101
+    OP_BINARY_AND   shift, and go to state 102
+    OP_BINARY_EQ    shift, and go to state 103
+    OP_BINARY_REL   shift, and go to state 104
+    PLUS_MINUS      shift, and go to state 105
+    OP_BINARY_MUL   shift, and go to state 106
 
 
-State 94
+State 95
 
    62 expresion: expresion . OP_BINARY_LIST expresion
    63          | expresion . OP_BINARY_OR expresion
@@ -1452,7 +1479,7 @@ State 94
     $default  reduce using rule 69 (expresion)
 
 
-State 95
+State 96
 
    61 expresion: OP_UNARY expresion .
    62          | expresion . OP_BINARY_LIST expresion
@@ -1468,7 +1495,7 @@ State 95
     $default  reduce using rule 61 (expresion)
 
 
-State 96
+State 97
 
    62 expresion: expresion OP_BINARY_LIST . expresion
 
@@ -1479,18 +1506,19 @@ State 96
     CONST_FLOAT    shift, and go to state 43
     CONST_BOOL     shift, and go to state 44
     CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
+    IDENTIFIER     shift, and go to state 73
     PLUS_MINUS     shift, and go to state 48
     OP_UNARY       shift, and go to state 49
 
-    expresion        go to state 132
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
+    expresion         go to state 134
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
 
 
-State 97
+State 98
 
    71 expresion: expresion OP_TERNARY_1 . expresion OP_TERNARY_2 expresion
 
@@ -1501,18 +1529,19 @@ State 97
     CONST_FLOAT    shift, and go to state 43
     CONST_BOOL     shift, and go to state 44
     CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
+    IDENTIFIER     shift, and go to state 73
     PLUS_MINUS     shift, and go to state 48
     OP_UNARY       shift, and go to state 49
 
-    expresion        go to state 133
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
+    expresion         go to state 135
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
 
 
-State 98
+State 99
 
    70 expresion: expresion OP_TERNARY_2 . expresion
 
@@ -1523,25 +1552,26 @@ State 98
     CONST_FLOAT    shift, and go to state 43
     CONST_BOOL     shift, and go to state 44
     CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
+    IDENTIFIER     shift, and go to state 73
     PLUS_MINUS     shift, and go to state 48
     OP_UNARY       shift, and go to state 49
 
-    expresion        go to state 134
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
-
-
-State 99
-
-   58 Sentencia_lista: expresion OP_LIST . COLON
-
-    COLON  shift, and go to state 135
+    expresion         go to state 136
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
 
 
 State 100
+
+   58 Sentencia_lista: expresion OP_LIST . COLON
+
+    COLON  shift, and go to state 137
+
+
+State 101
 
    63 expresion: expresion OP_BINARY_OR . expresion
 
@@ -1552,18 +1582,19 @@ State 100
     CONST_FLOAT    shift, and go to state 43
     CONST_BOOL     shift, and go to state 44
     CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
+    IDENTIFIER     shift, and go to state 73
     PLUS_MINUS     shift, and go to state 48
     OP_UNARY       shift, and go to state 49
 
-    expresion        go to state 136
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
+    expresion         go to state 138
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
 
 
-State 101
+State 102
 
    64 expresion: expresion OP_BINARY_AND . expresion
 
@@ -1574,18 +1605,19 @@ State 101
     CONST_FLOAT    shift, and go to state 43
     CONST_BOOL     shift, and go to state 44
     CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
+    IDENTIFIER     shift, and go to state 73
     PLUS_MINUS     shift, and go to state 48
     OP_UNARY       shift, and go to state 49
 
-    expresion        go to state 137
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
+    expresion         go to state 139
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
 
 
-State 102
+State 103
 
    65 expresion: expresion OP_BINARY_EQ . expresion
 
@@ -1596,18 +1628,19 @@ State 102
     CONST_FLOAT    shift, and go to state 43
     CONST_BOOL     shift, and go to state 44
     CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
+    IDENTIFIER     shift, and go to state 73
     PLUS_MINUS     shift, and go to state 48
     OP_UNARY       shift, and go to state 49
 
-    expresion        go to state 138
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
+    expresion         go to state 140
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
 
 
-State 103
+State 104
 
    66 expresion: expresion OP_BINARY_REL . expresion
 
@@ -1618,18 +1651,19 @@ State 103
     CONST_FLOAT    shift, and go to state 43
     CONST_BOOL     shift, and go to state 44
     CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
+    IDENTIFIER     shift, and go to state 73
     PLUS_MINUS     shift, and go to state 48
     OP_UNARY       shift, and go to state 49
 
-    expresion        go to state 139
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
+    expresion         go to state 141
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
 
 
-State 104
+State 105
 
    68 expresion: expresion PLUS_MINUS . expresion
 
@@ -1640,18 +1674,19 @@ State 104
     CONST_FLOAT    shift, and go to state 43
     CONST_BOOL     shift, and go to state 44
     CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
+    IDENTIFIER     shift, and go to state 73
     PLUS_MINUS     shift, and go to state 48
     OP_UNARY       shift, and go to state 49
 
-    expresion        go to state 140
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
+    expresion         go to state 142
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
 
 
-State 105
+State 106
 
    67 expresion: expresion OP_BINARY_MUL . expresion
 
@@ -1662,113 +1697,163 @@ State 105
     CONST_FLOAT    shift, and go to state 43
     CONST_BOOL     shift, and go to state 44
     CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
+    IDENTIFIER     shift, and go to state 73
     PLUS_MINUS     shift, and go to state 48
     OP_UNARY       shift, and go to state 49
 
-    expresion        go to state 141
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
+    expresion         go to state 143
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
 
 
-State 106
+State 107
+
+   79 argumentos_funcion: PARENT_END .
+
+    $default  reduce using rule 79 (argumentos_funcion)
+
+
+State 108
+
+   62 expresion: expresion . OP_BINARY_LIST expresion
+   63          | expresion . OP_BINARY_OR expresion
+   64          | expresion . OP_BINARY_AND expresion
+   65          | expresion . OP_BINARY_EQ expresion
+   66          | expresion . OP_BINARY_REL expresion
+   67          | expresion . OP_BINARY_MUL expresion
+   68          | expresion . PLUS_MINUS expresion
+   70          | expresion . OP_TERNARY_2 expresion
+   71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
+   81 Lista_expresiones: expresion .
+
+    OP_BINARY_LIST  shift, and go to state 97
+    OP_TERNARY_1    shift, and go to state 98
+    OP_TERNARY_2    shift, and go to state 99
+    OP_BINARY_OR    shift, and go to state 101
+    OP_BINARY_AND   shift, and go to state 102
+    OP_BINARY_EQ    shift, and go to state 103
+    OP_BINARY_REL   shift, and go to state 104
+    PLUS_MINUS      shift, and go to state 105
+    OP_BINARY_MUL   shift, and go to state 106
+
+    $default  reduce using rule 81 (Lista_expresiones)
+
+
+State 109
+
+   76 funcion: cabecera_funcion argumentos_funcion .
+
+    $default  reduce using rule 76 (funcion)
+
+
+State 110
+
+   78 argumentos_funcion: Lista_expresiones . PARENT_END
+   80 Lista_expresiones: Lista_expresiones . COMMA expresion
+
+    PARENT_END  shift, and go to state 144
+    COMMA       shift, and go to state 145
+
+
+State 111
 
    23 Cuerpo_declar_variables: tipo $@6 lista_variables COLON .
 
     $default  reduce using rule 23 (Cuerpo_declar_variables)
 
 
-State 107
+State 112
 
    26 lista_variables: lista_variables COMMA . IDENTIFIER
 
-    IDENTIFIER  shift, and go to state 142
+    IDENTIFIER  shift, and go to state 146
 
 
-State 108
+State 113
 
    13 Cabecera_subprograma: tipo IDENTIFIER $@3 PARENT_START . lista_de_parametros PARENT_END
 
     TYPE     shift, and go to state 14
     LIST_OF  shift, and go to state 15
 
-    tipo                 go to state 143
-    lista_de_parametros  go to state 144
+    tipo                 go to state 147
+    lista_de_parametros  go to state 148
 
 
-State 109
+State 114
 
    15 Cabecera_subprograma: tipo IDENTIFIER $@4 PARENT_START . PARENT_END
 
-    PARENT_END  shift, and go to state 145
+    PARENT_END  shift, and go to state 149
 
 
-State 110
+State 115
 
    60 expresion: PARENT_START expresion PARENT_END .
 
     $default  reduce using rule 60 (expresion)
 
 
-State 111
+State 116
 
-   86 constante_lista: BRACKET_START constante_lista_int BRACKET_END .
-
-    $default  reduce using rule 86 (constante_lista)
-
-
-State 112
-
-   90 constante_lista_int: constante_lista_int COMMA . CONST_INT
-
-    CONST_INT  shift, and go to state 146
-
-
-State 113
-
-   87 constante_lista: BRACKET_START constante_lista_float BRACKET_END .
-
-    $default  reduce using rule 87 (constante_lista)
-
-
-State 114
-
-   92 constante_lista_float: constante_lista_float COMMA . CONST_FLOAT
-
-    CONST_FLOAT  shift, and go to state 147
-
-
-State 115
-
-   88 constante_lista: BRACKET_START constante_lista_bool BRACKET_END .
+   88 constante_lista: BRACKET_START constante_lista_int BRACKET_END .
 
     $default  reduce using rule 88 (constante_lista)
 
 
-State 116
-
-   94 constante_lista_bool: constante_lista_bool COMMA . CONST_BOOL
-
-    CONST_BOOL  shift, and go to state 148
-
-
 State 117
 
-   89 constante_lista: BRACKET_START constante_lista_char BRACKET_END .
+   92 constante_lista_int: constante_lista_int COMMA . CONST_INT
 
-    $default  reduce using rule 89 (constante_lista)
+    CONST_INT  shift, and go to state 150
 
 
 State 118
 
-   96 constante_lista_char: constante_lista_char COMMA . CONST_CHAR
+   89 constante_lista: BRACKET_START constante_lista_float BRACKET_END .
 
-    CONST_CHAR  shift, and go to state 149
+    $default  reduce using rule 89 (constante_lista)
 
 
 State 119
+
+   94 constante_lista_float: constante_lista_float COMMA . CONST_FLOAT
+
+    CONST_FLOAT  shift, and go to state 151
+
+
+State 120
+
+   90 constante_lista: BRACKET_START constante_lista_bool BRACKET_END .
+
+    $default  reduce using rule 90 (constante_lista)
+
+
+State 121
+
+   96 constante_lista_bool: constante_lista_bool COMMA . CONST_BOOL
+
+    CONST_BOOL  shift, and go to state 152
+
+
+State 122
+
+   91 constante_lista: BRACKET_START constante_lista_char BRACKET_END .
+
+    $default  reduce using rule 91 (constante_lista)
+
+
+State 123
+
+   98 constante_lista_char: constante_lista_char COMMA . CONST_CHAR
+
+    CONST_CHAR  shift, and go to state 153
+
+
+State 124
 
    45 Sentencia_if: IF PARENT_START expresion . PARENT_END Sentencia
    46             | IF PARENT_START expresion . PARENT_END Sentencia ELSE Sentencia
@@ -1782,19 +1867,19 @@ State 119
    70          | expresion . OP_TERNARY_2 expresion
    71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
 
-    PARENT_END      shift, and go to state 150
-    OP_BINARY_LIST  shift, and go to state 96
-    OP_TERNARY_1    shift, and go to state 97
-    OP_TERNARY_2    shift, and go to state 98
-    OP_BINARY_OR    shift, and go to state 100
-    OP_BINARY_AND   shift, and go to state 101
-    OP_BINARY_EQ    shift, and go to state 102
-    OP_BINARY_REL   shift, and go to state 103
-    PLUS_MINUS      shift, and go to state 104
-    OP_BINARY_MUL   shift, and go to state 105
+    PARENT_END      shift, and go to state 154
+    OP_BINARY_LIST  shift, and go to state 97
+    OP_TERNARY_1    shift, and go to state 98
+    OP_TERNARY_2    shift, and go to state 99
+    OP_BINARY_OR    shift, and go to state 101
+    OP_BINARY_AND   shift, and go to state 102
+    OP_BINARY_EQ    shift, and go to state 103
+    OP_BINARY_REL   shift, and go to state 104
+    PLUS_MINUS      shift, and go to state 105
+    OP_BINARY_MUL   shift, and go to state 106
 
 
-State 120
+State 125
 
    47 Sentencia_while: WHILE PARENT_START expresion . PARENT_END Sentencia
    62 expresion: expresion . OP_BINARY_LIST expresion
@@ -1807,19 +1892,19 @@ State 120
    70          | expresion . OP_TERNARY_2 expresion
    71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
 
-    PARENT_END      shift, and go to state 151
-    OP_BINARY_LIST  shift, and go to state 96
-    OP_TERNARY_1    shift, and go to state 97
-    OP_TERNARY_2    shift, and go to state 98
-    OP_BINARY_OR    shift, and go to state 100
-    OP_BINARY_AND   shift, and go to state 101
-    OP_BINARY_EQ    shift, and go to state 102
-    OP_BINARY_REL   shift, and go to state 103
-    PLUS_MINUS      shift, and go to state 104
-    OP_BINARY_MUL   shift, and go to state 105
+    PARENT_END      shift, and go to state 155
+    OP_BINARY_LIST  shift, and go to state 97
+    OP_TERNARY_1    shift, and go to state 98
+    OP_TERNARY_2    shift, and go to state 99
+    OP_BINARY_OR    shift, and go to state 101
+    OP_BINARY_AND   shift, and go to state 102
+    OP_BINARY_EQ    shift, and go to state 103
+    OP_BINARY_REL   shift, and go to state 104
+    PLUS_MINUS      shift, and go to state 105
+    OP_BINARY_MUL   shift, and go to state 106
 
 
-State 121
+State 126
 
    48 Sentencia_for: FOR IDENTIFIER ASSIGN . expresion TO expresion Sentencia
 
@@ -1830,42 +1915,43 @@ State 121
     CONST_FLOAT    shift, and go to state 43
     CONST_BOOL     shift, and go to state 44
     CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
+    IDENTIFIER     shift, and go to state 73
     PLUS_MINUS     shift, and go to state 48
     OP_UNARY       shift, and go to state 49
 
-    expresion        go to state 152
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
+    expresion         go to state 156
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
 
 
-State 122
+State 127
 
    50 Sentencia_entrada: INPUT STRING COMMA . lista_variables COLON
 
-    error       shift, and go to state 65
-    IDENTIFIER  shift, and go to state 66
+    error       shift, and go to state 66
+    IDENTIFIER  shift, and go to state 67
 
-    lista_variables  go to state 153
+    lista_variables  go to state 157
 
 
-State 123
+State 128
 
    49 Sentencia_entrada: INPUT lista_variables COLON .
 
     $default  reduce using rule 49 (Sentencia_entrada)
 
 
-State 124
+State 129
 
    51 Sentencia_salida: OUTPUT Lista_expresiones_o_cadena COLON .
 
     $default  reduce using rule 51 (Sentencia_salida)
 
 
-State 125
+State 130
 
    52 Lista_expresiones_o_cadena: Lista_expresiones_o_cadena COMMA . expresion
    53                           | Lista_expresiones_o_cadena COMMA . STRING
@@ -1877,68 +1963,27 @@ State 125
     CONST_FLOAT    shift, and go to state 43
     CONST_BOOL     shift, and go to state 44
     CONST_CHAR     shift, and go to state 45
-    STRING         shift, and go to state 154
-    IDENTIFIER     shift, and go to state 72
+    STRING         shift, and go to state 158
+    IDENTIFIER     shift, and go to state 73
     PLUS_MINUS     shift, and go to state 48
     OP_UNARY       shift, and go to state 49
 
-    expresion        go to state 155
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
+    expresion         go to state 159
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
 
 
-State 126
+State 131
 
    57 Sentencia_return: RETURN expresion @9 . COLON
 
-    COLON  shift, and go to state 156
+    COLON  shift, and go to state 160
 
 
-State 127
-
-   77 funcion: IDENTIFIER PARENT_START PARENT_END .
-
-    $default  reduce using rule 77 (funcion)
-
-
-State 128
-
-   62 expresion: expresion . OP_BINARY_LIST expresion
-   63          | expresion . OP_BINARY_OR expresion
-   64          | expresion . OP_BINARY_AND expresion
-   65          | expresion . OP_BINARY_EQ expresion
-   66          | expresion . OP_BINARY_REL expresion
-   67          | expresion . OP_BINARY_MUL expresion
-   68          | expresion . PLUS_MINUS expresion
-   70          | expresion . OP_TERNARY_2 expresion
-   71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
-   79 Lista_expresiones: expresion .
-
-    OP_BINARY_LIST  shift, and go to state 96
-    OP_TERNARY_1    shift, and go to state 97
-    OP_TERNARY_2    shift, and go to state 98
-    OP_BINARY_OR    shift, and go to state 100
-    OP_BINARY_AND   shift, and go to state 101
-    OP_BINARY_EQ    shift, and go to state 102
-    OP_BINARY_REL   shift, and go to state 103
-    PLUS_MINUS      shift, and go to state 104
-    OP_BINARY_MUL   shift, and go to state 105
-
-    $default  reduce using rule 79 (Lista_expresiones)
-
-
-State 129
-
-   76 funcion: IDENTIFIER PARENT_START Lista_expresiones . PARENT_END
-   78 Lista_expresiones: Lista_expresiones . COMMA expresion
-
-    PARENT_END  shift, and go to state 157
-    COMMA       shift, and go to state 158
-
-
-State 130
+State 132
 
    44 Sentencia_asignacion: IDENTIFIER ASSIGN expresion . COLON
    62 expresion: expresion . OP_BINARY_LIST expresion
@@ -1951,26 +1996,26 @@ State 130
    70          | expresion . OP_TERNARY_2 expresion
    71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
 
-    COLON           shift, and go to state 159
-    OP_BINARY_LIST  shift, and go to state 96
-    OP_TERNARY_1    shift, and go to state 97
-    OP_TERNARY_2    shift, and go to state 98
-    OP_BINARY_OR    shift, and go to state 100
-    OP_BINARY_AND   shift, and go to state 101
-    OP_BINARY_EQ    shift, and go to state 102
-    OP_BINARY_REL   shift, and go to state 103
-    PLUS_MINUS      shift, and go to state 104
-    OP_BINARY_MUL   shift, and go to state 105
+    COLON           shift, and go to state 161
+    OP_BINARY_LIST  shift, and go to state 97
+    OP_TERNARY_1    shift, and go to state 98
+    OP_TERNARY_2    shift, and go to state 99
+    OP_BINARY_OR    shift, and go to state 101
+    OP_BINARY_AND   shift, and go to state 102
+    OP_BINARY_EQ    shift, and go to state 103
+    OP_BINARY_REL   shift, and go to state 104
+    PLUS_MINUS      shift, and go to state 105
+    OP_BINARY_MUL   shift, and go to state 106
 
 
-State 131
+State 133
 
    59 Sentencia_lista: OP_DOLLAR expresion COLON .
 
     $default  reduce using rule 59 (Sentencia_lista)
 
 
-State 132
+State 134
 
    62 expresion: expresion . OP_BINARY_LIST expresion
    62          | expresion OP_BINARY_LIST expresion .
@@ -1983,19 +2028,19 @@ State 132
    70          | expresion . OP_TERNARY_2 expresion
    71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
 
-    OP_TERNARY_1   shift, and go to state 97
-    OP_TERNARY_2   shift, and go to state 98
-    OP_BINARY_OR   shift, and go to state 100
-    OP_BINARY_AND  shift, and go to state 101
-    OP_BINARY_EQ   shift, and go to state 102
-    OP_BINARY_REL  shift, and go to state 103
-    PLUS_MINUS     shift, and go to state 104
-    OP_BINARY_MUL  shift, and go to state 105
+    OP_TERNARY_1   shift, and go to state 98
+    OP_TERNARY_2   shift, and go to state 99
+    OP_BINARY_OR   shift, and go to state 101
+    OP_BINARY_AND  shift, and go to state 102
+    OP_BINARY_EQ   shift, and go to state 103
+    OP_BINARY_REL  shift, and go to state 104
+    PLUS_MINUS     shift, and go to state 105
+    OP_BINARY_MUL  shift, and go to state 106
 
     $default  reduce using rule 62 (expresion)
 
 
-State 133
+State 135
 
    62 expresion: expresion . OP_BINARY_LIST expresion
    63          | expresion . OP_BINARY_OR expresion
@@ -2008,18 +2053,18 @@ State 133
    71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
    71          | expresion OP_TERNARY_1 expresion . OP_TERNARY_2 expresion
 
-    OP_BINARY_LIST  shift, and go to state 96
-    OP_TERNARY_1    shift, and go to state 97
-    OP_TERNARY_2    shift, and go to state 160
-    OP_BINARY_OR    shift, and go to state 100
-    OP_BINARY_AND   shift, and go to state 101
-    OP_BINARY_EQ    shift, and go to state 102
-    OP_BINARY_REL   shift, and go to state 103
-    PLUS_MINUS      shift, and go to state 104
-    OP_BINARY_MUL   shift, and go to state 105
+    OP_BINARY_LIST  shift, and go to state 97
+    OP_TERNARY_1    shift, and go to state 98
+    OP_TERNARY_2    shift, and go to state 162
+    OP_BINARY_OR    shift, and go to state 101
+    OP_BINARY_AND   shift, and go to state 102
+    OP_BINARY_EQ    shift, and go to state 103
+    OP_BINARY_REL   shift, and go to state 104
+    PLUS_MINUS      shift, and go to state 105
+    OP_BINARY_MUL   shift, and go to state 106
 
 
-State 134
+State 136
 
    62 expresion: expresion . OP_BINARY_LIST expresion
    63          | expresion . OP_BINARY_OR expresion
@@ -2032,24 +2077,24 @@ State 134
    70          | expresion OP_TERNARY_2 expresion .
    71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
 
-    OP_BINARY_OR   shift, and go to state 100
-    OP_BINARY_AND  shift, and go to state 101
-    OP_BINARY_EQ   shift, and go to state 102
-    OP_BINARY_REL  shift, and go to state 103
-    PLUS_MINUS     shift, and go to state 104
-    OP_BINARY_MUL  shift, and go to state 105
+    OP_BINARY_OR   shift, and go to state 101
+    OP_BINARY_AND  shift, and go to state 102
+    OP_BINARY_EQ   shift, and go to state 103
+    OP_BINARY_REL  shift, and go to state 104
+    PLUS_MINUS     shift, and go to state 105
+    OP_BINARY_MUL  shift, and go to state 106
 
     $default  reduce using rule 70 (expresion)
 
 
-State 135
+State 137
 
    58 Sentencia_lista: expresion OP_LIST COLON .
 
     $default  reduce using rule 58 (Sentencia_lista)
 
 
-State 136
+State 138
 
    62 expresion: expresion . OP_BINARY_LIST expresion
    63          | expresion . OP_BINARY_OR expresion
@@ -2062,16 +2107,16 @@ State 136
    70          | expresion . OP_TERNARY_2 expresion
    71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
 
-    OP_BINARY_AND  shift, and go to state 101
-    OP_BINARY_EQ   shift, and go to state 102
-    OP_BINARY_REL  shift, and go to state 103
-    PLUS_MINUS     shift, and go to state 104
-    OP_BINARY_MUL  shift, and go to state 105
+    OP_BINARY_AND  shift, and go to state 102
+    OP_BINARY_EQ   shift, and go to state 103
+    OP_BINARY_REL  shift, and go to state 104
+    PLUS_MINUS     shift, and go to state 105
+    OP_BINARY_MUL  shift, and go to state 106
 
     $default  reduce using rule 63 (expresion)
 
 
-State 137
+State 139
 
    62 expresion: expresion . OP_BINARY_LIST expresion
    63          | expresion . OP_BINARY_OR expresion
@@ -2084,15 +2129,15 @@ State 137
    70          | expresion . OP_TERNARY_2 expresion
    71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
 
-    OP_BINARY_EQ   shift, and go to state 102
-    OP_BINARY_REL  shift, and go to state 103
-    PLUS_MINUS     shift, and go to state 104
-    OP_BINARY_MUL  shift, and go to state 105
+    OP_BINARY_EQ   shift, and go to state 103
+    OP_BINARY_REL  shift, and go to state 104
+    PLUS_MINUS     shift, and go to state 105
+    OP_BINARY_MUL  shift, and go to state 106
 
     $default  reduce using rule 64 (expresion)
 
 
-State 138
+State 140
 
    62 expresion: expresion . OP_BINARY_LIST expresion
    63          | expresion . OP_BINARY_OR expresion
@@ -2105,14 +2150,14 @@ State 138
    70          | expresion . OP_TERNARY_2 expresion
    71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
 
-    OP_BINARY_REL  shift, and go to state 103
-    PLUS_MINUS     shift, and go to state 104
-    OP_BINARY_MUL  shift, and go to state 105
+    OP_BINARY_REL  shift, and go to state 104
+    PLUS_MINUS     shift, and go to state 105
+    OP_BINARY_MUL  shift, and go to state 106
 
     $default  reduce using rule 65 (expresion)
 
 
-State 139
+State 141
 
    62 expresion: expresion . OP_BINARY_LIST expresion
    63          | expresion . OP_BINARY_OR expresion
@@ -2125,13 +2170,13 @@ State 139
    70          | expresion . OP_TERNARY_2 expresion
    71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
 
-    PLUS_MINUS     shift, and go to state 104
-    OP_BINARY_MUL  shift, and go to state 105
+    PLUS_MINUS     shift, and go to state 105
+    OP_BINARY_MUL  shift, and go to state 106
 
     $default  reduce using rule 66 (expresion)
 
 
-State 140
+State 142
 
    62 expresion: expresion . OP_BINARY_LIST expresion
    63          | expresion . OP_BINARY_OR expresion
@@ -2144,12 +2189,12 @@ State 140
    70          | expresion . OP_TERNARY_2 expresion
    71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
 
-    OP_BINARY_MUL  shift, and go to state 105
+    OP_BINARY_MUL  shift, and go to state 106
 
     $default  reduce using rule 68 (expresion)
 
 
-State 141
+State 143
 
    62 expresion: expresion . OP_BINARY_LIST expresion
    63          | expresion . OP_BINARY_OR expresion
@@ -2162,70 +2207,100 @@ State 141
    70          | expresion . OP_TERNARY_2 expresion
    71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
 
-    OP_BINARY_MUL  shift, and go to state 105
+    OP_BINARY_MUL  shift, and go to state 106
 
     $default  reduce using rule 67 (expresion)
 
 
-State 142
+State 144
+
+   78 argumentos_funcion: Lista_expresiones PARENT_END .
+
+    $default  reduce using rule 78 (argumentos_funcion)
+
+
+State 145
+
+   80 Lista_expresiones: Lista_expresiones COMMA . expresion
+
+    error          shift, and go to state 33
+    PARENT_START   shift, and go to state 34
+    BRACKET_START  shift, and go to state 35
+    CONST_INT      shift, and go to state 42
+    CONST_FLOAT    shift, and go to state 43
+    CONST_BOOL     shift, and go to state 44
+    CONST_CHAR     shift, and go to state 45
+    IDENTIFIER     shift, and go to state 73
+    PLUS_MINUS     shift, and go to state 48
+    OP_UNARY       shift, and go to state 49
+
+    expresion         go to state 163
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
+
+
+State 146
 
    26 lista_variables: lista_variables COMMA IDENTIFIER .
 
     $default  reduce using rule 26 (lista_variables)
 
 
-State 143
+State 147
 
    30 lista_de_parametros: tipo . IDENTIFIER
 
-    IDENTIFIER  shift, and go to state 161
+    IDENTIFIER  shift, and go to state 164
 
 
-State 144
+State 148
 
    13 Cabecera_subprograma: tipo IDENTIFIER $@3 PARENT_START lista_de_parametros . PARENT_END
    29 lista_de_parametros: lista_de_parametros . COMMA tipo IDENTIFIER
 
-    PARENT_END  shift, and go to state 162
-    COMMA       shift, and go to state 163
+    PARENT_END  shift, and go to state 165
+    COMMA       shift, and go to state 166
 
 
-State 145
+State 149
 
    15 Cabecera_subprograma: tipo IDENTIFIER $@4 PARENT_START PARENT_END .
 
     $default  reduce using rule 15 (Cabecera_subprograma)
 
 
-State 146
-
-   90 constante_lista_int: constante_lista_int COMMA CONST_INT .
-
-    $default  reduce using rule 90 (constante_lista_int)
-
-
-State 147
-
-   92 constante_lista_float: constante_lista_float COMMA CONST_FLOAT .
-
-    $default  reduce using rule 92 (constante_lista_float)
-
-
-State 148
-
-   94 constante_lista_bool: constante_lista_bool COMMA CONST_BOOL .
-
-    $default  reduce using rule 94 (constante_lista_bool)
-
-
-State 149
-
-   96 constante_lista_char: constante_lista_char COMMA CONST_CHAR .
-
-    $default  reduce using rule 96 (constante_lista_char)
-
-
 State 150
+
+   92 constante_lista_int: constante_lista_int COMMA CONST_INT .
+
+    $default  reduce using rule 92 (constante_lista_int)
+
+
+State 151
+
+   94 constante_lista_float: constante_lista_float COMMA CONST_FLOAT .
+
+    $default  reduce using rule 94 (constante_lista_float)
+
+
+State 152
+
+   96 constante_lista_bool: constante_lista_bool COMMA CONST_BOOL .
+
+    $default  reduce using rule 96 (constante_lista_bool)
+
+
+State 153
+
+   98 constante_lista_char: constante_lista_char COMMA CONST_CHAR .
+
+    $default  reduce using rule 98 (constante_lista_char)
+
+
+State 154
 
    45 Sentencia_if: IF PARENT_START expresion PARENT_END . Sentencia
    46             | IF PARENT_START expresion PARENT_END . Sentencia ELSE Sentencia
@@ -2250,7 +2325,7 @@ State 150
     OP_UNARY       shift, and go to state 49
 
     bloque                go to state 50
-    Sentencia             go to state 164
+    Sentencia             go to state 167
     Sentencia_asignacion  go to state 52
     Sentencia_if          go to state 53
     Sentencia_while       go to state 54
@@ -2261,12 +2336,13 @@ State 150
     Sentencia_lista       go to state 59
     expresion             go to state 60
     funcion               go to state 61
-    constante             go to state 62
-    constante_base        go to state 63
-    constante_lista       go to state 64
+    cabecera_funcion      go to state 62
+    constante             go to state 63
+    constante_base        go to state 64
+    constante_lista       go to state 65
 
 
-State 151
+State 155
 
    47 Sentencia_while: WHILE PARENT_START expresion PARENT_END . Sentencia
 
@@ -2290,7 +2366,7 @@ State 151
     OP_UNARY       shift, and go to state 49
 
     bloque                go to state 50
-    Sentencia             go to state 165
+    Sentencia             go to state 168
     Sentencia_asignacion  go to state 52
     Sentencia_if          go to state 53
     Sentencia_while       go to state 54
@@ -2301,12 +2377,13 @@ State 151
     Sentencia_lista       go to state 59
     expresion             go to state 60
     funcion               go to state 61
-    constante             go to state 62
-    constante_base        go to state 63
-    constante_lista       go to state 64
+    cabecera_funcion      go to state 62
+    constante             go to state 63
+    constante_base        go to state 64
+    constante_lista       go to state 65
 
 
-State 152
+State 156
 
    48 Sentencia_for: FOR IDENTIFIER ASSIGN expresion . TO expresion Sentencia
    62 expresion: expresion . OP_BINARY_LIST expresion
@@ -2319,35 +2396,35 @@ State 152
    70          | expresion . OP_TERNARY_2 expresion
    71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
 
-    TO              shift, and go to state 166
-    OP_BINARY_LIST  shift, and go to state 96
-    OP_TERNARY_1    shift, and go to state 97
-    OP_TERNARY_2    shift, and go to state 98
-    OP_BINARY_OR    shift, and go to state 100
-    OP_BINARY_AND   shift, and go to state 101
-    OP_BINARY_EQ    shift, and go to state 102
-    OP_BINARY_REL   shift, and go to state 103
-    PLUS_MINUS      shift, and go to state 104
-    OP_BINARY_MUL   shift, and go to state 105
+    TO              shift, and go to state 169
+    OP_BINARY_LIST  shift, and go to state 97
+    OP_TERNARY_1    shift, and go to state 98
+    OP_TERNARY_2    shift, and go to state 99
+    OP_BINARY_OR    shift, and go to state 101
+    OP_BINARY_AND   shift, and go to state 102
+    OP_BINARY_EQ    shift, and go to state 103
+    OP_BINARY_REL   shift, and go to state 104
+    PLUS_MINUS      shift, and go to state 105
+    OP_BINARY_MUL   shift, and go to state 106
 
 
-State 153
+State 157
 
    26 lista_variables: lista_variables . COMMA IDENTIFIER
    50 Sentencia_entrada: INPUT STRING COMMA lista_variables . COLON
 
-    COLON  shift, and go to state 167
-    COMMA  shift, and go to state 107
+    COLON  shift, and go to state 170
+    COMMA  shift, and go to state 112
 
 
-State 154
+State 158
 
    53 Lista_expresiones_o_cadena: Lista_expresiones_o_cadena COMMA STRING .
 
     $default  reduce using rule 53 (Lista_expresiones_o_cadena)
 
 
-State 155
+State 159
 
    52 Lista_expresiones_o_cadena: Lista_expresiones_o_cadena COMMA expresion .
    62 expresion: expresion . OP_BINARY_LIST expresion
@@ -2360,63 +2437,34 @@ State 155
    70          | expresion . OP_TERNARY_2 expresion
    71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
 
-    OP_BINARY_LIST  shift, and go to state 96
-    OP_TERNARY_1    shift, and go to state 97
-    OP_TERNARY_2    shift, and go to state 98
-    OP_BINARY_OR    shift, and go to state 100
-    OP_BINARY_AND   shift, and go to state 101
-    OP_BINARY_EQ    shift, and go to state 102
-    OP_BINARY_REL   shift, and go to state 103
-    PLUS_MINUS      shift, and go to state 104
-    OP_BINARY_MUL   shift, and go to state 105
+    OP_BINARY_LIST  shift, and go to state 97
+    OP_TERNARY_1    shift, and go to state 98
+    OP_TERNARY_2    shift, and go to state 99
+    OP_BINARY_OR    shift, and go to state 101
+    OP_BINARY_AND   shift, and go to state 102
+    OP_BINARY_EQ    shift, and go to state 103
+    OP_BINARY_REL   shift, and go to state 104
+    PLUS_MINUS      shift, and go to state 105
+    OP_BINARY_MUL   shift, and go to state 106
 
     $default  reduce using rule 52 (Lista_expresiones_o_cadena)
 
 
-State 156
+State 160
 
    57 Sentencia_return: RETURN expresion @9 COLON .
 
     $default  reduce using rule 57 (Sentencia_return)
 
 
-State 157
-
-   76 funcion: IDENTIFIER PARENT_START Lista_expresiones PARENT_END .
-
-    $default  reduce using rule 76 (funcion)
-
-
-State 158
-
-   78 Lista_expresiones: Lista_expresiones COMMA . expresion
-
-    error          shift, and go to state 33
-    PARENT_START   shift, and go to state 34
-    BRACKET_START  shift, and go to state 35
-    CONST_INT      shift, and go to state 42
-    CONST_FLOAT    shift, and go to state 43
-    CONST_BOOL     shift, and go to state 44
-    CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
-    PLUS_MINUS     shift, and go to state 48
-    OP_UNARY       shift, and go to state 49
-
-    expresion        go to state 168
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
-
-
-State 159
+State 161
 
    44 Sentencia_asignacion: IDENTIFIER ASSIGN expresion COLON .
 
     $default  reduce using rule 44 (Sentencia_asignacion)
 
 
-State 160
+State 162
 
    70 expresion: expresion OP_TERNARY_2 . expresion
    71          | expresion OP_TERNARY_1 expresion OP_TERNARY_2 . expresion
@@ -2428,89 +2476,19 @@ State 160
     CONST_FLOAT    shift, and go to state 43
     CONST_BOOL     shift, and go to state 44
     CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
+    IDENTIFIER     shift, and go to state 73
     PLUS_MINUS     shift, and go to state 48
     OP_UNARY       shift, and go to state 49
 
-    expresion        go to state 169
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
-
-
-State 161
-
-   30 lista_de_parametros: tipo IDENTIFIER .
-
-    $default  reduce using rule 30 (lista_de_parametros)
-
-
-State 162
-
-   13 Cabecera_subprograma: tipo IDENTIFIER $@3 PARENT_START lista_de_parametros PARENT_END .
-
-    $default  reduce using rule 13 (Cabecera_subprograma)
+    expresion         go to state 171
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
 
 
 State 163
-
-   29 lista_de_parametros: lista_de_parametros COMMA . tipo IDENTIFIER
-
-    TYPE     shift, and go to state 14
-    LIST_OF  shift, and go to state 15
-
-    tipo  go to state 170
-
-
-State 164
-
-   45 Sentencia_if: IF PARENT_START expresion PARENT_END Sentencia .
-   46             | IF PARENT_START expresion PARENT_END Sentencia . ELSE Sentencia
-
-    ELSE  shift, and go to state 171
-
-    ELSE      [reduce using rule 45 (Sentencia_if)]
-    $default  reduce using rule 45 (Sentencia_if)
-
-
-State 165
-
-   47 Sentencia_while: WHILE PARENT_START expresion PARENT_END Sentencia .
-
-    $default  reduce using rule 47 (Sentencia_while)
-
-
-State 166
-
-   48 Sentencia_for: FOR IDENTIFIER ASSIGN expresion TO . expresion Sentencia
-
-    error          shift, and go to state 33
-    PARENT_START   shift, and go to state 34
-    BRACKET_START  shift, and go to state 35
-    CONST_INT      shift, and go to state 42
-    CONST_FLOAT    shift, and go to state 43
-    CONST_BOOL     shift, and go to state 44
-    CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
-    PLUS_MINUS     shift, and go to state 48
-    OP_UNARY       shift, and go to state 49
-
-    expresion        go to state 172
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
-
-
-State 167
-
-   50 Sentencia_entrada: INPUT STRING COMMA lista_variables COLON .
-
-    $default  reduce using rule 50 (Sentencia_entrada)
-
-
-State 168
 
    62 expresion: expresion . OP_BINARY_LIST expresion
    63          | expresion . OP_BINARY_OR expresion
@@ -2521,22 +2499,94 @@ State 168
    68          | expresion . PLUS_MINUS expresion
    70          | expresion . OP_TERNARY_2 expresion
    71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
-   78 Lista_expresiones: Lista_expresiones COMMA expresion .
+   80 Lista_expresiones: Lista_expresiones COMMA expresion .
 
-    OP_BINARY_LIST  shift, and go to state 96
-    OP_TERNARY_1    shift, and go to state 97
-    OP_TERNARY_2    shift, and go to state 98
-    OP_BINARY_OR    shift, and go to state 100
-    OP_BINARY_AND   shift, and go to state 101
-    OP_BINARY_EQ    shift, and go to state 102
-    OP_BINARY_REL   shift, and go to state 103
-    PLUS_MINUS      shift, and go to state 104
-    OP_BINARY_MUL   shift, and go to state 105
+    OP_BINARY_LIST  shift, and go to state 97
+    OP_TERNARY_1    shift, and go to state 98
+    OP_TERNARY_2    shift, and go to state 99
+    OP_BINARY_OR    shift, and go to state 101
+    OP_BINARY_AND   shift, and go to state 102
+    OP_BINARY_EQ    shift, and go to state 103
+    OP_BINARY_REL   shift, and go to state 104
+    PLUS_MINUS      shift, and go to state 105
+    OP_BINARY_MUL   shift, and go to state 106
 
-    $default  reduce using rule 78 (Lista_expresiones)
+    $default  reduce using rule 80 (Lista_expresiones)
+
+
+State 164
+
+   30 lista_de_parametros: tipo IDENTIFIER .
+
+    $default  reduce using rule 30 (lista_de_parametros)
+
+
+State 165
+
+   13 Cabecera_subprograma: tipo IDENTIFIER $@3 PARENT_START lista_de_parametros PARENT_END .
+
+    $default  reduce using rule 13 (Cabecera_subprograma)
+
+
+State 166
+
+   29 lista_de_parametros: lista_de_parametros COMMA . tipo IDENTIFIER
+
+    TYPE     shift, and go to state 14
+    LIST_OF  shift, and go to state 15
+
+    tipo  go to state 172
+
+
+State 167
+
+   45 Sentencia_if: IF PARENT_START expresion PARENT_END Sentencia .
+   46             | IF PARENT_START expresion PARENT_END Sentencia . ELSE Sentencia
+
+    ELSE  shift, and go to state 173
+
+    ELSE      [reduce using rule 45 (Sentencia_if)]
+    $default  reduce using rule 45 (Sentencia_if)
+
+
+State 168
+
+   47 Sentencia_while: WHILE PARENT_START expresion PARENT_END Sentencia .
+
+    $default  reduce using rule 47 (Sentencia_while)
 
 
 State 169
+
+   48 Sentencia_for: FOR IDENTIFIER ASSIGN expresion TO . expresion Sentencia
+
+    error          shift, and go to state 33
+    PARENT_START   shift, and go to state 34
+    BRACKET_START  shift, and go to state 35
+    CONST_INT      shift, and go to state 42
+    CONST_FLOAT    shift, and go to state 43
+    CONST_BOOL     shift, and go to state 44
+    CONST_CHAR     shift, and go to state 45
+    IDENTIFIER     shift, and go to state 73
+    PLUS_MINUS     shift, and go to state 48
+    OP_UNARY       shift, and go to state 49
+
+    expresion         go to state 174
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
+
+
+State 170
+
+   50 Sentencia_entrada: INPUT STRING COMMA lista_variables COLON .
+
+    $default  reduce using rule 50 (Sentencia_entrada)
+
+
+State 171
 
    62 expresion: expresion . OP_BINARY_LIST expresion
    63          | expresion . OP_BINARY_OR expresion
@@ -2550,12 +2600,12 @@ State 169
    71          | expresion . OP_TERNARY_1 expresion OP_TERNARY_2 expresion
    71          | expresion OP_TERNARY_1 expresion OP_TERNARY_2 expresion .
 
-    OP_BINARY_OR   shift, and go to state 100
-    OP_BINARY_AND  shift, and go to state 101
-    OP_BINARY_EQ   shift, and go to state 102
-    OP_BINARY_REL  shift, and go to state 103
-    PLUS_MINUS     shift, and go to state 104
-    OP_BINARY_MUL  shift, and go to state 105
+    OP_BINARY_OR   shift, and go to state 101
+    OP_BINARY_AND  shift, and go to state 102
+    OP_BINARY_EQ   shift, and go to state 103
+    OP_BINARY_REL  shift, and go to state 104
+    PLUS_MINUS     shift, and go to state 105
+    OP_BINARY_MUL  shift, and go to state 106
 
     OP_BINARY_LIST  reduce using rule 70 (expresion)
     OP_BINARY_LIST  [reduce using rule 71 (expresion)]
@@ -2566,14 +2616,14 @@ State 169
     $default        reduce using rule 71 (expresion)
 
 
-State 170
+State 172
 
    29 lista_de_parametros: lista_de_parametros COMMA tipo . IDENTIFIER
 
-    IDENTIFIER  shift, and go to state 173
+    IDENTIFIER  shift, and go to state 175
 
 
-State 171
+State 173
 
    46 Sentencia_if: IF PARENT_START expresion PARENT_END Sentencia ELSE . Sentencia
 
@@ -2597,7 +2647,7 @@ State 171
     OP_UNARY       shift, and go to state 49
 
     bloque                go to state 50
-    Sentencia             go to state 174
+    Sentencia             go to state 176
     Sentencia_asignacion  go to state 52
     Sentencia_if          go to state 53
     Sentencia_while       go to state 54
@@ -2608,12 +2658,13 @@ State 171
     Sentencia_lista       go to state 59
     expresion             go to state 60
     funcion               go to state 61
-    constante             go to state 62
-    constante_base        go to state 63
-    constante_lista       go to state 64
+    cabecera_funcion      go to state 62
+    constante             go to state 63
+    constante_base        go to state 64
+    constante_lista       go to state 65
 
 
-State 172
+State 174
 
    48 Sentencia_for: FOR IDENTIFIER ASSIGN expresion TO expresion . Sentencia
    62 expresion: expresion . OP_BINARY_LIST expresion
@@ -2641,20 +2692,20 @@ State 172
     CONST_BOOL      shift, and go to state 44
     CONST_CHAR      shift, and go to state 45
     IDENTIFIER      shift, and go to state 46
-    OP_BINARY_LIST  shift, and go to state 96
-    OP_TERNARY_1    shift, and go to state 97
-    OP_TERNARY_2    shift, and go to state 98
+    OP_BINARY_LIST  shift, and go to state 97
+    OP_TERNARY_1    shift, and go to state 98
+    OP_TERNARY_2    shift, and go to state 99
     OP_DOLLAR       shift, and go to state 47
-    OP_BINARY_OR    shift, and go to state 100
-    OP_BINARY_AND   shift, and go to state 101
-    OP_BINARY_EQ    shift, and go to state 102
-    OP_BINARY_REL   shift, and go to state 103
-    PLUS_MINUS      shift, and go to state 175
-    OP_BINARY_MUL   shift, and go to state 105
+    OP_BINARY_OR    shift, and go to state 101
+    OP_BINARY_AND   shift, and go to state 102
+    OP_BINARY_EQ    shift, and go to state 103
+    OP_BINARY_REL   shift, and go to state 104
+    PLUS_MINUS      shift, and go to state 177
+    OP_BINARY_MUL   shift, and go to state 106
     OP_UNARY        shift, and go to state 49
 
     bloque                go to state 50
-    Sentencia             go to state 176
+    Sentencia             go to state 178
     Sentencia_asignacion  go to state 52
     Sentencia_if          go to state 53
     Sentencia_while       go to state 54
@@ -2665,26 +2716,27 @@ State 172
     Sentencia_lista       go to state 59
     expresion             go to state 60
     funcion               go to state 61
-    constante             go to state 62
-    constante_base        go to state 63
-    constante_lista       go to state 64
+    cabecera_funcion      go to state 62
+    constante             go to state 63
+    constante_base        go to state 64
+    constante_lista       go to state 65
 
 
-State 173
+State 175
 
    29 lista_de_parametros: lista_de_parametros COMMA tipo IDENTIFIER .
 
     $default  reduce using rule 29 (lista_de_parametros)
 
 
-State 174
+State 176
 
    46 Sentencia_if: IF PARENT_START expresion PARENT_END Sentencia ELSE Sentencia .
 
     $default  reduce using rule 46 (Sentencia_if)
 
 
-State 175
+State 177
 
    68 expresion: expresion PLUS_MINUS . expresion
    69          | PLUS_MINUS . expresion
@@ -2696,25 +2748,26 @@ State 175
     CONST_FLOAT    shift, and go to state 43
     CONST_BOOL     shift, and go to state 44
     CONST_CHAR     shift, and go to state 45
-    IDENTIFIER     shift, and go to state 72
+    IDENTIFIER     shift, and go to state 73
     PLUS_MINUS     shift, and go to state 48
     OP_UNARY       shift, and go to state 49
 
-    expresion        go to state 177
-    funcion          go to state 61
-    constante        go to state 62
-    constante_base   go to state 63
-    constante_lista  go to state 64
+    expresion         go to state 179
+    funcion           go to state 61
+    cabecera_funcion  go to state 62
+    constante         go to state 63
+    constante_base    go to state 64
+    constante_lista   go to state 65
 
 
-State 176
+State 178
 
    48 Sentencia_for: FOR IDENTIFIER ASSIGN expresion TO expresion Sentencia .
 
     $default  reduce using rule 48 (Sentencia_for)
 
 
-State 177
+State 179
 
    62 expresion: expresion . OP_BINARY_LIST expresion
    63          | expresion . OP_BINARY_OR expresion

@@ -40,29 +40,29 @@ float              [0-9]*\.[0-9]+
 "input"                             return INPUT;
 "output"                            return OUTPUT;
 "return"                            return RETURN;
-"#"                                 {yylval.attr = 0; return OP_UNARY;}
-"?"																	{yylval.attr = 1; return OP_UNARY;}
-"--"                                {yylval.attr = 0; return OP_BINARY_LIST;}
-"**"                                {yylval.attr = 1; return OP_BINARY_LIST;}
-"++"                                return OP_TERNARY_1;
-"!"                                 {yylval.attr = 2; return OP_UNARY;}
-"$"                                 return OP_DOLLAR;
-">>"                                {yylval.attr = 0; return OP_LIST;}
-"<<"                                {yylval.attr = 1; return OP_LIST;}
-"%"                                 {yylval.attr = 0; return OP_BINARY_MUL;}
-"*"                                 {yylval.attr = 1; return OP_BINARY_MUL;}
-"/"                                 {yylval.attr = 2; return OP_BINARY_MUL;}
-"+"                                 {yylval.attr = 0; return PLUS_MINUS;}
-"-"                                 {yylval.attr = 1; return PLUS_MINUS;}
-"<"                                 {yylval.attr = 0; return OP_BINARY_REL;}
-">"                                 {yylval.attr = 1; return OP_BINARY_REL;}
-"<="                                {yylval.attr = 2; return OP_BINARY_REL;}
-">="                                {yylval.attr = 3; return OP_BINARY_REL;}
-"=="                                {yylval.attr = 0; return OP_BINARY_EQ;}
-"!="                                {yylval.attr = 1; return OP_BINARY_EQ;}
-"&&"                                return OP_BINARY_AND;
-"||"                                return OP_BINARY_OR;
-"@"                                 return OP_TERNARY_2;
+"#"                                 {yylval.lex = strdup(yytext); yylval.attr = 0; return OP_UNARY;}
+"?"																	{yylval.lex = strdup(yytext); yylval.attr = 1; return OP_UNARY;}
+"--"                                {yylval.lex = strdup(yytext); yylval.attr = 0; return OP_BINARY_LIST;}
+"**"                                {yylval.lex = strdup(yytext); yylval.attr = 1; return OP_BINARY_LIST;}
+"++"                                {yylval.lex = strdup(yytext); return OP_TERNARY_1;}
+"!"                                 {yylval.lex = strdup(yytext); yylval.attr = 2; return OP_UNARY;}
+"$"                                 {yylval.lex = strdup(yytext); return OP_DOLLAR;}
+">>"                                {yylval.lex = strdup(yytext); yylval.attr = 0; return OP_LIST;}
+"<<"                                {yylval.lex = strdup(yytext); yylval.attr = 1; return OP_LIST;}
+"%"                                 {yylval.lex = strdup(yytext); yylval.attr = 0; return OP_BINARY_MUL;}
+"*"                                 {yylval.lex = strdup(yytext); yylval.attr = 1; return OP_BINARY_MUL;}
+"/"                                 {yylval.lex = strdup(yytext); yylval.attr = 2; return OP_BINARY_MUL;}
+"+"                                 {yylval.lex = strdup(yytext); yylval.attr = 0; return PLUS_MINUS;}
+"-"                                 {yylval.lex = strdup(yytext); yylval.attr = 1; return PLUS_MINUS;}
+"<"                                 {yylval.lex = strdup(yytext); yylval.attr = 0; return OP_BINARY_REL;}
+">"                                 {yylval.lex = strdup(yytext); yylval.attr = 1; return OP_BINARY_REL;}
+"<="                                {yylval.lex = strdup(yytext); yylval.attr = 2; return OP_BINARY_REL;}
+">="                                {yylval.lex = strdup(yytext); yylval.attr = 3; return OP_BINARY_REL;}
+"=="                                {yylval.lex = strdup(yytext); yylval.attr = 0; return OP_BINARY_EQ;}
+"!="                                {yylval.lex = strdup(yytext); yylval.attr = 1; return OP_BINARY_EQ;}
+"&&"                                {yylval.lex = strdup(yytext); return OP_BINARY_AND;}
+"||"                                {yylval.lex = strdup(yytext); return OP_BINARY_OR;}
+"@"                                 {yylval.lex = strdup(yytext); return OP_TERNARY_2;}
 [0-9]+                              {yylval.lex = strdup(yytext); yylval.attr = 0; return CONST_INT;}
 \+[0-9]+                            {yylval.lex = strdup(yytext); yylval.attr = 1; return CONST_INT;}
 \-[0-9]+                            {yylval.lex = strdup(yytext); yylval.attr = 2; return CONST_INT;}
@@ -73,7 +73,7 @@ float              [0-9]*\.[0-9]+
 "false"                             {yylval.lex = strdup(yytext); yylval.attr = 1; return CONST_BOOL;}
 \'[^\']\'                           {yylval.lex = strdup(yytext); yylval.attr = 6; return CONST_CHAR;}
 \"[^\"]*\"                          {yylval.lex = strdup(yytext); yylval.attr = 7; return STRING;}
-{identificador}                     {yylval.lex = strdup(yytext);return IDENTIFIER;} 
+{identificador}                     {yylval.lex = strdup(yytext); return IDENTIFIER;} 
 [ \t]                               {;}
 \n                                  {++line;}
 [\n\r]                              {;}
