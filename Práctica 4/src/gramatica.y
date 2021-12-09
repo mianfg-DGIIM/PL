@@ -16,51 +16,27 @@ Mensaje de error sintáctico con BISON:
 BISON ante un error sintactivo, visualiza mensajes de errores con indicaciones de los tokens
 que se esperaban en lugar de los que han producido el error
 */
-%error-verbose
-
+//%error-verbose
+%define parse.error verbose
 
 /*Declaramos el conjunto de reglas o produciones que definen nuestra gramática*/
 
-%token MAIN
-%token BLOCK_START
-%token BLOCK_END
-%token PARENT_START;
-%token PARENT_END;
-%token BRACKET_START;
-%token BRACKET_END;
-%token COLON;
-%token COMMA;
-%token BEGIN_LOCAL;
-%token END_LOCAL;
-%token TYPE;
-%token LIST_OF;
-%token ASSIGN;
-%token IF;
-%token ELSE;
-%token WHILE;
-%token FOR;
-%token TO;
-%token INPUT;
-%token OUTPUT;
-%token RETURN;
-%token CONST_INT;
-%token CONST_FLOAT;
-%token CONST_BOOL;
-%token CONST_CHAR;
-%token STRING;
-%token IDENTIFIER;
-%left OP_BINARY_LIST;
-%left OP_TERNARY_1;
-%left OP_TERNARY_2;
-%right OP_LIST OP_DOLLAR;
-
-%left OP_BINARY_OR;
-%left OP_BINARY_AND;
-%left OP_BINARY_EQ;
-%left OP_BINARY_REL;
-%left PLUS_MINUS;
-%right OP_BINARY_MUL;
-%right OP_UNARY;
+%token MAIN PARENT_END BLOCK_START BLOCK_END BRACKET_START BRACKET_END COLON COMMA ASSIGN IF ELSE WHILE RETURN FOR TO OUTPUT INPUT BEGIN_LOCAL END_LOCAL LIST_OF TYPE STRING
+%right AT
+%left OP_BINARY_OR
+%left OP_BINARY_AND
+%left OP_BINARY_EQ
+%left OP_BINARY_REL
+%left PLUS_MINUS
+%left OP_BINARY_MUL
+%right OP_UNARY_NEG
+%right OP_UNARY_COUNT
+%right OP_UNARY_QUEST
+%right MINUS_MINUS
+%right PLUS_PLUS
+%right DOLLAR OP_LIST
+%left CONST_INT CONST_FLOAT CONST_BOOL CONST_CHAR IDENTIFIER
+%right PARENT_START
 
 %%
 
@@ -70,111 +46,77 @@ Programa : MAIN bloque ;
 bloque : BLOCK_START { TS_AddMark(); }
          bloque_in
          BLOCK_END { TS_ClearBlock(); } ;
-bloque_in : Declar_de_variables_locales Declar_de_subprogs
-          | Declar_de_variables_locales Declar_de_subprogs Sentencias ;
+bloque_in : Declar_de_variables_locales Declar_de_subprogs Sentencias
+          | Declar_de_variables_locales Declar_de_subprogs ;
 Declar_de_subprogs : Declar_de_subprogs Declar_subprog
                    | ;
 Declar_subprog : Cabecera_subprograma { esFunc = 1; }
                  bloque { esFunc = 0; } ;
-tipo : TYPE { $$.type = $1.type; }
-     | LIST_OF TYPE { $$.type = getListType($2.type); }
-Cabecera_subprograma : tipo IDENTIFIER { setType($1); decParam = 1; TS_AddFunction($2); }
-                       PARENT_START
-                       lista_de_parametros
-                       PARENT_END { decParam = 0; $4.nDim = 0; }
-                     | tipo IDENTIFIER { setType($1); decParam = 1; TS_AddFunction($2); }
-                       PARENT_START PARENT_END { decParam = 0; $4.nDim = 0; }
-                     | error ;
 Declar_de_variables_locales : BEGIN_LOCAL { decVar = 1; } Variables_locales END_LOCAL { decVar = 0; }
                             | ;
 Variables_locales : Variables_locales Cuerpo_declar_variables 
                   | Cuerpo_declar_variables ;                  
 Cuerpo_declar_variables : tipo { setType($1); } lista_variables COLON
-                        | error
-                        | tipo error ;
-lista_variables : lista_variables COMMA IDENTIFIER { VarList_Id($3, &$$); }
-                | IDENTIFIER { VarList_Id($1, &$$); }
-                | error ;
-lista_de_parametros : lista_de_parametros COMMA tipo IDENTIFIER { $4.nDim=0; setType($3); TS_AddParam($4); }
-                    | tipo IDENTIFIER { $2.nDim=0; setType($1); TS_AddParam($2);} ;
+                        | error ;
+Cabecera_subprograma : tipo IDENTIFIER { setType($1); decParam = 1; TS_AddFunction($2); }
+                       PARENT_START
+                       lista_de_parametros
+                       PARENT_END { decParam = 0; $4.nDim = 0; /*WIP*/ } ;
+lista_de_parametros : lista_de_parametros COMMA parametro
+                    | parametro
+                    |
+                    | error ;
+parametro : tipo IDENTIFIER { /* WIP CHECK $2.nDim=0; */ setType($1); TS_AddParam($2); } ;
 Sentencias : Sentencias {decVar = 2; } Sentencia
            | { decVar = 2; } Sentencia ;
 Sentencia : bloque
           | Sentencia_asignacion
           | Sentencia_if
           | Sentencia_while
-          | Sentencia_for
           | Sentencia_entrada
           | Sentencia_salida
           | Sentencia_return
+          | Sentencia_for
           | Sentencia_lista ;
-Sentencia_asignacion : IDENTIFIER ASSIGN expresion COLON {
-                         //printf("Sentencia_asignacion (%d). Printing info.\n", line);
-                         //print_Attrs($1, "IDENTIFIER");
-                         //print_Attrs($3, "expresion");
-                         //printf("Result: TS_GetType(IDENTIFIER)=%d, expresion.type=%d\n", TS_GetType($1), $3.type);
-                         if (TS_GetType($1) != $3.type) {
-                           printf("[SEMANTIC ERROR @ line %d] In assignation: types are not equal\n", line);
-                         }
-                         if (!Check_EqualSize($1, $3)) {
-                           printf("[SEMANTIC ERROR @ line %d] In assignation: sizes are not equal\n", line); 
-                         }
-                       } ;
-Sentencia_if : IF PARENT_START expresion PARENT_END Sentencia {
-                 if ($3.type != BOOLEAN) {
-                   printf("[SEMANTIC ERROR @ line %d] Expression is not of type BOOLEAN\n", line);  
-                 }
-               }
-             | IF PARENT_START expresion PARENT_END Sentencia ELSE Sentencia {
-                 if($3.type != BOOLEAN) {
-                   printf("[SEMANTIC ERROR @ line %d] Expression is not of type BOOLEAN\n", line);    
-                 }
-               };
-Sentencia_while : WHILE PARENT_START expresion PARENT_END Sentencia {
-                    if ($3.type != BOOLEAN) {
-                      printf("[SEMANTIC ERROR @ line %d] Expression is not of type BOOLEAN\n", line);
-                    }
-                  };
-Sentencia_for : FOR IDENTIFIER ASSIGN expresion TO expresion Sentencia {
-                  if ($4.type != INT) {
-                    printf("[SEMANTIC ERROR @ line %d] Expression is not of type INT\n", line);
-                  }
-                  if ($6.type != INT) {
-                    printf("[SEMANTIC ERROR @ line %d] Expression is not of type INT\n", line);
-                  }
-                };
-Sentencia_entrada : INPUT lista_variables COLON
-                  | INPUT STRING COMMA lista_variables COLON ;
+Sentencia_asignacion : IDENTIFIER ASSIGN expresion COLON { Check_Assign($1, $3); } ;
+Sentencia_if : IF PARENT_START expresion PARENT_END Sentencia { Check_Boolean($3); }
+              | IF PARENT_START expresion PARENT_END Sentencia ELSE Sentencia { Check_Boolean($3); } ;
+Sentencia_while : WHILE PARENT_START expresion PARENT_END Sentencia { Check_Boolean($3); } ;
+Sentencia_entrada : INPUT STRING COMMA lista_variables COLON
+                  | INPUT lista_variables COLON ;
 Sentencia_salida : OUTPUT Lista_expresiones_o_cadena COLON ;
+Sentencia_return : RETURN expresion { TS_CheckReturn($2, &$$); } COLON ;
+Sentencia_for : FOR IDENTIFIER ASSIGN expresion TO expresion Sentencia { Check_Int($4); Check_Int($6); } ;
+Sentencia_lista : IDENTIFIER OP_LIST COLON { Check_ListSentence($1); }
+                | DOLLAR IDENTIFIER COLON { Check_ListSentence($2); } ;
+expresion : OP_UNARY_NEG expresion { Check_OpUnaryNeg($1, $2, &$$); }
+          | OP_UNARY_COUNT expresion { Check_OpUnaryCount($1, $2, &$$); }
+          | OP_UNARY_QUEST expresion { Check_OpUnaryQuest($1, $2, &$$); }
+          | PLUS_PLUS expresion { Check_IncrementDecrement($1, $2, &$$); }
+          | MINUS_MINUS expresion { Check_IncrementDecrement($1, $2, &$$); }
+          | expresion PLUS_MINUS expresion { Check_PlusMinusBinary($1, $2, $3, &$$); }
+          | PLUS_MINUS expresion %prec OP_UNARY_NEG { Check_PlusMinus($1, $2, &$$); }
+          | expresion OP_BINARY_MUL expresion { Check_OpBinaryMul($1, $2, $3, &$$); }
+          | expresion OP_BINARY_AND expresion { Check_OpBinaryAndOr($1, $2, $3, &$$); }
+          | expresion OP_BINARY_OR expresion { Check_OpBinaryAndOr($1, $2, $3, &$$); }
+          | expresion OP_BINARY_REL expresion  { Check_OpBinaryRel($1, $2, $3, &$$); }
+          | expresion OP_BINARY_EQ expresion { Check_OpBinaryEq($1, $2, $3, &$$); }
+          | expresion AT expresion { Check_At($1, $2, $3, &$$); }
+          | expresion MINUS_MINUS expresion { Check_MinusMinus($1, $2, $3, &$$); }
+          | IDENTIFIER { $$.type = TS_GetType($1); $$.nDim = TS_GetNDim($1); decVar = 0; }
+          | constante { $$.type = $1.type; $$.nDim = $1.nDim; }
+          | funcion { $$.type = $1.type; $$.nDim = $1.nDim; currentFunction = -1; }
+          | expresion PLUS_PLUS expresion AT expresion { Check_ListTernary($1, $2, $3, $4, $5, &$$); }
+          | PARENT_START expresion PARENT_END { $$.type = $2.type; $$.nDim = $2.nDim; }
+          | error ;
+funcion : cabecera_funcion argumentos_funcion { $$.attr = $2.attr; $$.type = $2.type, $$.nDim = $2.nDim; } ;
+cabecera_funcion : IDENTIFIER PARENT_START { Check_FunctionCall($1); } ;
+argumentos_funcion : Lista_expresiones PARENT_END { TS_FunctionCall(&$$); }
+                   | PARENT_END { TS_FunctionCall(&$$); } ;
 Lista_expresiones_o_cadena : Lista_expresiones_o_cadena COMMA expresion { nParams++; TS_CheckParam($1); }
                            | Lista_expresiones_o_cadena COMMA STRING { nParams++; TS_CheckParam($1); }
                            | expresion { nParams=1; TS_CheckParam($1); }
                            | STRING { nParams=1; TS_CheckParam($1); };
-Sentencia_return : RETURN expresion { TS_CheckReturn($2, &$$); } COLON ;
-Sentencia_lista : expresion OP_LIST COLON { Check_ListSentence($1); }
-                | OP_DOLLAR expresion COLON { Check_ListSentence($2); } ;
-expresion : PARENT_START expresion PARENT_END { $$.type = $2.type; $$.nDim = $2.nDim; }
-          | OP_UNARY expresion { Check_OpUnary($1, $2, &$$); }
-          | expresion OP_BINARY_LIST expresion { Check_OpBinaryList($1, $2, $3, &$$); }
-          | expresion OP_BINARY_OR expresion { Check_OpBinaryAndOr($1, $2, $3, &$$); }
-          | expresion OP_BINARY_AND expresion { Check_OpBinaryAndOr($1, $2, $3, &$$); }
-          | expresion OP_BINARY_EQ expresion { Check_OpBinaryEq($1, $2, $3, &$$); }
-          | expresion OP_BINARY_REL expresion  { Check_OpBinaryRel($1, $2, $3, &$$); }
-          | expresion OP_BINARY_MUL expresion { Check_OpBinaryMul($1, $2, $3, &$$); }
-          | expresion PLUS_MINUS expresion { Check_PlusMinusBinary($1, $2, $3, &$$); }
-          | PLUS_MINUS expresion { Check_PlusMinus($1, $2, &$$); } %prec OP_UNARY
-          | expresion OP_TERNARY_2 expresion { Check_At($1, $2, $3, &$$); }
-          | expresion OP_TERNARY_1 expresion OP_TERNARY_2 expresion { Check_ListTernary($1, $2, $3, $4, $5, &$$); }
-          | IDENTIFIER { $$.type = TS_GetType($1); decVar = 0; }
-          | constante { $$.type = $1.type; $$.nDim = $1.nDim; }
-          | funcion { $$.type = $1.type; $$.nDim = $1.nDim; currentFunction = -1; }
-          | error ;
-funcion : cabecera_funcion argumentos_funcion ;
-cabecera_funcion : IDENTIFIER PARENT_START { Check_FunctionCall($1); } ;
-argumentos_funcion : Lista_expresiones PARENT_END { TS_FunctionCall(&$$); }
-                   | PARENT_END { TS_FunctionCall(&$$); };
-Lista_expresiones : Lista_expresiones COMMA expresion { TS_CheckParam($3); }
-                  | expresion { /* WIP correct? -> */ checkParams = 0; TS_CheckParam($1); } ;
 constante : constante_base
           | constante_lista ;
 constante_base : CONST_INT { $$.type = INT; }
@@ -193,6 +135,13 @@ constante_lista_bool : constante_lista_bool COMMA CONST_BOOL
                      | CONST_BOOL ;
 constante_lista_char : constante_lista_char COMMA CONST_CHAR
                      | CONST_CHAR ;
+Lista_expresiones : Lista_expresiones COMMA expresion { TS_CheckParam($3); }
+                  | expresion { /* WIP correct? -> */ checkParams = 0; TS_CheckParam($1); } ;
+tipo : TYPE { $$.type = $1.type; }
+     | LIST_OF TYPE { $$.type = getListType($2.type); } ;
+lista_variables : lista_variables COMMA IDENTIFIER { VarList_Id($3, &$$); }
+                | IDENTIFIER { VarList_Id($1, &$$); }
+                | lista_variables error IDENTIFIER ;
 
 %%
 
@@ -203,5 +152,5 @@ constante_lista_char : constante_lista_char COMMA CONST_CHAR
 #endif
 
 void yyerror(const char *msg) {
-  fprintf(stderr, "[SYNTACTIC ERROR] Line %d: %s\n", yylineno, msg) ;
+  fprintf(stderr, "[SYNTACTIC ERROR @ line %d] %s\n", yylineno, msg) ;
 }

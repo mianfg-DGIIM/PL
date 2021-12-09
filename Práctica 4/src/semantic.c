@@ -1,4 +1,5 @@
 #include "semantic.h"
+#define DEBUG 0
 
 inTS     ts[MAX_STACK];
 long int TOS             = 0;
@@ -6,7 +7,7 @@ int      line            = 1;
 int      decVar          = 0;
 int      decParam        = 0;
 int      esFunc          = 0;
-tData    currentType     = NOT_ASSIGNED;
+tData    currentType     = NONE;
 int      nParams         = 0;
 int      checkParams     = 0;
 int      checkFunction   = 0;
@@ -30,8 +31,8 @@ tData getListType(tData type) {
 
 const char* tDataToString(tData type) {
   switch (type) {
-    case NOT_ASSIGNED:
-      return "NOT ASSIGNED";
+    case NONE:
+      return "NONE";
     case INT:
       return "INT";
     case FLOAT:
@@ -49,9 +50,10 @@ const char* tDataToString(tData type) {
     case LIST_BOOLEAN:
       return "LIST OF BOOLEAN";
     default:
-      return "";
+      return "NONE";
   }
 }
+
 
 void setType(attrs value) {
   currentType = value.type;
@@ -72,7 +74,7 @@ tData listToType(tData listType) {
     case LIST_BOOLEAN:
       return BOOLEAN;
     default:
-      return NOT_ASSIGNED;
+      return NONE;
   }
 }
 
@@ -262,7 +264,7 @@ void TS_AddMark() {
 
   inInitScope.entry   = MARK;
   inInitScope.lex     = "{";
-  inInitScope.type    = NOT_ASSIGNED;
+  inInitScope.type    = NONE;
   inInitScope.nParams = 0;
   inInitScope.nDim    = 0;
 
@@ -368,7 +370,7 @@ void TS_GetById(attrs id, attrs *res) {
 
 int TS_GetType(attrs id) {
   int index = TS_FindById(id);
-  if(index == -1) {   // No es ninguna variable de la TS
+  if (index == -1) {   // No es ninguna variable de la TS
     //if (TS[index].entry != FUNCTION)
     printf("{375}[SEMANTIC ERROR @ line %d] Search error. Id not found: %s\n", line, id.lex);
     return -1;
@@ -377,12 +379,24 @@ int TS_GetType(attrs id) {
   }
 }
 
+int TS_GetNDim(attrs id) {
+  int index = TS_FindById(id);
+  if (index != -1)
+    return ts[index].nDim;
+  else
+    return 0;
+}
+
 void TS_FunctionCall(attrs *res) {
+  //printf("CF:%d\n", currentFunction);
   //print_TS();
   if (currentFunction != -1) {
     if (checkParams != ts[currentFunction].nParams) {
       printf("{386}[SEMANTIC ERROR @ line %d] Args error. Number of params not valid. Expected %d, but got %d\n",
         line, ts[currentFunction].nParams, checkParams);
+      res->lex  = strdup(ts[currentFunction].lex);
+      res->type = NONE;
+      res->nDim = 0;
     } else {
       res->lex  = strdup(ts[currentFunction].lex);
       res->type = ts[currentFunction].type;
@@ -395,7 +409,7 @@ void TS_CheckParam(attrs param) {
   checkParams += 1;
   int formalParam = currentFunction + checkParams;
 
-  if (param.type != ts[formalParam].type) {
+  if (param.type != ts[formalParam].type && ts[formalParam].type > 0) {
     printf("{403}[SEMANTIC ERROR @ line %d] Args error. Param type not valid. Expected %s, but got %s\n",
       line, tDataToString(ts[formalParam].type), tDataToString(param.type));
     return;
@@ -415,7 +429,7 @@ void print_TS() {
     if (ts[j].entry == 2) { e = "VAR"; }
     if (ts[j].entry == 3) { e = "PARAM"; }
 
-    if (ts[j].type == 0) { t = "NOT_ASSIGNED"; }
+    if (ts[j].type == 0) { t = "NONE"; }
     if (ts[j].type == 1) { t = "INT"; }
     if (ts[j].type == 2) { t = "FLOAT"; }
     if (ts[j].type == 3) { t = "CHAR"; }
@@ -442,7 +456,7 @@ void print_TS() {
 void print_Attrs(attrs e, char *msg) {
   char *t;
 
-    if (e.type == 0) { t = "NOT_ASSIGNED"; }
+    if (e.type == 0) { t = "NONE"; }
     if (e.type == 1) { t = "INT"; }
     if (e.type == 2) { t = "FLOAT"; }
     if (e.type == 3) { t = "CHAR"; }
@@ -460,67 +474,80 @@ void print_Attrs(attrs e, char *msg) {
   printf("------------------------------\n");
 }
 
-
 int Check_EqualSize(attrs e1, attrs e2) {
   return e1.nDim == e2.nDim;
 }
 
-void Check_ListSentence(attrs expr) {
-  if (!isList(expr))
-    printf("{474}[SEMANTIC ERROR @ line %d] Expression is not of type LIST, but type %s\n", line, tDataToString(expr.type));
+void Check_Assign(attrs e1, attrs e2) {
+  int type = TS_GetType(e1);
+  if (type != e2.type && e2.type != NONE && type > 0)
+    printf("{466}[SEMANTIC ERROR @ line %d] Assigning expression of type %s to %s, of type %s\n", line, tDataToString(e2.type), e1.lex, tDataToString(TS_GetType(e1)));
+  /* WIP unnecessary -> if (!Check_EqualSize(e1, e2))
+    printf("{468}[SEMANTIC ERROR @ line %d] Expression and %s are not the same size\n", line, e2.lex); */
 }
 
-void Check_OpUnary(attrs op, attrs expr, attrs *res) {
-  switch (op.attr) {
-    case 0: // #
-      if (!isList(expr)) {
-        printf("{481}[SEMANTIC ERROR @ line %d] Unary operator # expects expression of type #[LIST], but got type #[%s]\n",
-          line, tDataToString(expr.type));
-        return ;
-      }
-      res->type = INT;
-      res->nDim = 0;
-      break;
-    case 1: // ?
-      if (!isList(expr)) {
-        printf("{490}[SEMANTIC ERROR @ line %d] Unary operator ? expects expression of type ?[LIST], but got type ?[%s]\n",
-          line, tDataToString(expr.type));
-        return ;
-      }
-      res->type = listToType(expr.type);
-      res->nDim = 0;
-      break;
-    case 2: // !
-      if (expr.type != BOOLEAN) {
-        printf("{499}[SEMANTIC ERROR @ line %d] Unary operator ! expects expression of type ![BOOLEAN], but got type ![%s]\n",
-          line, tDataToString(expr.type));
-        return ;
-      }
-      res->type = BOOLEAN;
-      res->nDim = 0;
-      break;
-    default:
-      // won't reach here
-      printf("{508}[SEMANTIC ERROR @ line %d] Unary operator %s not recognized\n", line, op.lex);
-  }
+void Check_Boolean(attrs e) {
+  if (e.type != BOOLEAN)
+    printf("{476}[SEMANTIC ERROR @ line %d] Expected expression of type BOOLEAN, but got type %s\n", line, tDataToString(e.type));
 }
 
-void Check_PlusMinus(attrs op, attrs expr, attrs *res) {
-  if (!(expr.type == INT || expr.type == FLOAT)) {
-    printf("{514}[SEMANTIC ERROR @ line %d] Unary operator %s expects expression of type %s[INT|FLOAT], but got type %s[%s]\n",
-      line, op.lex, op.lex, op.lex, tDataToString(expr.type));
+void Check_Int(attrs e) {
+  if (e.type != INT)
+    printf("{481}[SEMANTIC ERROR @ line %d] Expected expression of type INT, but got type %s\n", line, tDataToString(e.type));
+}
+
+void Check_ListSentence(attrs id) {
+  int type = TS_GetType(id);
+  if (type != -1 && !(type == LIST_INT || type == LIST_FLOAT || type == LIST_BOOLEAN || type == LIST_CHAR))
+    printf("{474}[SEMANTIC ERROR @ line %d] %s is not of type LIST, but type %s\n", line, id.lex, tDataToString(type));
+}
+
+void Check_OpUnaryNeg(attrs op, attrs expr, attrs *res) {
+  if (expr.type != BOOLEAN) {
+    printf("{499}[SEMANTIC ERROR @ line %d] Unary operator ! expects expression of type ![BOOLEAN], but got type ![%s]\n",
+      line, tDataToString(expr.type));
     return ;
   }
-  res->type = expr.type;
+  res->type = BOOLEAN;
   res->nDim = 0;
+}
+
+void Check_OpUnaryCount(attrs op, attrs expr, attrs *res) {
+  if (!isList(expr)) {
+    printf("{481}[SEMANTIC ERROR @ line %d] Unary operator # expects expression of type #[LIST], but got type #[%s]\n",
+      line, tDataToString(expr.type));
+    return ;
+  }
+  res->type = INT;
+  res->nDim = 0;
+}
+
+void Check_OpUnaryQuest(attrs op, attrs expr, attrs *res) {
+  if (!isList(expr)) {
+    printf("{490}[SEMANTIC ERROR @ line %d] Unary operator ? expects expression of type ?[LIST], but got type ?[%s]\n",
+      line, tDataToString(expr.type));
+    return ;
+  }
+  res->type = listToType(expr.type);
+  res->nDim = 0;
+}
+
+void Check_IncrementDecrement(attrs op, attrs expr, attrs *res) {
+  if (!(expr.type == INT || expr.type == FLOAT)) {
+    printf("{522}[SEMANTIC ERROR @ line %d] Unary operator %s expects expression of type %s[INT|FLOAT], but got type %s[%s]\n",
+      line, op.lex, op.lex, op.lex, tDataToString(expr.type));
+  }
+  res->type = expr.type;
+  res->nDim = expr.nDim;
 }
 
 void Check_PlusMinusBinary(attrs expr1, attrs op, attrs expr2, attrs *res) {
   // WIP sólo permitimos la suma y resta de enteros/flotantes (¿suma/resta de char/bool?)
-  if (!(expr1.type == INT || expr1.type == LIST_INT || expr1.type == FLOAT || expr1.type == LIST_FLOAT ||
-    expr2.type == INT || expr2.type == LIST_INT || expr2.type == FLOAT || expr2.type == LIST_FLOAT)) {
+  if (!(expr1.type == INT || expr1.type == LIST_INT || expr1.type == FLOAT || expr1.type == LIST_FLOAT) ||
+    !(expr2.type == INT || expr2.type == LIST_INT || expr2.type == FLOAT || expr2.type == LIST_FLOAT)) {
     printf("{526}[SEMANTIC ERROR @ line %d] Binary operator %s expects expressions of types [INT|FLOAT|LIST OF INT|LIST OF FLOAT]%s[INT|FLOAT|LIST OF INT|LIST OF FLOAT], but got types [%s]%s[%s]\n",
       line, op.lex, op.lex, tDataToString(expr1.type), op.lex, tDataToString(expr2.type));
+    res->type = NONE;
     return ;
   }
 
@@ -554,65 +581,14 @@ void Check_PlusMinusBinary(attrs expr1, attrs op, attrs expr2, attrs *res) {
   }
 }
 
-void Check_OpBinaryList(attrs expr1, attrs op, attrs expr2, attrs *res) {
-  if (op.attr == 1) { // **
-    if (isList(expr1) && isList(expr2)) {
-      // both must be of the same type
-      if (expr1.type == expr2.type) {
-        res->type = expr1.type;
-        res->nDim = expr1.nDim + expr2.nDim;
-      } else {
-        printf("{571}[SEMANTIC ERROR @ line %d] Binay operator ** expects expressions of types [LIST OF x]**[LIST OF x] (lists of same type), but got [%s]**[%s]\n",
-          line, tDataToString(expr1.type), tDataToString(expr2.type));
-      }
-    } else {
-      printf("{575}[SEMANTIC ERROR @ line %d] Binary operator ** expects expressions of types [LIST]**[LIST], but got [%s]**[%s]\n",
-        line, tDataToString(expr1.type), tDataToString(expr2.type));
-    }
-  } else { // --
-    if (isList(expr1) && expr2.type == INT) {
-      res->type = expr1.type;
-      res->nDim = expr1.nDim - 1;
-    } else {
-      printf("{583}[SEMANTIC ERROR @ line %d] Binary operator -- expects expressions of types [LIST]--[INT], but got [%s]--[%s]\n",
-        line, tDataToString(expr1.type), tDataToString(expr2.type));
-    }
-  }
-}
-
-void Check_OpBinaryAndOr(attrs expr1, attrs op, attrs expr2, attrs *res) {
-  if (expr1.type == BOOLEAN && expr2.type == BOOLEAN) {
-    res->type = BOOLEAN;
-    res->nDim = 0;
+void Check_PlusMinus(attrs op, attrs expr, attrs *res) {
+  if (!(expr.type == INT || expr.type == FLOAT)) {
+    printf("{514}[SEMANTIC ERROR @ line %d] Unary operator %s expects expression of type %s[INT|FLOAT], but got type %s[%s]\n",
+      line, op.lex, op.lex, op.lex, tDataToString(expr.type));
     return ;
   }
-  printf("{598}[SEMANTIC ERROR @ line %d] Binary operator %s expects expressions of types [BOOLEAN]%s[BOOLEAN], but got [%s]%s[%s]\n",
-    line, op.lex, op.lex, tDataToString(expr1.type), op.lex, tDataToString(expr2.type));
-}
-
-void Check_OpBinaryEq(attrs expr1, attrs op, attrs expr2, attrs *res) {
-  if (isList(expr1) || isList(expr2)) {
-    printf("{604}[SEMANTIC ERROR @ line %d] Binary operator %s expects expressions of types [NOT LIST]%s[NOT LIST], but got [%s]%s[%s]\n",
-      line, op.lex, op.lex, tDataToString(expr1.type), op.lex, tDataToString(expr2.type));
-    return ;
-  }
-  if (expr1.type == expr2.type) {
-    res->type = BOOLEAN;
-    res->nDim = 0;
-    return ;
-  }
-  printf("{613}[SEMANTIC ERROR @ line %d] Binary operator %s expects expressions of types [x]%s[x] (same type), but got [%s]%s[%s]\n",
-    line, op.lex, op.lex, tDataToString(expr1.type), op.lex, tDataToString(expr2.type));
-}
-
-void Check_OpBinaryRel(attrs expr1, attrs op, attrs expr2, attrs *res) {
-  if ((expr1.type == INT || expr1.type == FLOAT || expr1.type == CHAR) && (expr2.type == INT || expr2.type == FLOAT || expr2.type == CHAR)) {
-    res->type = BOOLEAN;
-    res->nDim = 0;
-    return ;
-  }
-  printf("{623}[SEMANTIC ERROR @ line %d] Binary operator %s expects expressions of types [INT|FLOAT|CHAR]%s[INT|FLOAT|CHAR], but got [%s]%s[%s]\n",
-    line, op.lex, op.lex, tDataToString(expr1.type), op.lex, tDataToString(expr2.type));
+  res->type = expr.type;
+  res->nDim = 0;
 }
 
 void Check_OpBinaryMul(attrs expr1, attrs op, attrs expr2, attrs *res) {
@@ -628,6 +604,20 @@ void Check_OpBinaryMul(attrs expr1, attrs op, attrs expr2, attrs *res) {
     } else {
       printf("{675}[SEMANTIC ERROR @ line %d] Binary operator %s expects expressions of types [INT]%s[INT] or [LIST]%s[INT], but got [%s]%s[%s]\n",
         line, op.lex, op.lex, op.lex, tDataToString(expr1.type), op.lex, tDataToString(expr2.type));
+    }
+  } else if (op.attr == 3) {  // **
+    if (isList(expr1) && isList(expr2)) {
+      // both must be of the same type
+      if (expr1.type == expr2.type) {
+        res->type = expr1.type;
+        res->nDim = expr1.nDim + expr2.nDim;
+      } else {
+        printf("{571}[SEMANTIC ERROR @ line %d] Binay operator ** expects expressions of types [LIST OF x]**[LIST OF x] (lists of same type), but got [%s]**[%s]\n",
+          line, tDataToString(expr1.type), tDataToString(expr2.type));
+      }
+    } else {
+      printf("{575}[SEMANTIC ERROR @ line %d] Binary operator ** expects expressions of types [LIST]**[LIST], but got [%s]**[%s]\n",
+        line, tDataToString(expr1.type), tDataToString(expr2.type));
     }
   } else {  // * /
     // WIP sólo permitimos producto/división de enteros/flotantes (¿de char/bool?)
@@ -669,14 +659,62 @@ void Check_OpBinaryMul(attrs expr1, attrs op, attrs expr2, attrs *res) {
   }
 }
 
+void Check_OpBinaryAndOr(attrs expr1, attrs op, attrs expr2, attrs *res) {
+  if (expr1.type == BOOLEAN && expr2.type == BOOLEAN) {
+    res->type = BOOLEAN;
+    res->nDim = 0;
+    return ;
+  }
+  printf("{598}[SEMANTIC ERROR @ line %d] Binary operator %s expects expressions of types [BOOLEAN]%s[BOOLEAN], but got [%s]%s[%s]\n",
+    line, op.lex, op.lex, tDataToString(expr1.type), op.lex, tDataToString(expr2.type));
+}
+
+void Check_OpBinaryRel(attrs expr1, attrs op, attrs expr2, attrs *res) {
+  if ((expr1.type == INT || expr1.type == FLOAT || expr1.type == CHAR) && (expr2.type == INT || expr2.type == FLOAT || expr2.type == CHAR)) {
+    res->type = BOOLEAN;
+    res->nDim = 0;
+    return ;
+  }
+  printf("{623}[SEMANTIC ERROR @ line %d] Binary operator %s expects expressions of types [INT|FLOAT|CHAR]%s[INT|FLOAT|CHAR], but got [%s]%s[%s]\n",
+    line, op.lex, op.lex, tDataToString(expr1.type), op.lex, tDataToString(expr2.type));
+}
+
+void Check_OpBinaryEq(attrs expr1, attrs op, attrs expr2, attrs *res) {
+  if (isList(expr1) || isList(expr2)) {
+    printf("{604}[SEMANTIC ERROR @ line %d] Binary operator %s expects expressions of types [NOT LIST]%s[NOT LIST], but got [%s]%s[%s]\n",
+      line, op.lex, op.lex, tDataToString(expr1.type), op.lex, tDataToString(expr2.type));
+    return ;
+  }
+  if (expr1.type == expr2.type) {
+    res->type = BOOLEAN;
+    res->nDim = 0;
+    return ;
+  }
+  printf("{613}[SEMANTIC ERROR @ line %d] Binary operator %s expects expressions of types [x]%s[x] (same type), but got [%s]%s[%s]\n",
+    line, op.lex, op.lex, tDataToString(expr1.type), op.lex, tDataToString(expr2.type));
+}
+
+// WIP si hacemos IDENTIFIER AT expresion, debemos de hacer TS_GetById
 void Check_At(attrs expr1, attrs op, attrs expr2, attrs *res) {
   if (isList(expr1) && expr2.type == INT) {
     res->type = listToType(expr1.type);
     res->nDim = 0;
     return ;
   }
-  printf("{687}[SEMANTIC ERROR @ line %d] Binary operator @ expects expressions of types [LIST]@[INT], but got [%s]@[%s]\n",
-    line, tDataToString(expr1.type), tDataToString(expr2.type));
+  printf("%s[SEMANTIC ERROR @ line %d] Binary operator @ expects expressions of types [LIST]@[INT], but got [%s]@[%s]\n",
+    DEBUG ? "{704}" : "", line, tDataToString(expr1.type), tDataToString(expr2.type));
+  res->type = NONE;
+  res->nDim = 0;
+}
+
+void Check_MinusMinus(attrs expr1, attrs op, attrs expr2, attrs *res) {
+  if (isList(expr1) && expr2.type == INT) {
+    res->type = expr1.type;
+    res->nDim = expr1.nDim - 1;
+  } else {
+    printf("%s[SEMANTIC ERROR @ line %d] Binary operator -- expects expressions of types [LIST]--[INT], but got [%s]--[%s]\n",
+      DEBUG ? "{715}" : "", line, tDataToString(expr1.type), tDataToString(expr2.type));
+  }
 }
 
 void Check_ListTernary(attrs expr1, attrs op1, attrs expr2, attrs op2, attrs expr3, attrs *res) {
