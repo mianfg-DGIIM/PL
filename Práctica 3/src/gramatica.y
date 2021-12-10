@@ -52,13 +52,13 @@ que se esperaban en lugar de los que han producido el error
 %left OP_BINARY;
 %left OP_TERNARY_1; 
 %left OP_TERNARY_2; 
-
+%right OP_LISTA;
 %left OP_BINARY_OR;
 %left OP_BINARY_AND;
 %left OP_BINARY_EQ;
 %left OP_BINARY_REL;
 %left PLUS_MINUS;
-%right OP_BINARY_MUL;
+%left OP_BINARY_MUL;
 %right OP_UNARY;
 
 %%
@@ -116,7 +116,8 @@ Lista_expresiones_o_cadena : Lista_expresiones_o_cadena COMMA expresion
                            | expresion
                            | STRING ;
 Sentencia_return : RETURN expresion COLON ;
-Sentencias_lista : OP_UNARY expresion COLON ;
+Sentencias_lista : OP_UNARY expresion COLON
+                 | expresion OP_LISTA COLON ;
 expresion : PARENT_START expresion PARENT_END
           | OP_UNARY expresion
           | expresion OP_BINARY expresion
@@ -128,6 +129,7 @@ expresion : PARENT_START expresion PARENT_END
           | expresion PLUS_MINUS expresion
           | PLUS_MINUS expresion %prec OP_UNARY
           | expresion OP_TERNARY_1 expresion OP_TERNARY_2 expresion
+          | expresion OP_TERNARY_2 expresion
           | IDENTIFIER
           | constante
           | funcion

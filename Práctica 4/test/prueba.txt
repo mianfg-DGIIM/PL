@@ -1,7 +1,8 @@
 main {
     
     begin_local
-        int   ve;
+        in·t   ve;
+        int ve1, ve2;
         float vf ;
         bool  vl ;
         list of int   pe, pe2 ;
@@ -13,7 +14,7 @@ main {
     int funcionA (int a1, float a2, char a3)
     {
         begin_local
-            int x1, x2;
+            int x1, x2, a2;
         end_local
 
         char funcionB (char b1, bool b2)
@@ -27,16 +28,17 @@ main {
                     float x1;
                 end_local
 
-                x1= 1.3 ;
-                if (c2>10)
+                x1= 1.3 * ve ;
+                vf = funcionA(1+2, 2.5, 'a');
+                ve1 = funcionC(1, 2, 3, 4, 5);
+
+                if ((c2>10)+2)
                     c2= c2 - 1 ;
                 else {
                     x1= 3.1 ;
                 }
                 return x1 ;
             }
-
-            pf = pf * pf;
 
             xf = funcionC (true, 10);
             x2 = xf*(funcionC(false,1)-funcionC(true, 23))/ 10.0;
@@ -78,5 +80,7 @@ main {
         }
     }
 
-    
+    pe = pe**pe+2;
+    pe = pe+2.5;
+
 }
