@@ -1,0 +1,7 @@
+main;{
+	begin_local
+		int a;
+	end_local;
+
+	a = 7.2;
+};
