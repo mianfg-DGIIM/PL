@@ -740,3 +740,226 @@ void VarList_Id(attrs id, attrs *res) {
   else
     TS_GetById(id, res);
 }
+
+
+/*
+generaCION DE CÓDIGO INTERMEDIO
+*/
+
+int temp=0;
+int etiq=0;
+int varPrinc=1;
+int decIF = 0,decElse=0;
+
+char * temporal(){
+	char * cadena;
+	cadena = (char *) malloc(20);
+	sprintf(cadena, "temp%d",temp);
+	temp++;
+	return cadena;
+}
+char * etiqueta(){
+	char * cadena;
+	cadena = (char *) malloc(20);
+	sprintf(cadena, "etiqueta_%d",etiq);
+	etiq++;
+	return cadena;
+}
+
+// Abrir un fichero para crear el código intermedio
+void generateIntermedio(){
+
+  file = fopen("generated.c","w"); 
+	
+  fputs("#include <stdio.h>\n",file);
+
+}
+
+// Cerrar un fichero
+void closeIntermedio(){
+  fclose(file);
+
+
+void insertDesc(int type){
+	LIMIT++;
+	TF[LIMIT].in = descriptor;
+	if(type == 1){
+		TF[LIMIT].descriptor.EtiquetaElse = etiqueta();
+		TF[LIMIT].descriptor.EtiquetaSalida = etiqueta();
+	}else if(type == 2){
+		TF[LIMIT].descriptor.EtiquetaEntrada = etiqueta();
+		TF[LIMIT].descriptor.EtiquetaSalida = etiqueta();
+	}
+}
+
+void eliminaDesc(){
+	LIMIT--;
+}
+
+}
+/*type :  1. if con else 
+          2.while
+          3.if sin else
+*/
+void insertCond(int type){
+
+	char * cadena, *sent;
+	int topeTMP = LIMIT;
+	cadena = (char *) malloc(20);
+	sent = (char *) malloc(150);
+
+
+	while(TF[topeTMP].in != descriptor){
+		topeTMP--;
+	}
+	if(type == 1){
+		sprintf(cadena, "temp%d",temp-1);
+		TF[topeTMP].lex = (char *) malloc(50);
+		strcpy(TF[topeTMP].lex,cadena);
+		sprintf(sent,"if(!%s) goto %s;\n",cadena,TF[topeTMP].descriptor.EtiquetaElse);
+	}
+	else if(type == 2){
+    sprintf(cadena, "temp%d",temp-1);
+    sprintf(sent,"if(!%s) goto %s;\n",cadena,TF[topeTMP].descriptor.EtiquetaSalida);
+	}
+
+	fputs(sent,file);
+	free(sent);
+	free(cadena);
+}
+
+
+void insertEtiqInput(){
+	int topeTMP = LIMIT;
+	char * sent;
+	sent = (char *) malloc(200);
+	while(TF[topeTMP].in != descriptor){
+		topeTMP--;
+	}
+
+	sprintf(sent,"%s:\n",TF[topeTMP].descriptor.EtiquetaEntrada);
+	fputs(sent,file);
+}
+
+void insertEtiqOutput(){
+	int topeTMP = LIMIT-1;
+	char * sent;
+	sent = (char *) malloc(200);
+  printf("\nAntes\n");
+	while(TF[topeTMP].in != descriptor && topeTMP>0){
+    printf("\nDentro while %d\n", topeTMP);
+		topeTMP--;
+	}
+
+	sprintf(sent,"%s:\n",TF[topeTMP].descriptor.EtiquetaSalida);
+
+	fputs(sent,file);
+  printf("FUERA\n" );
+}
+
+void insertEtiqElse(){
+	int topeTMP = LIMIT-1;
+	char * sent;
+	sent = (char *) malloc(200);
+
+	while(TF[topeTMP].in != descriptor && topeTMP>0){
+
+		topeTMP--;
+	}
+	if(decElse == 1){ //Si se cumple la condicion del if creo
+		sprintf(sent,"goto %s;\n%s:\n",TF[topeTMP].descriptor.EtiquetaSalida,TF[topeTMP].descriptor.EtiquetaElse);
+	}
+	else{
+		sprintf(sent,"%s:",TF[topeTMP].descriptor.EtiquetaElse);
+	}
+	fputs(sent,file);
+  printf("FUERA_ELSE\n" );
+}
+
+void insertGotoInput(){
+	int topeTMP = LIMIT;
+	char * sent;
+	sent = (char *) malloc(200);
+	while(TF[topeTMP].in != descriptor){
+		topeTMP--;
+	}
+
+	sprintf(sent,"goto %s;\n",TF[topeTMP].descriptor.EtiquetaEntrada);
+	fputs(sent,file);
+}
+
+
+
+void generateEntSal(int type,attrs a){
+
+	if(type == 1){ //ENTRADA
+		fputs("scanf(\"%",file);
+		if(a.type == ENTERO) fputs("d",file);
+		else if(a.type == FLOTANTE) fputs("f",file);
+		else if(a.type == CARACTER) fputs("c",file);
+		else if(a.type == BOOLEANO) fputs("d",file);
+		fputs("\",&",file);
+		fputs(a.lex,file);
+		fputs(");",file);
+		fputs("\n",file);
+	} 
+	else{  //SALIDA
+		if(a.type != NA){
+			fputs("printf(\"%",file);
+			if(a.type == ENTERO) fputs("d",file);
+			else if(a.type == FLOTANTE) fputs("f",file);
+			else if(a.type == CARACTER) fputs("c",file);
+			else if(a.type == BOOLEANO) fputs("d",file);
+			fputs("\",",file);
+			fputs(a.lex,file);
+			fputs(");",file);
+		}else {
+			fputs("printf(",file);
+			fputs(a.lex,file);
+			fputs(");",file);
+		}
+		fputs("\n",file);
+	}
+}
+
+//Variables
+
+void generate(int type,attrs dest,attrs a, attrs op, attrs b){
+	char * sent;
+	sent = (char *) malloc(200);
+	if(type == 1){
+
+		sprintf(sent,"int %s;\n%s = %s %s %s;\n",dest.lex,dest.lex,a.lex,op.lex,b.lex);
+		fputs(sent,file);
+	}
+	else if(type == 4 ){
+		sprintf(sent,"%s %s %s %s\n",dest.lex,a.lex,op.lex,b.lex);
+		fputs(sent,file);
+	}
+	free(sent);
+}
+
+void generateDecVar(attrs a){
+	char * sent;
+	sent = (char *) malloc(1000);
+	if(tipoTMP == ENTERO){
+		sprintf(sent,"int %s;\n",a.lex);
+		fputs(sent,file);
+	}
+	else if(tipoTMP == FLOTANTE){
+		sprintf(sent,"float %s;\n",a.lex);
+		fputs(sent,file);
+	}
+	else if(tipoTMP == CARACTER){
+		sprintf(sent,"char %s;\n",a.lex);
+		fputs(sent,file);
+	}
+	else if(tipoTMP == BOOLEANO){
+		LIMIT++;
+		ts[LIMIT].in = descriptor;
+		ts[LIMIT].descriptor.EtiquetaSalida = etiqueta();
+		sprintf(sent,"int %s;\n",a.lex);
+		fputs(sent,file);
+	}
+	free(sent);
+}

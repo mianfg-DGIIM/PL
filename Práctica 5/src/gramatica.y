@@ -42,12 +42,32 @@ que se esperaban en lugar de los que han producido el error
 
 // REGLAS GRAMATICALES produciones
 
-Programa : MAIN bloque ;
+Programa :{generateIntermedio();} MAIN bloque {closeIntermedio();};
+
 bloque : BLOCK_START { TS_AddMark(); }
          bloque_in
-         BLOCK_END { TS_ClearBlock(); } ;
-bloque_in : Declar_de_variables_locales Declar_de_subprogs Sentencias
-          | Declar_de_variables_locales Declar_de_subprogs ;
+         BLOCK_END  { fputs("\n}\n",file); } { TS_ClearBlock(); } ;
+
+bloque_in : Declar_de_variables_locales 
+              {
+                if(varPrinc==1){
+                  varPrinc=0;
+                  fputs("int main(){\n",file); ????
+                }
+               
+              } 
+            Declar_de_subprogs
+            Sentencias
+          | Declar_de_variables_locales 
+              {
+                if(varPrinc==1){
+                  varPrinc=0;
+                  fputs("int main(){\n",file); ????
+                }
+               
+              }
+          Declar_de_subprogs ;
+
 Declar_de_subprogs : Declar_de_subprogs Declar_subprog
                    | ;
 Declar_subprog : Cabecera_subprograma { esFunc = 1; }
@@ -61,7 +81,7 @@ Cuerpo_declar_variables : tipo { setType($1); } lista_variables COLON
 Cabecera_subprograma : tipo IDENTIFIER { setType($1); decParam = 1; TS_AddFunction($2); }
                        PARENT_START
                        lista_de_parametros
-                       PARENT_END { decParam = 0; $4.nDim = 0; /*WIP*/ } ;
+                       PARENT_END { fputs(")",file); }  { decParam = 0; $4.nDim = 0; /*WIP*/ } ;
 lista_de_parametros : lista_de_parametros COMMA parametro
                     | parametro
                     |
@@ -69,24 +89,96 @@ lista_de_parametros : lista_de_parametros COMMA parametro
 parametro : tipo IDENTIFIER { /* WIP CHECK $2.nDim=0; */ setType($1); TS_AddParam($2); } ;
 Sentencias : Sentencias {decVar = 2; } Sentencia
            | { decVar = 2; } Sentencia ;
-Sentencia : bloque
+Sentencia : {	if(decIF==1){
+                {insertCond(1);}
+                fputs("{\n",file);
+                decIF++;
+              }  
+				    } bloque
           | Sentencia_asignacion
-          | Sentencia_if
-          | Sentencia_while
-          | Sentencia_entrada
-          | Sentencia_salida
-          | Sentencia_return
-          | Sentencia_for
-          | Sentencia_lista ;
-Sentencia_asignacion : IDENTIFIER ASSIGN expresion COLON { Check_Assign($1, $3); } ;
-Sentencia_if : IF PARENT_START expresion PARENT_END Sentencia { Check_Boolean($3); }
-              | IF PARENT_START expresion PARENT_END Sentencia ELSE Sentencia { Check_Boolean($3); } ;
-Sentencia_while : WHILE PARENT_START expresion PARENT_END Sentencia { Check_Boolean($3); } ;
-Sentencia_entrada : INPUT STRING COMMA lista_variables COLON
-                  | INPUT lista_variables COLON ;
-Sentencia_salida : OUTPUT Lista_expresiones_o_cadena COLON ;
+          | { decIF=1;insertDesc(1);} Sentencia_if {decIF = 0;eliminaDesc();}
+          | {	if(decIF==1){
+                insertCond(1);
+                fputs("{\n",file);
+                decIF++;
+						  }
+              insertDesc(2);
+              insertEtiqInput();
+              fputs("{\n",file);
+					  } Sentencia_while
+          | {	if(decIF==1){
+                insertCond(1);
+                fputs("{\n",file);
+                decIF++;
+						  }
+					} Sentencia_entrada
+          | {if(decIF==1){
+							insertCond(1);
+							fputs("{\n",file);
+							decIF++;
+						}
+					  }Sentencia_salida
+          | {if(decIF==1){
+							insertCond(1);
+							fputs("{\n",file);
+							decIF++;
+						}
+					}Sentencia_return
+          | if(decIF==1){
+							insertCond(1);
+							fputs("{\n",file);
+							decIF++;
+						}
+					}Sentencia_for
+          | if(decIF==1){
+							insertCond(1);
+							fputs("{\n",file);
+							decIF++;
+						}
+					}Sentencia_lista ;
+Sentencia_asignacion : IDENTIFIER ASSIGN expresion COLON { 
+                  Check_Assign($1, $3); 
+                  if(decIF==1){
+                    insertCond(1);
+                    fputs("{\n",file);
+                    decIF++;
+                  }
+		              generate(4,$1,$2,$3,$4);
+                } ;
+Sentencia_if : IF PARENT_START expresion PARENT_END Sentencia { 
+                Check_Boolean($3);
+                
+                $$.lex = $3.lex;
+                fputs("}\n",file);
+                insertEtiqElse();
+                fputs("{}\n",file);
+					     
+              }
+              | IF PARENT_START expresion PARENT_END Sentencia ELSE  {
+                decElse=1; 
+                fputs("}\n",file);
+                insertEtiqElse();
+                fputs("{\n",file);
+                decElse=0;
+                }
+                Sentencia { Check_Boolean($3);fputs("}\n",file);insertEtiqOutput();fputs("{}\n",file);} ;
+Sentencia_while : WHILE PARENT_START expresion PARENT_END {insertCond(2);} Sentencia { 
+                    Check_Boolean($3); 
+
+                    $$.lex = $3.lex;
+                    fputs("}\n",file);
+                    insertGotoInput();
+                    insertEtiqOutput();
+                    fputs("{}\n",file);
+                    
+                  } ;
+Sentencia_entrada : INPUT STRING COMMA lista_variables COLON {generateEntSal(1,$2);}
+                  | INPUT lista_variables COLON {generateEntSal(1,$2);};
+Sentencia_salida : OUTPUT Lista_expresiones_o_cadena COLON {generateEntSal(2,$2);};
 Sentencia_return : RETURN expresion { TS_CheckReturn($2, &$$); } COLON ;
+
 Sentencia_for : FOR IDENTIFIER ASSIGN expresion TO expresion Sentencia { Check_Int($4); Check_Int($6); } ;
+
 Sentencia_lista : IDENTIFIER OP_LIST COLON { Check_ListSentence($1); }
                 | DOLLAR IDENTIFIER COLON { Check_ListSentence($2); } ;
 expresion : OP_UNARY_NEG expresion { Check_OpUnaryNeg($1, $2, &$$); }
@@ -103,7 +195,7 @@ expresion : OP_UNARY_NEG expresion { Check_OpUnaryNeg($1, $2, &$$); }
           | expresion OP_BINARY_EQ expresion { Check_OpBinaryEq($1, $2, $3, &$$); }
           | expresion AT expresion { Check_At($1, $2, $3, &$$); }
           | expresion MINUS_MINUS expresion { Check_MinusMinus($1, $2, $3, &$$); }
-          | IDENTIFIER { $$.type = TS_GetType($1); $$.nDim = TS_GetNDim($1); decVar = 0; }
+          | IDENTIFIER { generateDecVar($1); $$.type = TS_GetType($1); $$.nDim = TS_GetNDim($1); decVar = 0; }
           | constante { $$.type = $1.type; $$.nDim = $1.nDim; }
           | funcion { $$.type = $1.type; $$.nDim = $1.nDim; currentFunction = -1; }
           | expresion PLUS_PLUS expresion AT expresion { Check_ListTernary($1, $2, $3, $4, $5, &$$); }

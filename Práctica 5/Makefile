@@ -3,8 +3,8 @@ SRC = src
 BIN = bin
 INCLUDE = include
 
-practica4: $(OBJ)/semantic.o $(OBJ)/main.o $(OBJ)/gramatica.tab.o
-	gcc -o $(BIN)/practica4 $(OBJ)/semantic.o $(OBJ)/main.o $(OBJ)/gramatica.tab.o
+practica5: $(OBJ)/semantic.o $(OBJ)/main.o $(OBJ)/gramatica.tab.o
+	gcc -o $(BIN)/practica5 $(OBJ)/semantic.o $(OBJ)/main.o $(OBJ)/gramatica.tab.o
 
 $(OBJ)/main.o: $(SRC)/main.c
 	gcc -o $@ -c $(SRC)/main.c -I$(INCLUDE)
