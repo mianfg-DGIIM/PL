@@ -2,6 +2,15 @@
 #include <stdio.h>
 #include <string.h>
 
+
+typedef struct {
+	char *EtiquetaEntrada;
+	char *EtiquetaSalida;
+	char *EtiquetaElse;
+	char *NombreVarControl;
+}DescriptorDeInstrControl;
+
+
 /**
  * Tipo de entrada en la tabla de símbolos
  */
@@ -9,7 +18,8 @@ typedef enum {
   MARK = 0,           /** Marca especial para referenciar los inicios de bloque */
   FUNCTION,           /** Es función */
   VAR,                /** Es variable local */
-  PARAM               /** Es parámetro formal de una función */
+  PARAM,               /** Es parámetro formal de una función */
+  descriptor
 } tIn;
 
 /**
@@ -40,6 +50,7 @@ typedef struct {
   int nParams;        /** Indica el número de parámetros formales (en el caso de una función) */
   unsigned int nDim;  /** Dimensión de la lista */
   int ended;          /** Indica si la función ha finalizado */
+  DescriptorDeInstrControl descriptor;   /* Descriptor*/
 } inTS;
 
 /**
@@ -119,6 +130,10 @@ extern int checkFunction;
  */
 extern int currentFunction;
 
+extern int temp;
+extern int etiq;
+extern int varPrinc;
+extern int decIF, decElse;
 
 /**
  * @brief Devuelve el tipo de variable de la lista
@@ -289,3 +304,20 @@ void Check_ListTernary(attrs expr1, attrs op1, attrs expr2, attrs op2, attrs exp
 void Check_FunctionCall(attrs id);
 
 void VarList_Id(attrs id, attrs *res);
+
+
+/*Generacion de codigo intermedio */
+extern FILE * file;
+char * temporal();
+char * etiqueta();
+void generateIntermedio();
+void closeIntermedio();
+void insertDesc(int type);
+void eliminaDesc();
+void insertCond(int type);
+void insertEtiqInput();
+void insertEtiqOutput();
+void insertEtiqElse();
+void generateEntSal(int type,attrs a);
+void generate(int type,attrs dest,attrs a, attrs op, attrs b);
+void generateDecVar(attrs a);

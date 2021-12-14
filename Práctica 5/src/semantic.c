@@ -109,14 +109,14 @@ int TS_DeleteEntry() {
 }
 
 /*int TS_ClearBlock() {
-  while (ts[TOS-1].in != MARK && TOS > 0) {
+  while (ts[TOS-1]entry != MARK && TOS > 0) {
     TOS--;
   }
-  if (ts[TOS-1].in == MARK) {
+  if (ts[TOS-1]entry == MARK) {
     TOS--;
   }
-  if (ts[TOS-1].in == PARAM) {
-    while(ts[TOS-1].in != FUNCTION && TOS > 0){
+  if (ts[TOS-1]entry == PARAM) {
+    while(ts[TOS-1]entry != FUNCTION && TOS > 0){
     TOS--;
   }
     TOS--;
@@ -778,25 +778,25 @@ void generateIntermedio(){
 // Cerrar un fichero
 void closeIntermedio(){
   fclose(file);
-
+}
 
 void insertDesc(int type){
-	LIMIT++;
-	TF[LIMIT].in = descriptor;
+	TOS++;
+	ts[TOS].entry = descriptor;
 	if(type == 1){
-		TF[LIMIT].descriptor.EtiquetaElse = etiqueta();
-		TF[LIMIT].descriptor.EtiquetaSalida = etiqueta();
+		ts[TOS].descriptor.EtiquetaElse = etiqueta();
+		ts[TOS].descriptor.EtiquetaSalida = etiqueta();
 	}else if(type == 2){
-		TF[LIMIT].descriptor.EtiquetaEntrada = etiqueta();
-		TF[LIMIT].descriptor.EtiquetaSalida = etiqueta();
+		ts[TOS].descriptor.EtiquetaEntrada = etiqueta();
+		ts[TOS].descriptor.EtiquetaSalida = etiqueta();
 	}
 }
 
 void eliminaDesc(){
-	LIMIT--;
+	TOS--;
 }
 
-}
+
 /*type :  1. if con else 
           2.while
           3.if sin else
@@ -804,23 +804,23 @@ void eliminaDesc(){
 void insertCond(int type){
 
 	char * cadena, *sent;
-	int topeTMP = LIMIT;
+	int topeTMP = TOS;
 	cadena = (char *) malloc(20);
 	sent = (char *) malloc(150);
 
 
-	while(TF[topeTMP].in != descriptor){
+	while(ts[topeTMP].entry != descriptor){
 		topeTMP--;
 	}
 	if(type == 1){
 		sprintf(cadena, "temp%d",temp-1);
-		TF[topeTMP].lex = (char *) malloc(50);
-		strcpy(TF[topeTMP].lex,cadena);
-		sprintf(sent,"if(!%s) goto %s;\n",cadena,TF[topeTMP].descriptor.EtiquetaElse);
+		ts[topeTMP].lex = (char *) malloc(50);
+		strcpy(ts[topeTMP].lex,cadena);
+		sprintf(sent,"if(!%s) goto %s;\n",cadena,ts[topeTMP].descriptor.EtiquetaElse);
 	}
 	else if(type == 2){
     sprintf(cadena, "temp%d",temp-1);
-    sprintf(sent,"if(!%s) goto %s;\n",cadena,TF[topeTMP].descriptor.EtiquetaSalida);
+    sprintf(sent,"if(!%s) goto %s;\n",cadena,ts[topeTMP].descriptor.EtiquetaSalida);
 	}
 
 	fputs(sent,file);
@@ -830,61 +830,61 @@ void insertCond(int type){
 
 
 void insertEtiqInput(){
-	int topeTMP = LIMIT;
+	int topeTMP = TOS;
 	char * sent;
 	sent = (char *) malloc(200);
-	while(TF[topeTMP].in != descriptor){
+	while(ts[topeTMP].entry != descriptor){
 		topeTMP--;
 	}
 
-	sprintf(sent,"%s:\n",TF[topeTMP].descriptor.EtiquetaEntrada);
+	sprintf(sent,"%s:\n",ts[topeTMP].descriptor.EtiquetaEntrada);
 	fputs(sent,file);
 }
 
 void insertEtiqOutput(){
-	int topeTMP = LIMIT-1;
+	int topeTMP = TOS-1;
 	char * sent;
 	sent = (char *) malloc(200);
   printf("\nAntes\n");
-	while(TF[topeTMP].in != descriptor && topeTMP>0){
+	while(ts[topeTMP].entry != descriptor && topeTMP>0){
     printf("\nDentro while %d\n", topeTMP);
 		topeTMP--;
 	}
 
-	sprintf(sent,"%s:\n",TF[topeTMP].descriptor.EtiquetaSalida);
+	sprintf(sent,"%s:\n",ts[topeTMP].descriptor.EtiquetaSalida);
 
 	fputs(sent,file);
   printf("FUERA\n" );
 }
 
 void insertEtiqElse(){
-	int topeTMP = LIMIT-1;
+	int topeTMP = TOS-1;
 	char * sent;
 	sent = (char *) malloc(200);
 
-	while(TF[topeTMP].in != descriptor && topeTMP>0){
+	while(ts[topeTMP].entry != descriptor && topeTMP>0){
 
 		topeTMP--;
 	}
 	if(decElse == 1){ //Si se cumple la condicion del if creo
-		sprintf(sent,"goto %s;\n%s:\n",TF[topeTMP].descriptor.EtiquetaSalida,TF[topeTMP].descriptor.EtiquetaElse);
+		sprintf(sent,"goto %s;\n%s:\n",ts[topeTMP].descriptor.EtiquetaSalida,ts[topeTMP].descriptor.EtiquetaElse);
 	}
 	else{
-		sprintf(sent,"%s:",TF[topeTMP].descriptor.EtiquetaElse);
+		sprintf(sent,"%s:",ts[topeTMP].descriptor.EtiquetaElse);
 	}
 	fputs(sent,file);
   printf("FUERA_ELSE\n" );
 }
 
 void insertGotoInput(){
-	int topeTMP = LIMIT;
+	int topeTMP = TOS;
 	char * sent;
 	sent = (char *) malloc(200);
-	while(TF[topeTMP].in != descriptor){
+	while(ts[topeTMP].entry != descriptor){
 		topeTMP--;
 	}
 
-	sprintf(sent,"goto %s;\n",TF[topeTMP].descriptor.EtiquetaEntrada);
+	sprintf(sent,"goto %s;\n",ts[topeTMP].descriptor.EtiquetaEntrada);
 	fputs(sent,file);
 }
 
@@ -894,22 +894,22 @@ void generateEntSal(int type,attrs a){
 
 	if(type == 1){ //ENTRADA
 		fputs("scanf(\"%",file);
-		if(a.type == ENTERO) fputs("d",file);
-		else if(a.type == FLOTANTE) fputs("f",file);
-		else if(a.type == CARACTER) fputs("c",file);
-		else if(a.type == BOOLEANO) fputs("d",file);
+		if(a.type == INT) fputs("d",file);
+		else if(a.type == FLOAT) fputs("f",file);
+		else if(a.type == CHAR) fputs("c",file);
+		else if(a.type == BOOLEAN) fputs("d",file);
 		fputs("\",&",file);
 		fputs(a.lex,file);
 		fputs(");",file);
 		fputs("\n",file);
 	} 
 	else{  //SALIDA
-		if(a.type != NA){
+		if(a.type != NONE){
 			fputs("printf(\"%",file);
-			if(a.type == ENTERO) fputs("d",file);
-			else if(a.type == FLOTANTE) fputs("f",file);
-			else if(a.type == CARACTER) fputs("c",file);
-			else if(a.type == BOOLEANO) fputs("d",file);
+			if(a.type == INT) fputs("d",file);
+			else if(a.type == FLOAT) fputs("f",file);
+			else if(a.type == CHAR) fputs("c",file);
+			else if(a.type == BOOLEAN) fputs("d",file);
 			fputs("\",",file);
 			fputs(a.lex,file);
 			fputs(");",file);
@@ -942,22 +942,22 @@ void generate(int type,attrs dest,attrs a, attrs op, attrs b){
 void generateDecVar(attrs a){
 	char * sent;
 	sent = (char *) malloc(1000);
-	if(tipoTMP == ENTERO){
+	if(currentType == INT){
 		sprintf(sent,"int %s;\n",a.lex);
 		fputs(sent,file);
 	}
-	else if(tipoTMP == FLOTANTE){
+	else if(currentType == FLOAT){
 		sprintf(sent,"float %s;\n",a.lex);
 		fputs(sent,file);
 	}
-	else if(tipoTMP == CARACTER){
+	else if(currentType == CHAR){
 		sprintf(sent,"char %s;\n",a.lex);
 		fputs(sent,file);
 	}
-	else if(tipoTMP == BOOLEANO){
-		LIMIT++;
-		ts[LIMIT].in = descriptor;
-		ts[LIMIT].descriptor.EtiquetaSalida = etiqueta();
+	else if(currentType == BOOLEAN){
+		TOS++;
+		ts[TOS].entry= descriptor;
+		ts[TOS].descriptor.EtiquetaSalida = etiqueta();
 		sprintf(sent,"int %s;\n",a.lex);
 		fputs(sent,file);
 	}

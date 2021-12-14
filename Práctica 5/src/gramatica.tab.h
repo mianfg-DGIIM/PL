@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.5.1.  */
+/* A Bison parser, made by GNU Bison 3.7.5.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -31,8 +31,9 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-/* Undocumented macros, especially those whose name start with YY_,
-   are private implementation details.  Do not rely on them.  */
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
 
 #ifndef YY_YY_SRC_GRAMATICA_TAB_H_INCLUDED
 # define YY_YY_SRC_GRAMATICA_TAB_H_INCLUDED
@@ -44,54 +45,59 @@
 extern int yydebug;
 #endif
 
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    MAIN = 258,
-    PARENT_END = 259,
-    BLOCK_START = 260,
-    BLOCK_END = 261,
-    BRACKET_START = 262,
-    BRACKET_END = 263,
-    COLON = 264,
-    COMMA = 265,
-    ASSIGN = 266,
-    IF = 267,
-    ELSE = 268,
-    WHILE = 269,
-    RETURN = 270,
-    FOR = 271,
-    TO = 272,
-    OUTPUT = 273,
-    INPUT = 274,
-    BEGIN_LOCAL = 275,
-    END_LOCAL = 276,
-    LIST_OF = 277,
-    TYPE = 278,
-    STRING = 279,
-    AT = 280,
-    OP_BINARY_OR = 281,
-    OP_BINARY_AND = 282,
-    OP_BINARY_EQ = 283,
-    OP_BINARY_REL = 284,
-    PLUS_MINUS = 285,
-    OP_BINARY_MUL = 286,
-    OP_UNARY_NEG = 287,
-    OP_UNARY_COUNT = 288,
-    OP_UNARY_QUEST = 289,
-    MINUS_MINUS = 290,
-    PLUS_PLUS = 291,
-    DOLLAR = 292,
-    OP_LIST = 293,
-    CONST_INT = 294,
-    CONST_FLOAT = 295,
-    CONST_BOOL = 296,
-    CONST_CHAR = 297,
-    IDENTIFIER = 298,
-    PARENT_START = 299
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    MAIN = 258,                    /* MAIN  */
+    PARENT_END = 259,              /* PARENT_END  */
+    BLOCK_START = 260,             /* BLOCK_START  */
+    BLOCK_END = 261,               /* BLOCK_END  */
+    BRACKET_START = 262,           /* BRACKET_START  */
+    BRACKET_END = 263,             /* BRACKET_END  */
+    COLON = 264,                   /* COLON  */
+    COMMA = 265,                   /* COMMA  */
+    ASSIGN = 266,                  /* ASSIGN  */
+    IF = 267,                      /* IF  */
+    ELSE = 268,                    /* ELSE  */
+    WHILE = 269,                   /* WHILE  */
+    RETURN = 270,                  /* RETURN  */
+    FOR = 271,                     /* FOR  */
+    TO = 272,                      /* TO  */
+    OUTPUT = 273,                  /* OUTPUT  */
+    INPUT = 274,                   /* INPUT  */
+    BEGIN_LOCAL = 275,             /* BEGIN_LOCAL  */
+    END_LOCAL = 276,               /* END_LOCAL  */
+    LIST_OF = 277,                 /* LIST_OF  */
+    TYPE = 278,                    /* TYPE  */
+    STRING = 279,                  /* STRING  */
+    AT = 280,                      /* AT  */
+    OP_BINARY_OR = 281,            /* OP_BINARY_OR  */
+    OP_BINARY_AND = 282,           /* OP_BINARY_AND  */
+    OP_BINARY_EQ = 283,            /* OP_BINARY_EQ  */
+    OP_BINARY_REL = 284,           /* OP_BINARY_REL  */
+    PLUS_MINUS = 285,              /* PLUS_MINUS  */
+    OP_BINARY_MUL = 286,           /* OP_BINARY_MUL  */
+    OP_UNARY_NEG = 287,            /* OP_UNARY_NEG  */
+    OP_UNARY_COUNT = 288,          /* OP_UNARY_COUNT  */
+    OP_UNARY_QUEST = 289,          /* OP_UNARY_QUEST  */
+    MINUS_MINUS = 290,             /* MINUS_MINUS  */
+    PLUS_PLUS = 291,               /* PLUS_PLUS  */
+    DOLLAR = 292,                  /* DOLLAR  */
+    OP_LIST = 293,                 /* OP_LIST  */
+    CONST_INT = 294,               /* CONST_INT  */
+    CONST_FLOAT = 295,             /* CONST_FLOAT  */
+    CONST_BOOL = 296,              /* CONST_BOOL  */
+    CONST_CHAR = 297,              /* CONST_CHAR  */
+    IDENTIFIER = 298,              /* IDENTIFIER  */
+    PARENT_START = 299             /* PARENT_START  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
 
 /* Value type.  */

@@ -52,7 +52,7 @@ bloque_in : Declar_de_variables_locales
               {
                 if(varPrinc==1){
                   varPrinc=0;
-                  fputs("int main(){\n",file); ????
+                  fputs("int main(){\n",file); 
                 }
                
               } 
@@ -62,7 +62,7 @@ bloque_in : Declar_de_variables_locales
               {
                 if(varPrinc==1){
                   varPrinc=0;
-                  fputs("int main(){\n",file); ????
+                  fputs("int main(){\n",file); 
                 }
                
               }
@@ -124,13 +124,13 @@ Sentencia : {	if(decIF==1){
 							decIF++;
 						}
 					}Sentencia_return
-          | if(decIF==1){
+          | {if(decIF==1){
 							insertCond(1);
 							fputs("{\n",file);
 							decIF++;
 						}
 					}Sentencia_for
-          | if(decIF==1){
+          | {if(decIF==1){
 							insertCond(1);
 							fputs("{\n",file);
 							decIF++;
