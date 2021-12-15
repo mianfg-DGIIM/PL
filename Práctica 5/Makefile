@@ -23,7 +23,7 @@ $(OBJ)/semantic.o: $(SRC)/semantic.c
 	gcc -o $@ -c $(SRC)/semantic.c -I$(INCLUDE)
 
 all:
-	make practica4
+	make practica5
 
 clean:
 	rm -rf $(BIN)/practica5 $(OBJ)/* $(SRC)/gramatica.tab.c $(SRC)/lex.yy.c

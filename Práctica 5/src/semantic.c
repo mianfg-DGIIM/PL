@@ -13,6 +13,7 @@ int      checkParams     = 0;
 int      checkFunction   = 0;
 int      currentFunction = -1;
 
+FILE * file;
 
 tData getListType(tData type) {
   switch (type) {
