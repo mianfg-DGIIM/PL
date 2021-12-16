@@ -4,7 +4,7 @@ BIN = bin
 INCLUDE = include
 
 practica4: $(OBJ)/semantic.o $(OBJ)/main.o $(OBJ)/gramatica.tab.o
-	gcc -o $(BIN)/practica4 $(OBJ)/semantic.o $(OBJ)/main.o $(OBJ)/gramatica.tab.o
+	gcc -o $(BIN)/practica5 $(OBJ)/semantic.o $(OBJ)/main.o $(OBJ)/gramatica.tab.o
 
 $(OBJ)/main.o: $(SRC)/main.c
 	gcc -o $@ -c $(SRC)/main.c -I$(INCLUDE)
@@ -23,8 +23,8 @@ $(OBJ)/semantic.o: $(SRC)/semantic.c
 	gcc -o $@ -c $(SRC)/semantic.c -I$(INCLUDE)
 
 all:
-	make practica4
+	make practica5
 
 clean:
-	rm -rf $(BIN)/practica4 $(OBJ)/* $(SRC)/gramatica.tab.c $(SRC)/lex.yy.c
-	rm -rf $(BIN)/practica4.exe
+	rm -rf $(BIN)/practica5 $(OBJ)/* $(SRC)/gramatica.tab.c $(SRC)/lex.yy.c
+	rm -rf $(BIN)/practica5.exe

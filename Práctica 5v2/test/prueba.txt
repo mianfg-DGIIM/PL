@@ -1,7 +1,7 @@
 main {
     
     begin_local
-        in·t   ve;
+        int   ve;
         int ve1, ve2;
         float vf ;
         bool  vl ;

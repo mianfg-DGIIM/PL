@@ -1,6 +1,8 @@
 #include "semantic.h"
 #define DEBUG 0
 
+
+
 inTS     ts[MAX_STACK];
 long int TOS             = 0;
 long int TOPEFLUJO             = 0;   // RENAME TOF
@@ -17,6 +19,7 @@ int      currentFunction = -1;
 unsigned int contBloques = 0;
 unsigned int contBloquesPrimeraFun = 0;
 unsigned int numLinea = 1;
+
 
 unsigned int Subprog ;     /*Indicador de comienzo de bloque de un subprog*/
 FILE* file;
@@ -42,8 +45,6 @@ tData getListType(tData type) {
 
 const char* tDataToString(tData type) {
   switch (type) {
-    case NONE:
-      return "NONE";
     case INT:
       return "INT";
     case FLOAT:
@@ -156,6 +157,8 @@ int TS_ClearBlock() {
     return ret;
   }
 
+  
+
   // dejamos TOS donde estaría la marca de bloque para comenzar a insertar ahí,
   // todo lo anterior en la TS se conserva (parámetros formales, funciones...)
   currentTOS = TOS;
@@ -176,6 +179,19 @@ int TS_ClearBlock() {
 
   return ret;
 }
+
+void insertarFlujo(etiquetaFlujo s){
+    if (TOPEFLUJO == MAX_TF) {
+      printf("\nError: tamanio maximo alcanzado\n");
+      exit(-1);
+    } else {
+      TF[TOPEFLUJO].EtiquetaEntrada=s.EtiquetaEntrada;
+      TF[TOPEFLUJO].EtiquetaSalida=s.EtiquetaSalida;
+      TF[TOPEFLUJO].EtiquetaElse=s.EtiquetaElse;
+      TF[TOPEFLUJO].NombreVarControl=s.NombreVarControl;
+      ++TOPEFLUJO;
+    }
+  }
 
 void updateCurrentFunction(int lastFunc) {
   lastFunc--;
@@ -382,6 +398,13 @@ void TS_CheckReturn(attrs expr, attrs *res) {
     printf("[SEMANTIC ERROR @ line %d] Result not declared into function\n", line);
     return;
   }
+}
+
+char *strdup(const char *src) {
+    char *dst = malloc(strlen (src) + 1);  // Space for length plus nul
+    if (dst == NULL) return NULL;          // No memory
+    strcpy(dst, src);                      // Copy the characters
+    return dst;                            // Return the new string
 }
 
 void TS_GetById(attrs id, attrs *res) {
@@ -744,6 +767,13 @@ void Check_MinusMinus(attrs expr1, attrs op, attrs expr2, attrs *res) {
   }
 }
 
+void sacarTF(){
+	if(DEBUG) printf("sacar()\n");
+   if (TOPEFLUJO > 0) {
+      --TOPEFLUJO;
+   }
+}
+
 void Check_ListTernary(attrs expr1, attrs op1, attrs expr2, attrs op2, attrs expr3, attrs *res) {
   if (!isList(expr1) || listToType(expr1.type) != expr2.type || expr3.type != INT) {
     printf("%s[SEMANTIC ERROR @ line %d] Ternary operator ++ @ expects expressions of types [LIST OF x]++[x]@[INT], but got types [%s]++[%s]@[%s]\n",
@@ -771,11 +801,8 @@ void VarList_Id(attrs id, attrs *res) {
 
 
 
-
-
 /* PRÁCTICA 5 */
 
-int temp = -1;
 int etiqueta = -1;
 
 char* generarTemp(tData tipo){
@@ -786,6 +813,13 @@ char* generarTemp(tData tipo){
   else
     sprintf(cadena, "%s temp%d;\n%stemp%d", tipoDeDato(tipo), temp, numTabs(), temp);
   return cadena;
+}
+
+void copiarEF(etiquetaFlujo *dest, etiquetaFlujo *source){
+  if (source->EtiquetaEntrada != NULL)   dest->EtiquetaEntrada = strdup(source->EtiquetaEntrada) ;
+  if (source->EtiquetaSalida != NULL)    dest->EtiquetaSalida = strdup(source->EtiquetaSalida) ;
+  if (source->EtiquetaElse != NULL)    dest->EtiquetaElse = strdup(source->EtiquetaElse) ;
+  if (source->NombreVarControl != NULL)  dest->NombreVarControl = strdup(source->NombreVarControl) ;
 }
 
 char* generarEtiqueta() {
@@ -819,6 +853,8 @@ void cerrarFichero() {
 
 char* tipoDeDato (tData td) {
   switch (td) {
+    case NONE:
+      return "None";
     case INT:
       return "int";
     case BOOLEAN:
@@ -925,4 +961,44 @@ char* numTabs(){
   for( int i=0; i<contBloques-contBloquesPrimeraFun; ++i )
     sprintf(aux, "%s\t", aux);
   return aux;
+}
+
+void concatenarStrings1(char* destination, char* source1){
+  if( destination == NULL)
+    destination = (char *) malloc(200);
+  sprintf(destination, "%s", source1);
+}
+
+void concatenarStrings2(char* destination, char* source1, char* source2){
+  if( destination == NULL)
+    destination = (char *) malloc(200);
+  sprintf(destination, "%s%s", source1, source2);
+}
+
+void concatenarStrings3(char* destination, char* source1, char* source2, char* source3){
+  if( destination == NULL)
+    destination = (char *) malloc(200);
+  sprintf(destination, "%s,%s", source2, source3);
+}
+
+void concatenarStrings4(char* destination, char* s1, char* s2, char* s3, char* s4){
+  if( destination == NULL)
+    destination = (char *) malloc(200);
+  sprintf(destination, "%s%s%s%s", s1, s2, s3, s4);
+}
+
+void concatenarStrings5(char* destination, char* s1, char* s2, char* s3, char* s4, char* s5){
+  if( destination == NULL)
+    destination = (char *) malloc(200);
+  sprintf(destination, "%s%s%s%s%s", s1, s2, s3, s4, s5);
+}
+
+void mensajeErrorTipo1(inTS ts, tData esperado){
+	if (ts.type != NONE && esperado != NONE){
+		if( ts.entry == VAR )
+			printf("Error semantico en la linea %d: La variable %s no es de tipo %s\n", numLinea, ts.lex, tDataToString(esperado));
+		else if( ts.entry == FUNCTION )
+			printf("Error semantico en la linea %d: La funcion %s no devuelve valores de tipo %s\n", numLinea, ts.lex,tDataToString(esperado));
+		else printf("Error semantico en la linea %d: La expresion no es de tipo %s\n", numLinea, tDataToString(esperado));
+	}
 }

@@ -68,7 +68,7 @@ Declar_de_variables_locales : BEGIN_LOCAL { decVar = 1; } Variables_locales END_
 Variables_locales : Variables_locales Cuerpo_declar_variables 
                   | Cuerpo_declar_variables ;
 Cuerpo_declar_variables : tipo { setType($1); } lista_variables COLON {  char* sent = (char*) malloc(200);
-                                      sprintf(sent, "%s%s %s;\n", numTabs(), tipoDeDato($1.type), $3.lex);
+                                      sprintf(sent, "%s%s  %s;\n", numTabs(), tipoDeDato($1.type), $3.lex);
                                       fputs(sent, file);
                                     }
                         | error ;
@@ -153,7 +153,7 @@ Sentencia_while : WHILE PARENT_START {
                             sacarTF();
 } } ;
 Sentencia_entrada : INPUT lista_variables COLON {
-  char* sent = (char*) malloc(200);
+                      char* sent = (char*) malloc(200);
                                     sprintf(sent, "\", %s);\n", $2.lex);
                                     fputs(sent, file);
 } ;
@@ -179,12 +179,12 @@ Sentencia_for : FOR IDENTIFIER ASSIGN expresion {
                           fputs(sent, file);
 } TO expresion {
   char* sent = (char*) malloc(200);
-                          sprintf(sent, "%s%s = %s<%s;\n", numTabs(), generarTemp(booleano), $2.lex, $7.lex);
+                          sprintf(sent, "%s%s = %s<%s;\n", numTabs(), generarTemp(BOOLEAN), $2.lex, $7.lex);
                           fputs(sent, file);
                           sprintf(sent, "%sif (!temp%d) goto %s;\n", numTabs(), temp ,TF[TOPEFLUJO-1].EtiquetaSalida);
                           fputs(sent, file);
 } STEP expresion Sentencia { Check_Int($4); Check_Int($6); char* sent = (char*) malloc(200);
-                    sprintf(sent, "%s%s = %s+%s;\n", numTabs(), generarTemp(entero), $2.lex, $10.lex);
+                    sprintf(sent, "%s%s = %s+%s;\n", numTabs(), generarTemp(INT), $2.lex, $10.lex);
                     fputs(sent, file);
                     sprintf(sent, "%s%s = temp%d;\n", numTabs(), $2.lex, temp);
                     fputs(sent, file);
@@ -206,9 +206,30 @@ Sentencia_lista : IDENTIFIER OP_LIST COLON { Check_ListSentence($1); {
                     sprintf(sent, "%sbegin(&%s);\n", numTabs(), $2.lex);
                     fputs(sent, file);
                 } } ;
-expresion : OP_UNARY_NEG expresion { Check_OpUnaryNeg($1, $2, &$$); }
-          | OP_UNARY_COUNT expresion { Check_OpUnaryCount($1, $2, &$$); }
-          | OP_UNARY_QUEST expresion { Check_OpUnaryQuest($1, $2, &$$); }
+expresion : OP_UNARY_NEG expresion { Check_OpUnaryNeg($1, $2, &$$); {	
+															char* sent = (char*) malloc(200);
+															sprintf(sent, "%s%s = %s%s;\n", numTabs(), generarTemp($$.type), $1.valor, $2.valor);
+															fputs(sent, file);
+															char* aux = (char*) malloc(20);
+															sprintf(aux, "temp%d", temp);
+															concatenarStrings1($$.valor, aux);
+														}}
+          | OP_UNARY_COUNT expresion { Check_OpUnaryCount($1, $2, &$$); {	
+															char* sent = (char*) malloc(200);
+															sprintf(sent, "%s%s = %s%s;\n", numTabs(), generarTemp($$.type), $1.valor, $2.valor);
+															fputs(sent, file);
+															char* aux = (char*) malloc(20);
+															sprintf(aux, "temp%d", temp);
+															concatenarStrings1($$.valor, aux);
+														}}
+          | OP_UNARY_QUEST expresion { Check_OpUnaryQuest($1, $2, &$$); {	
+															char* sent = (char*) malloc(200);
+															sprintf(sent, "%s%s = %s%s;\n", numTabs(), generarTemp($$.type), $1.valor, $2.valor);
+															fputs(sent, file);
+															char* aux = (char*) malloc(20);
+															sprintf(aux, "temp%d", temp);
+															concatenarStrings1($$.valor, aux);
+														}}
           | PLUS_PLUS expresion { Check_IncrementDecrement($1, $2, &$$); }
           | MINUS_MINUS expresion { Check_IncrementDecrement($1, $2, &$$); }
           | expresion PLUS_MINUS expresion { Check_PlusMinusBinary($1, $2, $3, &$$); }
@@ -261,7 +282,7 @@ Lista_expresiones : Lista_expresiones COMMA expresion { TS_CheckParam($3); }
 tipo : TYPE { $$.type = $1.type; }
      | LIST_OF TYPE { $$.type = getListType($2.type); } ;
 lista_variables : lista_variables COMMA IDENTIFIER { VarList_Id($3, &$$); {
-  if( $0.type != lista )
+  if( $0.type != LIST_INT && $0.type != LIST_FLOAT && $0.type != LIST_CHAR && $0.type != LIST_BOOLEAN)
                             concatenarStrings3($$.lex, $1.lex, $2.lex, $3.lex);
                           else{
                             concatenarStrings5($$.lex, $1.lex, ";\n", numTabs(), tipoDeDato($0.type), " ");
@@ -269,7 +290,7 @@ lista_variables : lista_variables COMMA IDENTIFIER { VarList_Id($3, &$$); {
                           }
 } }
                 | IDENTIFIER { VarList_Id($1, &$$); {
-                  if( $0.type != lista )
+                  if( $0.type != LIST_INT && $0.type != LIST_FLOAT && $0.type != LIST_CHAR && $0.type != LIST_BOOLEAN)
                             concatenarStrings1($$.lex, $1.lex);
                           else{
                             concatenarStrings2($$.lex, $1.lex, " = NULL");

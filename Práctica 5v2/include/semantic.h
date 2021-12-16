@@ -4,6 +4,8 @@
 
 #define true 1
 #define false 0
+#define MAX_TS 1000
+#define MAX_TF 1000
 
 /**
  * Tipo de entrada en la tabla de símbolos
@@ -58,8 +60,10 @@ typedef struct {
 typedef struct {
   int attr;           /**< Atributo del símbolo (si tiene) */
   char *lex;          /**< Nombre del lexema */
+  char* valor;
   tData type;         /**< Tipo del símbolo */
   unsigned int nDim;  /**< Dimensión de la lista */
+  etiquetaFlujo ef;
 } attrs;
 
 #define YYSTYPE attrs   /** En adelante, cada símbolo tiene una estructura de tipo attrs */
@@ -69,7 +73,7 @@ typedef struct {
  * Pila de la tabla de símbolos (TS)
  */
 extern inTS ts[MAX_STACK];  // Pila de la tabla de símbolos
-extern etiquetaFlujo TF[MAX_STACK];  // RENAME tf
+etiquetaFlujo TF[MAX_TF];
 
 /**
  * Tope de la pila (Top Of Stack), indica la siguiente posición en la
@@ -84,6 +88,8 @@ FILE* file_std;
 FILE* file_fun;
 char* argumento;
 char* tabs;
+
+
 
 unsigned int contBloques;
 unsigned int contBloquesPrimeraFun;
@@ -333,48 +339,23 @@ char tipoAFormato(tData dato);
 char* tipoAPuntero(tData dato);
 char* numTabs();
 
-char *strdup(const char *src) {
-    char *dst = malloc(strlen (src) + 1);  // Space for length plus nul
-    if (dst == NULL) return NULL;          // No memory
-    strcpy(dst, src);                      // Copy the characters
-    return dst;                            // Return the new string
-}
+void mensajeErrorTipo1(inTS ts, tData esperado);
+char *strdup(const char *src);
 
-void copiarEF(etiquetaFlujo *dest, etiquetaFlujo *source){
-  if (source->EtiquetaEntrada != NULL)   dest->EtiquetaEntrada = strdup(source->EtiquetaEntrada) ;
-  if (source->EtiquetaSalida != NULL)    dest->EtiquetaSalida = strdup(source->EtiquetaSalida) ;
-  if (source->EtiquetaElse != NULL)    dest->EtiquetaElse = strdup(source->EtiquetaElse) ;
-  if (source->NombreVarControl != NULL)  dest->NombreVarControl = strdup(source->NombreVarControl) ;
-}
+void copiarEF(etiquetaFlujo *dest, etiquetaFlujo *source);
+void sacarTF();
 
+void insertarFlujo(etiquetaFlujo s);
 
-void concatenarStrings1(char* destination, char* source1){
-  if( destination == NULL)
-    destination = (char *) malloc(200);
-  sprintf(destination, "%s", source1);
-}
+static int temp = -1;
 
-void concatenarStrings2(char* destination, char* source1, char* source2){
-  if( destination == NULL)
-    destination = (char *) malloc(200);
-  sprintf(destination, "%s%s", source1, source2);
-}
+void concatenarStrings1(char* destination, char* source1);
 
-void concatenarStrings3(char* destination, char* source1, char* source2, char* source3){
-  if( destination == NULL)
-    destination = (char *) malloc(200);
-  sprintf(destination, "%s%s%s", source1, source2, source3);
-}
+void concatenarStrings2(char* destination, char* source1, char* source2);
 
-void concatenarStrings4(char* destination, char* s1, char* s2, char* s3, char* s4){
-  if( destination == NULL)
-    destination = (char *) malloc(200);
-  sprintf(destination, "%s%s%s%s", s1, s2, s3, s4);
-}
+void concatenarStrings3(char* destination, char* source1, char* source2, char* source3);
 
-void concatenarStrings5(char* destination, char* s1, char* s2, char* s3, char* s4, char* s5){
-  if( destination == NULL)
-    destination = (char *) malloc(200);
-  sprintf(destination, "%s%s%s%s%s", s1, s2, s3, s4, s5);
-}
+void concatenarStrings4(char* destination, char* s1, char* s2, char* s3, char* s4);
+
+void concatenarStrings5(char* destination, char* s1, char* s2, char* s3, char* s4, char* s5);
 
