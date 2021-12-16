@@ -3,6 +3,7 @@
 
 inTS     ts[MAX_STACK];
 long int TOS             = 0;
+long int TOPEFLUJO             = 0;   // RENAME TOF
 int      line            = 1;
 int      decVar          = 0;
 int      decParam        = 0;
@@ -13,6 +14,16 @@ int      checkParams     = 0;
 int      checkFunction   = 0;
 int      currentFunction = -1;
 
+unsigned int contBloques = 0;
+unsigned int contBloquesPrimeraFun = 0;
+unsigned int numLinea = 1;
+
+unsigned int Subprog ;     /*Indicador de comienzo de bloque de un subprog*/
+FILE* file;
+FILE* file_std;
+FILE* file_fun;
+char* argumento;
+char* tabs = NULL;
 
 tData getListType(tData type) {
   switch (type) {
@@ -209,6 +220,22 @@ int TS_FindByName(attrs e) {
   
   while (i > 0) {
     if (ts[i].entry == FUNCTION && strcmp(e.lex, ts[i].lex) == 0)
+      return i;
+    i--;
+  }
+
+  //printf("[SEMANTIC ERROR @ line %d] Identifier not declared: %s\n", line, e.lex);
+  return -1;
+}
+
+int TS_FindByNameChar(char* name) {
+  int i = TOS - 1;    
+
+  if (TOS == 0)
+    return -1;
+  
+  while (i > 0) {
+    if (ts[i].entry == FUNCTION && strcmp(name, ts[i].lex) == 0)
       return i;
     i--;
   }
@@ -542,7 +569,7 @@ void Check_IncrementDecrement(attrs op, attrs expr, attrs *res) {
 }
 
 void Check_PlusMinusBinary(attrs expr1, attrs op, attrs expr2, attrs *res) {
-  // WIP sólo permitimos la suma y resta de enteros/flotantes (¿suma/resta de char/bool?)
+  // WIP sólo permitimos la suma y resta de INTs/flotantes (¿suma/resta de char/bool?)
   if (!(expr1.type == INT || expr1.type == LIST_INT || expr1.type == FLOAT || expr1.type == LIST_FLOAT) ||
     !(expr2.type == INT || expr2.type == LIST_INT || expr2.type == FLOAT || expr2.type == LIST_FLOAT)) {
     printf("%s[SEMANTIC ERROR @ line %d] Binary operator %s expects expressions of types [INT|FLOAT|LIST OF INT|LIST OF FLOAT]%s[INT|FLOAT|LIST OF INT|LIST OF FLOAT], but got types [%s]%s[%s]\n",
@@ -620,7 +647,7 @@ void Check_OpBinaryMul(attrs expr1, attrs op, attrs expr2, attrs *res) {
         DEBUG ? "{619}" : "",line, tDataToString(expr1.type), tDataToString(expr2.type));
     }
   } else {  // * /
-    // WIP sólo permitimos producto/división de enteros/flotantes (¿de char/bool?)
+    // WIP sólo permitimos producto/división de INTs/flotantes (¿de char/bool?)
     if (!(expr1.type == INT || expr1.type == LIST_INT || expr1.type == FLOAT || expr1.type == LIST_FLOAT) ||
       !(expr2.type == INT || expr2.type == LIST_INT || expr2.type == FLOAT || expr2.type == LIST_FLOAT)) {
       printf("%s[SEMANTIC ERROR @ line %d] Binary operator %s expects expressions of types [INT|FLOAT|LIST OF INT|LIST OF FLOAT]%s[INT|FLOAT|LIST OF INT|LIST OF FLOAT], but got [%s]%s[%s]\n",
@@ -739,4 +766,163 @@ void VarList_Id(attrs id, attrs *res) {
     TS_AddId(id);
   else
     TS_GetById(id, res);
+}
+
+
+
+
+
+
+/* PRÁCTICA 5 */
+
+int temp = -1;
+int etiqueta = -1;
+
+char* generarTemp(tData tipo){
+  char* cadena = (char*) malloc(30);
+  ++temp;
+  if(tipo == LIST_INT || tipo == LIST_FLOAT || tipo == LIST_CHAR || tipo == LIST_BOOLEAN)
+    sprintf(cadena, "%s temp%d = NULL;\n%stemp%d", tipoDeDato(tipo), temp, numTabs(), temp);
+  else
+    sprintf(cadena, "%s temp%d;\n%stemp%d", tipoDeDato(tipo), temp, numTabs(), temp);
+  return cadena;
+}
+
+char* generarEtiqueta() {
+  char* cadena = (char*) malloc(20);
+  ++etiqueta;
+  sprintf(cadena, "etiqueta%d", etiqueta);
+  return cadena;
+}
+
+void generarFicheroFunciones() {
+  file_fun = fopen("dec_fun.h", "w");
+  fputs("#include<stdio.h>\n", file_fun);
+  fputs("#include \"dec_dat.h\"\n\n", file_fun);
+  fputs("typedef int bool;\n", file_fun);
+}
+
+void generarFichero() {
+  file_std = fopen("codigoGenerado.c", "w");
+  file = file_std;
+  fputs("#include<stdio.h>\n", file);
+  fputs("#include \"dec_fun.h\"\n", file);
+  //fputs("#include \"dec_dat.h\"\n\n", file);
+  fputs("typedef int bool;\n\n", file);
+  generarFicheroFunciones();
+}
+
+void cerrarFichero() {
+  fclose(file);
+  fclose(file_fun);
+}
+
+char* tipoDeDato (tData td) {
+  switch (td) {
+    case INT:
+      return "int";
+    case BOOLEAN:
+      return "bool";
+    case FLOAT:
+      return "float";
+    case CHAR:
+      return "char";
+    case LIST_INT:
+    case LIST_BOOLEAN:
+    case LIST_FLOAT:
+    case LIST_CHAR:
+      return "List";
+    default:
+      return "/* error */";
+  }
+}
+
+void insertarParametros(char* nom, int numArgumentos){
+  int index;
+
+  for(int i=numArgumentos; i>0; --i) {
+    if(i!=numArgumentos)
+      fputs(",",file);
+    index = TS_FindByNameChar(nom);
+    char* nombre = ts[index-i].lex;
+    char* midato = tipoDeDato(ts[index-i].type);
+    char* sent;
+    sent = (char*) malloc(200);;
+    sprintf(sent, "%s %s", midato, nombre);
+    fputs(sent, file);
+  }
+}
+
+/*
+void insertarSubprog(char* nom, tData dato, int numArgumentos){
+  char* sent;
+  sent = (char*) malloc(200);
+  sprintf(sent,"%s %s (", tipoDeDato(dato), nom);
+  fputs(sent, file);
+  insertarParametros(nom, numArgumentos);
+  fputs(")", file);
+}
+
+
+void insertarVariables(tData dato){
+  int i;
+  bool fin = false;
+  bool coma = false;
+  char* sent;
+  sent = (char*) malloc(200);
+  sprintf(sent, "%s%s ", tabs, tipoDeDato(dato));
+
+  for(i=0; i<TOPE && fin==false; ++i){
+    if(ts[TOPE-1-i].entrada == 3 && ts[TOPE-1-i].tipoDato == dato){
+      if(coma) sprintf(sent,"%s,",sent);
+      sprintf(sent, "%s %s", sent, ts[TOPE-1-i].nombre);
+      coma = true;
+    }
+    else{
+      fin=true;
+    }
+  }
+
+  sprintf(sent, "%s;\n", sent);
+  fputs(sent, file);
+}
+
+*/
+
+void insertarAsignacion(char* nom, char* valor) {
+  char* sent = (char*) malloc(200);
+  sprintf(sent, "%s%s = %s;\n", tabs, nom, valor);
+  fputs(sent, file);
+}
+
+void insertarCadena(char* cad){
+  fputs(cad, file);
+}
+
+char tipoAFormato(tData dato) {
+  if(dato == NONE)    return 's';
+  else if(dato == FLOAT)    return 'f';
+  else if(dato == INT)    return 'd';
+  else if(dato == CHAR)  return 'c';
+  else if(dato == LIST_CHAR /*WIP WARN*/ )  return 's';
+  else if(dato == BOOLEAN)  return 'd';
+  else             return 'l';
+}
+
+char* tipoAPuntero(tData dato){
+  if(dato == NONE)    return " s";
+  else if(dato == FLOAT)    return " &";
+  else if(dato == INT)    return " &";
+  else if(dato == CHAR)  return " &";
+  else if(dato == LIST_CHAR /*WIP WARN*/ )  return " ";
+  else if(dato == BOOLEAN)  return " &";
+  else             return " ";
+}
+
+char* numTabs(){
+  char* aux = (char*) malloc(50);
+  sprintf(aux, "");
+  for( int i=0; i<contBloques-contBloquesPrimeraFun; ++i )
+    sprintf(aux, "%s\t", aux);
+  return aux;
 }

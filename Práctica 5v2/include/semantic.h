@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#define true 1
+#define false 0
+
 /**
  * Tipo de entrada en la tabla de símbolos
  */
@@ -27,6 +30,12 @@ typedef enum {
   LIST_BOOLEAN,       /** Lista de booleanos */
 } tData;
 
+typedef struct {
+  char* EtiquetaEntrada ;
+  char* EtiquetaSalida ;
+  char* EtiquetaElse ;
+  char* NombreVarControl ;
+} etiquetaFlujo ;
 
 /* ELEMENTOS DE LA TABLA DE SÍMBOLOS */
 
@@ -40,6 +49,7 @@ typedef struct {
   int nParams;        /** Indica el número de parámetros formales (en el caso de una función) */
   unsigned int nDim;  /** Dimensión de la lista */
   int ended;          /** Indica si la función ha finalizado */
+  etiquetaFlujo ef;
 } inTS;
 
 /**
@@ -59,12 +69,25 @@ typedef struct {
  * Pila de la tabla de símbolos (TS)
  */
 extern inTS ts[MAX_STACK];  // Pila de la tabla de símbolos
+extern etiquetaFlujo TF[MAX_STACK];  // RENAME tf
 
 /**
  * Tope de la pila (Top Of Stack), indica la siguiente posición en la
  * pila TS para insertar una entrada
  */
 extern long int TOS;
+extern long int TOPEFLUJO;
+
+unsigned int Subprog ;     /*Indicador de comienzo de bloque de un subprog*/
+FILE* file;
+FILE* file_std;
+FILE* file_fun;
+char* argumento;
+char* tabs;
+
+unsigned int contBloques;
+unsigned int contBloquesPrimeraFun;
+unsigned int numLinea;
 
 /**
  * Línea del fichero que se está analizando
@@ -199,6 +222,12 @@ int TS_FindById(attrs e);
 int TS_FindByName(attrs e);
 
 /**
+ * @brief Busca una entrada en la TS de una función por su identificador o nombre
+ * @return Índice de la entrada encontrada, -1 en caso de no encontrarla
+ */
+int TS_FindByNameChar(char* name);
+
+/**
  * @brief Añade una entrada (identificador) en la tabla de símbolos de una variable local
  */
 void TS_AddId(attrs e);
@@ -289,3 +318,63 @@ void Check_ListTernary(attrs expr1, attrs op1, attrs expr2, attrs op2, attrs exp
 void Check_FunctionCall(attrs id);
 
 void VarList_Id(attrs id, attrs *res);
+
+
+char* generarTemp(tData tipo);
+char* generarEtiqueta();
+void generarFicheroFunciones();
+void generarFichero();
+void cerrarFichero();
+char* tipoDeDato (tData td);
+void insertarParametros(char* nom, int numArgumentos);
+void insertarAsignacion(char* nom, char* valor);
+void insertarCadena(char* cad);
+char tipoAFormato(tData dato);
+char* tipoAPuntero(tData dato);
+char* numTabs();
+
+char *strdup(const char *src) {
+    char *dst = malloc(strlen (src) + 1);  // Space for length plus nul
+    if (dst == NULL) return NULL;          // No memory
+    strcpy(dst, src);                      // Copy the characters
+    return dst;                            // Return the new string
+}
+
+void copiarEF(etiquetaFlujo *dest, etiquetaFlujo *source){
+  if (source->EtiquetaEntrada != NULL)   dest->EtiquetaEntrada = strdup(source->EtiquetaEntrada) ;
+  if (source->EtiquetaSalida != NULL)    dest->EtiquetaSalida = strdup(source->EtiquetaSalida) ;
+  if (source->EtiquetaElse != NULL)    dest->EtiquetaElse = strdup(source->EtiquetaElse) ;
+  if (source->NombreVarControl != NULL)  dest->NombreVarControl = strdup(source->NombreVarControl) ;
+}
+
+
+void concatenarStrings1(char* destination, char* source1){
+  if( destination == NULL)
+    destination = (char *) malloc(200);
+  sprintf(destination, "%s", source1);
+}
+
+void concatenarStrings2(char* destination, char* source1, char* source2){
+  if( destination == NULL)
+    destination = (char *) malloc(200);
+  sprintf(destination, "%s%s", source1, source2);
+}
+
+void concatenarStrings3(char* destination, char* source1, char* source2, char* source3){
+  if( destination == NULL)
+    destination = (char *) malloc(200);
+  sprintf(destination, "%s%s%s", source1, source2, source3);
+}
+
+void concatenarStrings4(char* destination, char* s1, char* s2, char* s3, char* s4){
+  if( destination == NULL)
+    destination = (char *) malloc(200);
+  sprintf(destination, "%s%s%s%s", s1, s2, s3, s4);
+}
+
+void concatenarStrings5(char* destination, char* s1, char* s2, char* s3, char* s4, char* s5){
+  if( destination == NULL)
+    destination = (char *) malloc(200);
+  sprintf(destination, "%s%s%s%s%s", s1, s2, s3, s4, s5);
+}
+

@@ -37,6 +37,7 @@ float              [0-9]*\.[0-9]+
 "while"                             return WHILE;
 "for"                               return FOR;
 "to"                                return TO;
+"step"                              return STEP;
 "input"                             return INPUT;
 "output"                            return OUTPUT;
 "return"                            return RETURN;
