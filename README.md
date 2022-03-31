@@ -1,34 +1,22 @@
-# DGIIM-PL
-## Prácticas de PL
+[⬅ Más asignaturas del DGIIM](https://github.com/mianfg/DGIIM)
 
-<br/>
+# `PL` Procesadores de Lenguajes
 
-### Pasos para compilar y ejecutar el programa (Windows working):  
-```
-flex lex.l 
-gcc lex.yy.c 
-a.exe prueba.txt
-```
+| Nombre                | Procesadores de Lenguajes                                    |
+| --------------------- | ------------------------------------------------------------ |
+| Abreviatura           | `PL`                                                         |
+| Grado correspondiente | Ingeniería Informática                                       |
+| Facultad              | Escuela Técnica Superior de Ingeniería Informática y de Telecomunicación (ETSIIT)  |
+| Universidad           | Universidad de Granada                                       |
+| Departamento          | Lenguajes y Sistemas Informáticos                            |
+| Curso                 | 2021/2022                                                    |
 
-> Si se quiere guardar la salida en un fichero de texto:
-```
-a.exe prueba.txt > salida.txt
-```
+### Información
 
-### Pasos para compilar y ejecutar la práctica 3 (Windows working): 
+Estos son los contenidos que he realizado mientras cursaba esta asignatura en el **Doble Grado en Ingeniería Informática y Matemáticas** en la Universidad de Granada. Espero que te sean útiles 😊
 
-Eliminamos ficheros temporales:
-```
-make clean
-```
-Y generamos el programa correspondiente a la práctica 3:
-```
-make 
-```
-En la carpeta /bin tendremos generado el ejecutable `practica3` que acepta como argumento un fichero de entrada para realizar su análisis sintáctico con YACC.
+### Licencia
 
-Para ejecutarlo:
+El contenido de este repositorio ha sido creado por mí y por los profesores de la asignatura, y se distribuye bajo una licencia **Creative Commons Zero v1.0 Universal** (más información [aquí](./LICENSE)).
 
-```
-./practica3 fichero_entrada.txt
-```
+En caso de que detectes contenidos que violen los derechos de propiedad intelectual, por favor contacta conmigo en [hello@mianfg.me](mailto:hello@mianfg.me).
