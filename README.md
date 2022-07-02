@@ -1,5 +1,7 @@
 [⬅ Más asignaturas del DGIIM](https://github.com/mianfg/DGIIM)
 
+![Repo image](https://repository-images.githubusercontent.com/417473534/9a52fb08-250b-40c1-8b77-62c18d0f196b)
+
 # `PL` Procesadores de Lenguajes
 
 | Nombre                | Procesadores de Lenguajes                                    |
